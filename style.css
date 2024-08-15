@@ -1,165 +1,112 @@
-@charset "UTF-8";
 * {
-  position: relative;
-  font-family: 微軟正黑體;
-  vertical-align: top;
+    font-family: Arial, Helvetica, sans-serif;
+    /* border: solid 1px; */
+    vertical-align: middle;
+    background-color: #242526;
+    color: #e4e6eb;
+    box-sizing: border-box;
+    position: relative;
 }
 
-html, body {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  background-color: #222;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
+html,body {
+    margin: 0;
 }
 
-.phone {
-  width: 250px;
-  padding: 10px;
-  background-color: #fff;
-  border-radius: 10px;
-  transition: 0.5s;
-  left: 0;
+.container {
+    max-width: 1000px;
+    margin-right: auto;
+    margin-left: auto;
 }
 
 .top {
-  height: 40px;
-}
-.top .camera {
-  width: 10px;
-  height: 10px;
-  border-radius: 100%;
-  background-color: #333;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+    height: 50px;
+    margin-bottom: 5px;
 }
 
-.screen {
-  height: 350px;
-  transition: 0.5s;
-  overflow: hidden;
-  cursor: pointer;
+.cover {
+    height: 300px;
+    background-position: 0;
+    background-image: url(https://scontent.ftpe7-2.fna.fbcdn.net/v/t39.30808-6/280202705_1632923873728490_7186756583553572368_n.jpg?stp=dst-jpg_p720x720&_nc_cat=111&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=OW61XQaso0cQ7kNvgEQ4rbA&_nc_ht=scontent.ftpe7-2.fna&oh=00_AYBu_HXRhggp0Plm6dAotYBBboAGPfRpqjG2FXvzCMXd3g&oe=66C3778C);
 }
-.screen .pages {
-  width: 100%;
-  height: 100%;
-  white-space: nowrap;
-  font-size: 0px;
-  transition: 0.5s;
-  left: 0px;
-}
-.screen .pages .page {
-  font-size: initial;
-  display: inline-block;
-  background-color: #333;
-  width: 100%;
-  height: 100%;
-  padding: 10px;
-  box-sizing: border-box;
-  position: relative;
-  white-space: normal;
-  color: #eee;
-  font-size: 12px;
-}
-.screen .pages .page p {
-  margin-top: 30px;
-}
-.screen .pages .page h2 {
-  color: white;
-  font-size: 20px;
-  margin: 0;
-}
-.screen .pages .page:before {
-  position: absolute;
-  left: 0;
-  top: 0;
-  content: "";
-  display: block;
-  background-color: #FFAB36;
-  width: 100%;
-  height: 60px;
-}
-.screen .pages .page:after {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  content: "";
-  display: block;
-  background-color: #FFAB36;
-  width: 100%;
-  height: 20px;
-}
-.screen .pages .page1 {
-  background-color: #FFAB36;
-  color: white;
-}
-.screen .pages .page1 h2 {
-  font-size: 20px;
-  margin-bottom: 0px;
-}
-.screen .pages .page1 h1 {
-  font-size: 30px;
-  margin-top: 0px;
-}
-.screen .pages .page1 .orange {
-  width: 300px;
-  height: 300px;
-  background-color: #FF9E17;
-  border-radius: 100%;
+
+.mid {
+    height: 150px;
 }
 
 .bottom {
-  height: 60px;
-}
-.bottom .button {
-  width: 40px;
-  height: 40px;
-  border-radius: 100%;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  font-size: 25px;
-  color: rgba(0, 0, 0, 0.4);
-  border: solid 1px rgba(0, 0, 0, 0.2);
-  cursor: pointer;
-}
-.bottom .button:hover {
-  background-color: #ddd;
+    height: 200px;
+    min-width: 350px;
+    padding: 20px;
 }
 
-.status, .phonename {
-  color: white;
-  margin: 0;
+.icon {
+    height: 40px;
+    margin: 8px;
+    border-radius: 100%;
 }
 
-.status {
-  margin-top: 20px;
-  font-size: 15px;
+input {
+    width: 250px;
+    height: 30px;
+    margin: 2px;
+    padding: 10px;
+    border-radius: 15px;
+    border: solid 0px;
+    background-color: #3a3b3c;
+    color: #b0b3b8;
 }
 
-.phonename {
-  margin: 10px;
+.person{
+    width: 170px;
+    height: 170px;
+    background-size: 100% auto;
+    background-image: url('https://scontent.ftpe7-1.fna.fbcdn.net/v/t39.30808-6/447852143_2144027442618128_1897818902236200588_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=s_brO9Wtw14Q7kNvgHPY_dE&_nc_ht=scontent.ftpe7-1.fna&oh=00_AYAV__CeggrP-BsfkNZK22AtS1bRTqgsgd_z01D9qre93w&oe=66C385AA');
+    border-radius: 100%;
+    border: #e4e6eb 1px solid;
+    top: -25px;
+    left: 5px;
 }
 
-.buttons {
-  margin-top: 20px;
+.names{
+    left: 155%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    /* text-align: center;  */
 }
-.buttons button {
-  background-color: transparent;
-  border: solid 1px rgba(255, 255, 255, 0.2);
-  color: white;
-  padding: 5px 14px;
-  border-radius: 5px;
-  cursor: pointer;
+
+.name{
+    font-size: 25px;
+    font-weight: 800;
+    color: #e4e6eb;
 }
-.buttons button:hover {
-  background-color: #fff;
-  color: #333;
+
+.friend{
+    font-size: 15px;
+    font-weight: 600;
+    color: #b0b3b8;
+}
+
+.fa{
+    color: #727b87;
+    margin: 5px;
+}
+
+.fa-instagram,.icon{
+    cursor: pointer;
+}
+
+@media screen and (max-width:600px) {
+    .person{
+        left: 50%;
+        transform: translate(-50%);
+    }
+    .names{
+        left: 50%;
+        top: 120%;
+        transform: translate(-50%,-50%);
+        text-align: center; 
+    }
+    .bottom{
+        top: 60px;
+    }
 }
