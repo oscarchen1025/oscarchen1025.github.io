@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>聯發科深度解剖 · MediaTek 2454.TW</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg2: #10151b;
+    --bg3: #13181f;
+    --surface: #15191e;
+    --surface2: #1a1f26;
+    --border: #1e2530;
+    --border2: #252d3a;
+    --green: #15e8b2;
+    --green2: #10c994;
+    --green3: #0a8060;
+    --green-dim: rgba(21,232,178,0.08);
+    --green-glow: rgba(21,232,178,0.15);
+    --red: #f34561;
+    --red-dim: rgba(243,69,97,0.1);
+    --yellow: #ffb347;
+    --text: #ffffff;
+    --text2: #a8b8c8;
+    --text3: #4d5f72;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Space Grotesk', 'Noto Sans TC', sans-serif;
+    --body: 'Noto Sans TC', sans-serif;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── TICKER BAR ── */
+  .ticker-bar {
+    position: fixed; top:0; left:0; right:0; z-index:100;
+    background: rgba(13,17,23,0.95);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+    height: 36px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+  }
+  .ticker-track {
+    display: flex;
+    gap: 40px;
+    animation: ticker 30s linear infinite;
+    white-space: nowrap;
+    padding-left: 100%;
+  }
+  .ticker-track:hover { animation-play-state: paused; }
+  @keyframes ticker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .ticker-item {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    display: flex; gap: 8px; align-items: center;
+  }
+  .ticker-item .sym { color: var(--text2); }
+  .ticker-item .price { color: var(--text); font-weight: 600; }
+  .ticker-item .chg-pos { color: var(--green); }
+  .ticker-item .chg-neg { color: var(--red); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    position: relative;
+    padding: 80px 40px 60px;
+    overflow: hidden;
+  }
+  .hero::before {
+    content:'';
+    position:absolute; inset:0;
+    background: radial-gradient(ellipse 70% 60% at 50% 55%, rgba(21,232,178,0.06) 0%, transparent 70%);
+    pointer-events:none;
+  }
+  .hero-badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--green);
+    border: 1px solid var(--green3);
+    padding: 6px 18px;
+    border-radius: 20px;
+    margin-bottom: 40px;
+    background: rgba(21,232,178,0.05);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .hero-badge::before {
+    content:'';
+    width:7px; height:7px; border-radius:50%;
+    background: var(--green);
+    animation: blink 2s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+  .hero-title {
+    font-size: clamp(64px, 10vw, 130px);
+    font-weight: 900;
+    line-height: 0.9;
+    text-align: center;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+  }
+  .hero-title .line1 { color: #fff; display: block; }
+  .hero-title .line2 {
+    color: var(--green);
+    display: block;
+    text-shadow: 0 0 60px rgba(21,232,178,0.5);
+  }
+  .hero-sub {
+    text-align: center;
+    color: var(--text2);
+    font-size: 15px;
+    max-width: 560px;
+    margin-bottom: 60px;
+    line-height: 1.8;
+  }
+  .hero-sub strong { color: var(--text); }
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    width: 100%;
+    max-width: 700px;
+  }
+  .hero-stat {
+    background: var(--bg);
+    padding: 24px 20px;
+    text-align: center;
+  }
+  .hero-stat-val {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--green);
+    display: block;
+    margin-bottom: 4px;
+  }
+  .hero-stat-label {
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 0.08em;
+  }
+  .scroll-hint {
+    position: absolute; bottom: 30px;
+    font-family: var(--mono); font-size: 10px;
+    letter-spacing: 0.2em; color: var(--text3);
+    animation: fade-ud 2s ease-in-out infinite;
+  }
+  @keyframes fade-ud { 0%,100%{opacity:0.3;transform:translateY(0)} 50%{opacity:1;transform:translateY(-4px)} }
+
+  /* ── NAV ── */
+  .sticky-nav {
+    position: sticky; top: 36px; z-index: 90;
+    background: rgba(13,17,23,0.97);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(20px);
+    padding: 0 40px;
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+  }
+  .sticky-nav a {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--text3);
+    text-decoration: none;
+    padding: 14px 20px;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .sticky-nav a:hover { color: var(--green); border-color: var(--green); }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+  .section { padding: 80px 0; border-bottom: 1px solid var(--border); }
+
+  /* ── SECTION HEADER ── */
+  .section-number {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--green);
+    letter-spacing: 0.2em;
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-number::after {
+    content:'';
+    flex:1; height:1px; background: var(--border);
+  }
+  .section-title {
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+  }
+  .section-desc {
+    color: var(--text2);
+    font-size: 14px;
+    max-width: 640px;
+    margin-bottom: 48px;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content:'';
+    position:absolute; top:0; left:0; right:0; height:2px;
+    background: linear-gradient(90deg, var(--green), transparent);
+  }
+  .card-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--green);
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+
+  /* ── GRIDS ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+
+  /* ── KPI BLOCKS ── */
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px;
+    text-align: center;
+  }
+  .kpi-val {
+    font-family: var(--mono);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--green);
+    display: block;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .kpi-label { font-size: 12px; color: var(--text2); }
+  .kpi-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+  /* ── REVENUE BAR CHART ── */
+  .bar-chart { margin-top: 24px; }
+  .bar-row {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 12px;
+  }
+  .bar-label { font-size: 12px; color: var(--text2); min-width: 130px; text-align: right; }
+  .bar-track {
+    flex:1; height:28px; background: var(--bg3);
+    border-radius: 3px; position: relative; overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%; border-radius: 3px;
+    background: linear-gradient(90deg, var(--green3), var(--green));
+    transition: width 1.2s cubic-bezier(.22,.8,.36,1);
+    display: flex; align-items: center; justify-content: flex-end;
+    padding-right: 10px;
+  }
+  .bar-pct {
+    font-family: var(--mono); font-size: 11px;
+    color: rgba(0,0,0,0.8); font-weight: 700;
+  }
+  .bar-amt { font-family: var(--mono); font-size: 11px; color: var(--text3); min-width: 70px; }
+
+  /* ── TABLE ── */
+  .data-table { width: 100%; border-collapse: collapse; }
+  .data-table th {
+    font-family: var(--mono); font-size: 10px;
+    letter-spacing: 0.12em; color: var(--text3);
+    text-align: left; padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    text-transform: uppercase;
+  }
+  .data-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(30,37,48,0.5);
+    font-size: 13px;
+    vertical-align: middle;
+  }
+  .data-table tr:last-child td {  }
+  .data-table tr:hover td { background: var(--green-dim); }
+  .td-num { font-family: var(--mono); text-align: right; }
+  .td-green { color: var(--green); }
+  .td-red { color: var(--red); }
+  .td-yellow { color: var(--yellow); }
+
+  /* ── MOAT BARS ── */
+  .moat-item { margin-bottom: 20px; }
+  .moat-header { display:flex; justify-content:space-between; margin-bottom:6px; }
+  .moat-label { font-size: 13px; color: var(--text); }
+  .moat-score { font-family: var(--mono); font-size: 12px; color: var(--green); }
+  .moat-track {
+    height: 6px; background: var(--bg3); border-radius: 10px; overflow: hidden;
+  }
+  .moat-fill {
+    height: 100%; border-radius: 10px;
+    background: linear-gradient(90deg, var(--green3), var(--green));
+    transition: width 1.5s cubic-bezier(.22,.8,.36,1);
+  }
+  .moat-desc { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+  /* ── RISK MATRIX ── */
+  .risk-matrix {
+    display: grid;
+    grid-template-columns: 60px 1fr 1fr;
+    grid-template-rows: auto 1fr 1fr;
+    gap: 4px;
+    height: 340px;
+  }
+  .rm-corner { background: transparent; }
+  .rm-xlabel, .rm-ylabel {
+    font-family: var(--mono); font-size: 10px;
+    letter-spacing: 0.1em; color: var(--text3);
+    display: flex; align-items: center; justify-content: center;
+    text-transform: uppercase;
+  }
+  .rm-ylabel { writing-mode: vertical-rl; transform: rotate(180deg); }
+  .rm-cell {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .rm-red { background: rgba(243,69,97,0.08); border-color: rgba(243,69,97,0.2); }
+  .rm-yellow { background: rgba(255,215,0,0.06); border-color: rgba(255,215,0,0.2); }
+  .rm-green { background: rgba(21,232,178,0.05); border-color: rgba(21,232,178,0.15); }
+  .rm-badge {
+    font-family: var(--mono); font-size: 10px; font-weight: 700;
+    padding: 3px 8px; border-radius: 3px;
+    display: inline-block; letter-spacing: 0.05em;
+    width: fit-content;
+  }
+  .rm-badge-red { background: rgba(243,69,97,0.2); color: var(--red); }
+  .rm-badge-yellow { background: rgba(255,215,0,0.15); color: var(--yellow); }
+  .rm-badge-green { background: rgba(21,232,178,0.1); color: var(--green); }
+  .rm-risk { font-size: 11px; color: var(--text2); line-height: 1.5; }
+
+  /* ── SCENARIO CARDS ── */
+  .scenario-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px; }
+  .scenario {
+    padding: 28px;
+    position: relative;
+  }
+  .scenario-bull { background: rgba(21,232,178,0.04); border: 1px solid rgba(21,232,178,0.15); border-radius:6px 0 0 6px; }
+  .scenario-base { background: rgba(255,215,0,0.03); border: 1px solid rgba(255,215,0,0.12); }
+  .scenario-bear { background: rgba(243,69,97,0.04); border: 1px solid rgba(243,69,97,0.15); border-radius: 0 6px 6px 0; }
+  .scenario-label {
+    font-family: var(--mono); font-size: 10px;
+    letter-spacing: 0.15em; margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+  .scenario-price {
+    font-size: 36px; font-weight: 900;
+    line-height: 1; margin-bottom: 4px;
+    font-family: var(--mono);
+  }
+  .scenario-updown { font-size: 12px; margin-bottom: 20px; font-family: var(--mono); }
+  .scenario-row { display:flex; justify-content:space-between; margin-bottom: 8px; }
+  .scenario-key { font-size: 12px; color: var(--text2); }
+  .scenario-val { font-family: var(--mono); font-size: 12px; }
+
+  /* ── TIMELINE ── */
+  .timeline { position: relative; padding-left: 30px; }
+  .timeline::before {
+    content:''; position:absolute; left:8px; top:0; bottom:0;
+    width: 2px; background: var(--border2);
+  }
+  .tl-item { position: relative; margin-bottom: 28px; }
+  .tl-dot {
+    position: absolute; left: -26px; top: 4px;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--green); border: 2px solid var(--bg);
+    box-shadow: 0 0 10px rgba(21,232,178,0.5);
+  }
+  .tl-date { font-family: var(--mono); font-size: 11px; color: var(--green); margin-bottom: 4px; }
+  .tl-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .tl-desc { font-size: 13px; color: var(--text2); }
+
+  /* ── QUOTE BLOCK ── */
+  .quote-block {
+    border-left: 3px solid var(--green);
+    padding: 20px 24px;
+    background: var(--green-dim);
+    border-radius: 0 6px 6px 0;
+    margin: 24px 0;
+  }
+  .quote-text { font-size: 16px; font-style: italic; margin-bottom: 10px; }
+  .quote-author { font-family: var(--mono); font-size: 11px; color: var(--green); }
+
+  /* ── FLAG LIST ── */
+  .flag-item {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .flag-item:last-child {  }
+  .flag-icon { font-size: 18px; min-width: 24px; }
+  .flag-text { font-size: 13px; color: var(--text2); }
+  .flag-text strong { color: var(--text); display: block; margin-bottom: 3px; }
+
+  /* ── PEER COMPARE ── */
+  .peer-header {
+    display: grid;
+    grid-template-columns: 160px repeat(4, 1fr);
+    gap: 1px; background: var(--border);
+    border-radius: 6px 6px 0 0;
+    overflow: hidden;
+  }
+  .peer-header-cell {
+    background: var(--surface2);
+    padding: 12px 16px;
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: 0.1em; color: var(--text3);
+    text-transform: uppercase;
+  }
+  .peer-header-cell.highlight { color: var(--green); }
+  .peer-row {
+    display: grid;
+    grid-template-columns: 160px repeat(4, 1fr);
+    gap: 1px; background: var(--border);
+  }
+  .peer-cell {
+    background: var(--surface);
+    padding: 14px 16px;
+    font-size: 13px;
+  }
+  .peer-name { font-weight: 700; }
+  .peer-ticker { font-family: var(--mono); font-size: 10px; color: var(--text3); }
+
+  /* ── TRADINGVIEW ── */
+  .tv-container {
+    width: 100%; height: 500px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  /* ── PROGRESS RING-like SCORE ── */
+  .score-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+  .score-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px;
+    text-align: center;
+  }
+  .score-num {
+    font-family: var(--mono); font-size: 40px; font-weight: 700;
+    color: var(--green); line-height: 1;
+    margin-bottom: 4px;
+  }
+  .score-label { font-size: 12px; color: var(--text2); margin-bottom: 8px; }
+  .score-bar-wrap { height: 4px; background: var(--bg3); border-radius:10px; }
+  .score-bar { height: 4px; border-radius:10px; background: linear-gradient(90deg, var(--green3), var(--green)); }
+
+  /* ── VERDICT BOX ── */
+  .verdict-box {
+    background: var(--green-dim);
+    border: 1px solid var(--green3);
+    border-radius: 8px;
+    padding: 32px;
+    display: flex; gap: 24px;
+    align-items: flex-start;
+    margin-top: 40px;
+  }
+  .verdict-rating {
+    font-family: var(--mono); font-size: 48px; font-weight: 700;
+    color: var(--green); line-height: 1;
+    min-width: 80px; text-align: center;
+  }
+  .verdict-label { font-size: 11px; color: var(--green2); font-family: var(--mono); letter-spacing:0.1em; }
+  .verdict-body { font-size: 14px; color: var(--text2); line-height: 1.8; }
+  .verdict-body strong { color: var(--text); }
+
+  /* ── FIVE FORCES ── */
+  .forces-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .force-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px;
+  }
+  .force-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
+  .force-name { font-size: 14px; font-weight: 700; }
+  .force-level {
+    font-family: var(--mono); font-size: 10px; font-weight: 700;
+    padding: 3px 10px; border-radius: 20px; letter-spacing: 0.05em;
+  }
+  .level-high { background: rgba(243,69,97,0.15); color: var(--red); }
+  .level-med { background: rgba(255,215,0,0.12); color: var(--yellow); }
+  .level-low { background: rgba(21,232,178,0.1); color: var(--green); }
+  .force-desc { font-size: 12px; color: var(--text2); line-height: 1.7; }
+
+  /* ── DIVIDER ── */
+  .divider { height: 1px; background: var(--border); margin: 40px 0; }
+
+  /* Highlight tag */
+  .hl { color: var(--green); background: rgba(21,232,178,0.1); padding: 1px 6px; border-radius: 3px; font-weight: 700; }
+  .hl-red { color: var(--red); background: rgba(243,69,97,0.1); padding: 1px 6px; border-radius: 3px; font-weight: 700; }
+  .hl-yellow { color: var(--yellow); background: rgba(255,215,0,0.1); padding: 1px 6px; border-radius: 3px; font-weight: 700; }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  @media (max-width: 768px) {
+    .grid-2, .grid-3, .grid-4, .scenario-grid { grid-template-columns: 1fr; }
+    .hero-stats { grid-template-columns: repeat(2,1fr); }
+    .peer-header, .peer-row { display:none; }
+    .container { padding: 0 20px; }
+    .section { padding: 50px 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TICKER BAR -->
+<div class="ticker-bar">
+  <div class="ticker-track" id="ticker">
+    <span class="ticker-item"><span class="sym">2454.TW</span><span class="price">NT$3,155</span><span class="chg-pos">+9.93%</span></span>
+    <span class="ticker-item"><span class="sym">USD/TWD</span><span class="price">30.15</span><span class="chg-neg">-0.3%</span></span>
+    <span class="ticker-item"><span class="sym">QCOM</span><span class="price">$148.20</span><span class="chg-neg">-1.2%</span></span>
+    <span class="ticker-item"><span class="sym">AVGO</span><span class="price">$1,890</span><span class="chg-pos">+0.8%</span></span>
+    <span class="ticker-item"><span class="sym">NVDA</span><span class="price">$1,102</span><span class="chg-pos">+3.2%</span></span>
+    <span class="ticker-item"><span class="sym">TSM</span><span class="price">$175.40</span><span class="chg-pos">+1.4%</span></span>
+    <span class="ticker-item"><span class="sym">US10Y</span><span class="price">4.28%</span><span class="chg-neg">-0.5%</span></span>
+    <span class="ticker-item"><span class="sym">費城半導體</span><span class="price">3,982</span><span class="chg-pos">+2.1%</span></span>
+    <span class="ticker-item"><span class="sym">2454 2025全年EPS</span><span class="price">NT$66.16</span><span class="chg-pos">+12.3%營收</span></span>
+    <span class="ticker-item"><span class="sym">2454.TW</span><span class="price">NT$3,155</span><span class="chg-pos">+9.93%</span></span>
+    <span class="ticker-item"><span class="sym">USD/TWD</span><span class="price">30.15</span><span class="chg-neg">-0.3%</span></span>
+    <span class="ticker-item"><span class="sym">QCOM</span><span class="price">$148.20</span><span class="chg-neg">-1.2%</span></span>
+    <span class="ticker-item"><span class="sym">AVGO</span><span class="price">$1,890</span><span class="chg-pos">+0.8%</span></span>
+    <span class="ticker-item"><span class="sym">NVDA</span><span class="price">$1,102</span><span class="chg-pos">+3.2%</span></span>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">深度研究報告 · MEDIATEK · 2454.TW</div>
+  <h1 class="hero-title">
+    <span class="line1">聯發科</span>
+    <span class="line2">深度解剖</span>
+  </h1>
+  <p class="hero-sub">從 <strong>Fabless商業模式</strong> 到 <strong>AI晶片佈局</strong>，從財務健康度到地緣政治風險——一份資深分析師視角的完整研究框架。</p>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <span class="hero-stat-val">NT$5,960億</span>
+      <span class="hero-stat-label">2025 全年營收</span>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-val">47.5%</span>
+      <span class="hero-stat-label">2025 毛利率</span>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-val">38%+</span>
+      <span class="hero-stat-label">全球手機AP市占</span>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-val">~60%</span>
+      <span class="hero-stat-label">中國市場曝險</span>
+    </div>
+  </div>
+  <div class="scroll-hint">SCROLL TO READ</div>
+</section>
+
+<!-- STICKY NAV -->
+<nav class="sticky-nav">
+  <a href="#business">商業模式</a>
+  <a href="#moat">競爭護城河</a>
+  <a href="#financials">財務分析</a>
+  <a href="#balance">資產負債</a>
+  <a href="#valuation">估值評估</a>
+  <a href="#monthly-chart">月營收圖表</a>
+  <a href="#industry">產業分析</a>
+  <a href="#risks">風險矩陣</a>
+
+</nav>
+
+<!-- ══════════════════════════════════════════
+     SECTION 1: 商業模式
+══════════════════════════════════════════ -->
+<section class="section" id="business">
+  <div class="container">
+    <div class="section-number">01 · BUSINESS MODEL</div>
+    <h2 class="section-title">核心業務架構</h2>
+    <p class="section-desc">Fabless模式下，聯發科透過輕資產策略，將資源集中於IC設計與IP研發，並委外台積電代工製造。</p>
+
+    <div class="grid-2" style="margin-bottom:32px;">
+      <div class="card">
+        <div class="card-title">各產品線營收佔比（2025）</div>
+        <div class="bar-chart">
+          <div class="bar-row">
+            <div class="bar-label">智慧手機 SoC</div>
+            <div class="bar-track"><div class="bar-fill" style="width:59%"><span class="bar-pct">59%</span></div></div>
+            <div class="bar-amt">NT$3,516億</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">智慧家居 / IoT</div>
+            <div class="bar-track"><div class="bar-fill" style="width:17%"><span class="bar-pct">17%</span></div></div>
+            <div class="bar-amt">NT$1,013億</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">電源管理 IC</div>
+            <div class="bar-track"><div class="bar-fill" style="width:10%"><span class="bar-pct">10%</span></div></div>
+            <div class="bar-amt">NT$596億</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">車用晶片</div>
+            <div class="bar-track"><div class="bar-fill" style="width:6%"><span class="bar-pct">6%</span></div></div>
+            <div class="bar-amt">NT$358億</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">其他 (ASIC/運算)</div>
+            <div class="bar-track"><div class="bar-fill" style="width:8%"><span class="bar-pct">8%</span></div></div>
+            <div class="bar-amt">NT$477億</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Fabless 成本結構解析</div>
+        <div style="margin-bottom:12px;">
+          <div style="font-size:13px; color:var(--text2); line-height:1.8;">
+            <p>聯發科作為純設計公司，其成本結構迥異於IDM（整合元件製造商）：</p>
+          </div>
+        </div>
+        <div class="bar-chart">
+          <div class="bar-row">
+            <div class="bar-label">晶圓代工成本</div>
+            <div class="bar-track"><div class="bar-fill" style="width:40%; background: linear-gradient(90deg, #cc5500, #ff8c00);"><span class="bar-pct" style="color:#fff;">~40%</span></div></div>
+            <div class="bar-amt" style="color:var(--text2);">佔營收</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">封測 / OSAT</div>
+            <div class="bar-track"><div class="bar-fill" style="width:10%; background: linear-gradient(90deg, #995500, #cc7700);"><span class="bar-pct" style="color:#fff;">~10%</span></div></div>
+            <div class="bar-amt" style="color:var(--text2);">佔營收</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">研發費用</div>
+            <div class="bar-track"><div class="bar-fill" style="width:19%;"><span class="bar-pct">~19%</span></div></div>
+            <div class="bar-amt" style="color:var(--text2);">佔營收</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">銷售管理費</div>
+            <div class="bar-track"><div class="bar-fill" style="width:6%; background: linear-gradient(90deg, #445544, #667766);"><span class="bar-pct" style="color:#ccc;">~6%</span></div></div>
+            <div class="bar-amt" style="color:var(--text2);">佔營收</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">稅後淨利</div>
+            <div class="bar-track"><div class="bar-fill" style="width:18%;"><span class="bar-pct">~18%</span></div></div>
+            <div class="bar-amt" style="color:var(--green);">護城河</div>
+          </div>
+        </div>
+        <p style="font-size:11px; color:var(--text3); margin-top:12px;">⚡ Fabless優勢：無重資產折舊壓力，資本配置彈性高，毛利率更易突破50%天花板</p>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-title">客戶集中度</div>
+        <table class="data-table">
+          <thead><tr><th>客戶</th><th>估計佔比</th><th>依賴度</th></tr></thead>
+          <tbody>
+            <tr><td>小米集團</td><td class="td-num td-red">~18%</td><td><span class="hl-red">極高</span></td></tr>
+            <tr><td>OPPO/OnePlus</td><td class="td-num">~14%</td><td><span class="hl-yellow">高</span></td></tr>
+            <tr><td>vivo</td><td class="td-num">~11%</td><td><span class="hl-yellow">高</span></td></tr>
+            <tr><td>三星</td><td class="td-num">~9%</td><td><span class="hl">中</span></td></tr>
+            <tr><td>傳音 (Transsion)</td><td class="td-num">~7%</td><td><span class="hl">中</span></td></tr>
+            <tr><td>其他品牌</td><td class="td-num">~41%</td><td>分散</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title">地理分佈 & 地緣風險</div>
+        <div class="bar-chart" style="margin-bottom:16px;">
+          <div class="bar-row">
+            <div class="bar-label">中國大陸</div>
+            <div class="bar-track"><div class="bar-fill" style="width:60%; background:linear-gradient(90deg,#7a1030,#f34561);"><span class="bar-pct" style="color:#fff;">~60%</span></div></div>
+            <div class="bar-amt td-red">⚠️ 高風險</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">亞太 (ex-CN)</div>
+            <div class="bar-track"><div class="bar-fill" style="width:22%;"><span class="bar-pct">22%</span></div></div>
+            <div class="bar-amt">中度</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">美洲 / 歐洲</div>
+            <div class="bar-track"><div class="bar-fill" style="width:12%;"><span class="bar-pct">12%</span></div></div>
+            <div class="bar-amt">低度</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">其他新興市場</div>
+            <div class="bar-track"><div class="bar-fill" style="width:6%;"><span class="bar-pct">6%</span></div></div>
+            <div class="bar-amt">成長中</div>
+          </div>
+        </div>
+        <div class="quote-block" style="margin:0; padding:12px 16px;">
+          <p style="font-size:12px; color:var(--red);">⚠️ 若美中晶片戰升級，60%中國曝險是核心下行風險，估計EPS衝擊達40-50%</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">成長催化劑時間軸</div>
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-dot"></div>
+            <div class="tl-date">短期 (6–12M)</div>
+            <div class="tl-title">AI手機換機潮</div>
+            <div class="tl-desc">天璣9400搭載Edge AI NPU，推動中階旗艦替換週期加速，ASP提升12-15%</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot" style="background:var(--yellow);box-shadow:0 0 10px rgba(255,215,0,0.5);"></div>
+            <div class="tl-date" style="color:var(--yellow);">中期 (2–3Y)</div>
+            <div class="tl-title">車用ADAS & 衛星通訊</div>
+            <div class="tl-desc">NTN低軌衛星直連晶片、Wi-Fi 7平台及ADAS Domain Controller進入放量期</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot" style="background:var(--text3);box-shadow:none;"></div>
+            <div class="tl-date" style="color:var(--text3);">長期 (3Y+)</div>
+            <div class="tl-title">AIoT生態 & 資料中心</div>
+            <div class="tl-desc">邊緣推理晶片滲透企業端；是否進軍資料中心ASIC仍是最大未知數</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TSMC Dependency -->
+    <div class="card" style="margin-top:20px;">
+      <div class="card-title">台積電依賴度評估</div>
+      <div class="grid-4" style="margin-top:8px;">
+        <div class="kpi">
+          <span class="kpi-val">~95%</span>
+          <span class="kpi-label">台積電代工佔比</span>
+          <span class="kpi-sub">幾乎全委外</span>
+        </div>
+        <div class="kpi">
+          <span class="kpi-val">N3/N4</span>
+          <span class="kpi-label">Dimensity 9400製程</span>
+          <span class="kpi-sub">3nm旗艦製程</span>
+        </div>
+        <div class="kpi" style="border-color:rgba(243,69,97,0.3);">
+          <span class="kpi-val" style="color:var(--red);">高</span>
+          <span class="kpi-label">先進製程風險</span>
+          <span class="kpi-sub">無替代方案</span>
+        </div>
+        <div class="kpi">
+          <span class="kpi-val">Samsung</span>
+          <span class="kpi-label">次要代工選項</span>
+          <span class="kpi-sub">中低階製程分散</span>
+        </div>
+      </div>
+      <p style="font-size:13px; color:var(--text2); margin-top:16px;">⚡ <strong style="color:var(--text);">關鍵洞察：</strong>台積電在2nm（N2）的量產時間表直接決定聯發科2026年旗艦晶片的競爭力。若台積電遭遇地緣政治干擾或產能配給緊縮，聯發科首當其衝，因為高通同樣競爭台積電先進製程產能。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 2: 競爭護城河
+══════════════════════════════════════════ -->
+<section class="section" id="moat">
+  <div class="container">
+    <div class="section-number">02 · COMPETITIVE MOAT</div>
+    <h2 class="section-title">護城河深度分析</h2>
+    <p class="section-desc">從IP Portfolio到平台黏性，評估聯發科在全球晶片設計版圖的競爭地位。</p>
+
+    <div class="grid-2" style="margin-bottom:32px;">
+      <div class="card">
+        <div class="card-title">Economic Moat 評分（10分制）— 全市場競爭地位</div>
+        <div style="margin-top:8px;">
+          <div class="moat-item">
+            <div class="moat-header"><span class="moat-label">① IP Portfolio & 專利深度</span><span class="moat-score">7.5/10</span></div>
+            <div class="moat-track"><div class="moat-fill" style="width:75%;"></div></div>
+            <div class="moat-desc">超過10,000項全球有效專利（截至2025年），5G Modem（M90/M100）、Wi-Fi 7、藍牙5.4擁有強勢標準必要專利（SEP）；ASIC定製設計能力快速積累。GPU/ISP IP仍依賴ARM授權，自研架構佔比偏低為短板。</div>
+          </div>
+          <div class="moat-item">
+            <div class="moat-header"><span class="moat-label">② R&D投入強度 (R&D/Rev)</span><span class="moat-score">8.5/10</span></div>
+            <div class="moat-track"><div class="moat-fill" style="width:85%;"></div></div>
+            <div class="moat-desc">2025年R&D費用NT$1,430億，佔營收24%，年增46%，大幅躍升業界第一梯隊；絕對值與Qualcomm相當，反映ASIC/AI加速研發投入不惜成本。</div>
+          </div>
+          <div class="moat-item">
+            <div class="moat-header"><span class="moat-label">③ 天璣生態系黏性（平台黏性）</span><span class="moat-score">7.0/10</span></div>
+            <div class="moat-track"><div class="moat-fill" style="width:70%;"></div></div>
+            <div class="moat-desc">中低階OEM客戶高黏性（OPPO/vivo/傳音）；天璣9000+系列導入HyperEngine 6.0，遊戲/AI生態積分持續深化。但旗艦品牌偏好高通仍是弱點，切換成本較CPU架構世代較高。</div>
+          </div>
+          <div class="moat-item">
+            <div class="moat-header"><span class="moat-label">④ 客戶切換成本</span><span class="moat-score">6.5/10</span></div>
+            <div class="moat-track"><div class="moat-fill" style="width:65%;"></div></div>
+            <div class="moat-desc">手機端設計週期6-18個月，BSP軟體、攝影調教、快充協議（HyperCharge）深度整合提高切換摩擦；ASIC客戶（Google TPU）切換成本極高，一旦投入定製幾乎無法更換。</div>
+          </div>
+          <div class="moat-item">
+            <div class="moat-header"><span class="moat-label">⑤ 規模效益 & 成本優勢</span><span class="moat-score">8.0/10</span></div>
+            <div class="moat-track"><div class="moat-fill" style="width:80%;"></div></div>
+            <div class="moat-desc">全球出貨量前二大AP廠，台積電先進製程年採購量龐大，具晶圓採購議價優勢；中低階多晶片整合（SoC）降低OEM整機BOM成本競爭優勢顯著。</div>
+          </div>
+          <div class="moat-item">
+            <div class="moat-header"><span class="moat-label">⑥ ASIC定製能力 & 資料中心橋頭堡</span><span class="moat-score">7.0/10</span></div>
+            <div class="moat-track"><div class="moat-fill" style="width:70%;"></div></div>
+            <div class="moat-desc">Google TPU v8x/v8e獨家合作是最大護城河新支柱；正洽談第二家美系CSP（估微軟）ASIC合作。成功建立Hyperscaler ASIC設計能力後，進入壁壘極高，技術積累不可逆。</div>
+          </div>
+          <div class="moat-item">
+            <div class="moat-header"><span class="moat-label">⑦ 標準制定參與度 & 生態地位</span><span class="moat-score">7.5/10</span></div>
+            <div class="moat-track"><div class="moat-fill" style="width:75%;"></div></div>
+            <div class="moat-desc">3GPP 5G/6G標準核心貢獻者；Wi-Fi Alliance、Bluetooth SIG委員會席位；與NVIDIA NVLink Fusion合作讓自研CPU可連接NVIDIA GPU，進一步融入AI生態系統。</div>
+          </div>
+        </div>
+        <div style="margin-top:20px; padding:16px; background:var(--green-dim); border:1px solid var(--green3); border-radius:6px; text-align:center;">
+          <span style="font-family:var(--mono); font-size:13px; color:var(--green);">綜合 ECONOMIC MOAT 評分</span>
+          <span style="display:block; font-family:var(--mono); font-size:48px; font-weight:900; color:var(--green); line-height:1.2;">7.4 / 10</span>
+          <span style="font-size:12px; color:var(--text2);">等級：WIDE MOAT（寬護城河）— AI ASIC轉型進一步強化護城河深度</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">天璣 vs 驍龍：技術差距量化</div>
+        <table class="data-table" style="margin-bottom:16px;">
+          <thead><tr><th>維度</th><th>Dimensity 9400</th><th>Snapdragon 8 Elite</th><th>差距</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>CPU架構</td>
+              <td>1+3+4 Cortex X925</td>
+              <td>2×Oryon Prime+6×Oryon Perf</td>
+              <td class="td-yellow">落後</td>
+            </tr>
+            <tr>
+              <td>GPU效能</td>
+              <td>Immortalis G925</td>
+              <td>Adreno 830</td>
+              <td class="td-yellow">持平</td>
+            </tr>
+            <tr>
+              <td>AI NPU算力</td>
+              <td>50 TOPS</td>
+              <td>45 TOPS</td>
+              <td class="td-green">小幅領先</td>
+            </tr>
+            <tr>
+              <td>5G調制解調器</td>
+              <td>M90 (integrated)</td>
+              <td>X80 (integrated)</td>
+              <td class="td-green">持平/微幅領先</td>
+            </tr>
+            <tr>
+              <td>製程節點</td>
+              <td>TSMC 3nm</td>
+              <td>TSMC 3nm</td>
+              <td class="td-green">對等</td>
+            </tr>
+            <tr>
+              <td>品牌溢價</td>
+              <td>中性偏負</td>
+              <td>強正向</td>
+              <td class="td-red">顯著落後</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="quote-block" style="margin:0; padding:12px 16px;">
+          <p style="font-size:12px; color:var(--green);">💡 2024年差距顯著收窄：Dimensity 9400在AI NPU首度超越驍龍，此為關鍵拐點，代表技術追趕已進入最後一哩路</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Market Share -->
+    <div class="card">
+      <div class="card-title">全球市占率趨勢（2020–2026E）</div>
+      <div class="grid-2" style="margin-top:16px;">
+        <div>
+          <p style="font-size:12px; color:var(--text2); margin-bottom:12px;">📱 智慧型手機 AP 市占（出貨量基礎）</p>
+          <table class="data-table">
+            <thead><tr><th>年度</th><th>聯發科</th><th>高通</th><th>Apple</th><th>其他</th></tr></thead>
+            <tbody>
+              <tr><td>2020</td><td class="td-num td-green">31%</td><td class="td-num">29%</td><td class="td-num">15%</td><td class="td-num">25%</td></tr>
+              <tr><td>2021</td><td class="td-num td-green">37%</td><td class="td-num">26%</td><td class="td-num">16%</td><td class="td-num">21%</td></tr>
+              <tr><td>2022</td><td class="td-num td-green">36%</td><td class="td-num">27%</td><td class="td-num">17%</td><td class="td-num">20%</td></tr>
+              <tr><td>2023</td><td class="td-num td-green">37%</td><td class="td-num">26%</td><td class="td-num">18%</td><td class="td-num">19%</td></tr>
+              <tr><td>2024</td><td class="td-num td-green">38%</td><td class="td-num">26%</td><td class="td-num">18%</td><td class="td-num">18%</td></tr>
+              <tr><td>2025E</td><td class="td-num td-green">39%</td><td class="td-num">25%</td><td class="td-num">19%</td><td class="td-num">17%</td></tr>
+              <tr><td>2026E</td><td class="td-num td-green">40%</td><td class="td-num">25%</td><td class="td-num">19%</td><td class="td-num">16%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <p style="font-size:12px; color:var(--text2); margin-bottom:12px;">🌐 IoT 晶片市占（收入基礎，含Wi-Fi/BT/智慧家庭）</p>
+          <table class="data-table">
+            <thead><tr><th>年度</th><th>聯發科</th><th>全球市場規模</th><th>YoY</th></tr></thead>
+            <tbody>
+              <tr><td>2021</td><td class="td-num td-green">11%</td><td class="td-num">$280億</td><td class="td-num td-green">+18%</td></tr>
+              <tr><td>2022</td><td class="td-num td-green">13%</td><td class="td-num">$310億</td><td class="td-num td-red">-8%</td></tr>
+              <tr><td>2023</td><td class="td-num td-green">12%</td><td class="td-num">$285億</td><td class="td-num td-red">-12%</td></tr>
+              <tr><td>2024</td><td class="td-num td-green">14%</td><td class="td-num">$318億</td><td class="td-num td-green">+22%</td></tr>
+              <tr><td>2025E</td><td class="td-num td-green">16%</td><td class="td-num">$365億</td><td class="td-num td-green">+18%</td></tr>
+              <tr><td>2026E</td><td class="td-num td-green">17%</td><td class="td-num">$420億</td><td class="td-num td-green">+15%</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 3: 財務分析
+══════════════════════════════════════════ -->
+<section class="section" id="financials">
+  <div class="container">
+    <div class="section-number">03 · FINANCIAL ANALYSIS</div>
+    <h2 class="section-title">損益表深度解析</h2>
+    <p class="section-desc">過去5年財務軌跡，找出成長轉折點，量化獲利能力護城河。</p>
+
+    <!-- Annual Revenue Table -->
+    <div class="card" style="margin-bottom:24px;">
+      <div class="card-title">年度營收 & 獲利指標（2021–2026E，NT$億）</div>
+      <div style="overflow-x:auto; margin-top:12px;">
+        <table class="data-table" style="min-width:800px;">
+          <thead>
+            <tr>
+              <th>年度</th>
+              <th>營收</th>
+              <th>YoY%</th>
+              <th>毛利率</th>
+              <th>營業利益率</th>
+              <th>淨利率</th>
+              <th>EPS (NT$)</th>
+              <th>R&D%</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>2021</td><td class="td-num">4,935</td><td class="td-num td-green">+81%</td><td class="td-num">46.8%</td><td class="td-num">27.3%</td><td class="td-num">22.8%</td><td class="td-num td-green">111.25</td><td class="td-num">18.9%</td></tr>
+            <tr style="background:rgba(21,232,178,0.04)"><td><strong>2022</strong></td><td class="td-num"><strong>4,605</strong></td><td class="td-num td-red"><strong>-6.7%</strong></td><td class="td-num">47.5%</td><td class="td-num">25.9%</td><td class="td-num">21.6%</td><td class="td-num">99.68</td><td class="td-num">19.8%</td></tr>
+            <tr style="background:rgba(243,69,97,0.03)"><td>2023</td><td class="td-num">4,334</td><td class="td-num td-red">-5.9%</td><td class="td-num">45.8%</td><td class="td-num">18.5%</td><td class="td-num">17.8%</td><td class="td-num td-red">48.51</td><td class="td-num">20.9%</td></tr>
+            <tr style="background:rgba(21,232,178,0.04)"><td><strong>2024</strong></td><td class="td-num td-green"><strong>5,306</strong></td><td class="td-num td-green"><strong>+22.4%</strong></td><td class="td-num td-green"><strong>50.1%</strong></td><td class="td-num td-green"><strong>27.8%</strong></td><td class="td-num td-green"><strong>20.2%</strong></td><td class="td-num td-green"><strong>66.92</strong></td><td class="td-num">18.9%</td></tr>
+            <tr style="background:rgba(21,232,178,0.06)"><td><strong style="color:var(--green);">2025A</strong></td><td class="td-num td-green"><strong>5,960</strong></td><td class="td-num td-green"><strong>+12.3%</strong></td><td class="td-num td-yellow"><strong>47.5%</strong></td><td class="td-num td-yellow"><strong>17.4%</strong></td><td class="td-num td-yellow"><strong>17.8%</strong></td><td class="td-num td-yellow"><strong>66.16</strong></td><td class="td-num">24.0%</td></tr>
+            <tr><td>2026E</td><td class="td-num">5,900–6,200</td><td class="td-num td-yellow">-1%~+4%</td><td class="td-num">45.5%~47%</td><td class="td-num">15%~17%</td><td class="td-num">15%~17%</td><td class="td-num td-yellow">60–68</td><td class="td-num">24–26%</td></tr>
+            <tr><td>2027E</td><td class="td-num">6,800–8,500</td><td class="td-num td-green">+15%~+40%</td><td class="td-num">47%~50%</td><td class="td-num">19%~24%</td><td class="td-num">18%~22%</td><td class="td-num td-green">80–95</td><td class="td-num">22%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px; color:var(--text3); margin-top:12px;">⭐ 2025年為穩健成長年：手機業務突破100億美元歷史新高，但毛利率因產品組合變化與研發持續擴大而下滑至47.5%。2027年ASIC/TPU業務（Google TPU v8x/v8e）將成為下一輪成長主引擎。</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">轉折點分析</div>
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-dot" style="background:var(--green)"></div>
+            <div class="tl-date">2021年 爆發</div>
+            <div class="tl-title">營收+81%，歷史峰值</div>
+            <div class="tl-desc">疫情居家需求激增 + 5G換機潮 + 華為禁令後中國OEM轉單效應三重疊加</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot" style="background:var(--red)"></div>
+            <div class="tl-date">2022–2023年 衰退</div>
+            <div class="tl-title">庫存危機，EPS腰斬</div>
+            <div class="tl-desc">過度備貨 → 渠道庫存積壓 → 聯發科被迫殺價去化，毛利率受壓2Q22-4Q23</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot" style="background:var(--green)"></div>
+            <div class="tl-date">2024年 V型反彈</div>
+            <div class="tl-title">毛利率突破50%歷史高</div>
+            <div class="tl-desc">庫存正常化 + AI手機ASP提升 + 產品組合升級（天璣9400佔比提升）驅動毛利歷史新高</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">費用結構 & 紅旗識別</div>
+        <div class="flag-item">
+          <span class="flag-icon">✅</span>
+          <div class="flag-text"><strong>R&D費用率大幅提升至24%</strong>2025年R&D費用NT$1,430億，佔營收24%，年增46%，顯示在AI ASIC業務轉型期大幅加碼技術投入，為未來成長奠定基礎</div>
+        </div>
+        <div class="flag-item">
+          <span class="flag-icon">✅</span>
+          <div class="flag-text"><strong>SBC稀釋影響可控</strong>股份基礎支付費用約NT$45億/年，佔EPS稀釋約3-4%，在科技公司中屬中等水準</div>
+        </div>
+        <div class="flag-item">
+          <span class="flag-icon">⚠️</span>
+          <div class="flag-text"><strong>2022-2023毛利率連降3季</strong>2022Q3至2023Q1連續3季毛利率下滑，觸發紅旗指標；2024年已完全反轉</div>
+        </div>
+        <div class="flag-item">
+          <span class="flag-icon">✅</span>
+          <div class="flag-text"><strong>存貨週轉回歸正常</strong>2024年底庫存週轉天數回落至55天（vs 2023高峰90天），需求放緩風險消退</div>
+        </div>
+        <div class="flag-item">
+          <span class="flag-icon">🔍</span>
+          <div class="flag-text"><strong>核心EPS（剔除一次性項目）</strong>2025核心EPS NT$66.16，全年淨利NT$1,061億，年減1%；2026Q1 EPS NT$15.17，季增5.6%但年減17.4%，主因手機業務疲弱</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 4: 資產負債 & 現金流
+══════════════════════════════════════════ -->
+<section class="section" id="balance">
+  <div class="container">
+    <div class="section-number">04 · BALANCE SHEET & CASHFLOW</div>
+    <h2 class="section-title">財務健康度全掃描</h2>
+    <p class="section-desc">深挖資產負債表與現金流，辨識真實財務品質與股東回報能力。</p>
+
+    <div class="grid-4" style="margin-bottom:24px;">
+      <div class="kpi"><span class="kpi-val">NT$2,350億</span><span class="kpi-label">現金及約當現金</span><span class="kpi-sub">2025 Q4末</span></div>
+      <div class="kpi"><span class="kpi-val">3.6x</span><span class="kpi-label">短期負債覆蓋比</span><span class="kpi-sub">健康閾值>2x ✅</span></div>
+      <div class="kpi"><span class="kpi-val">52天</span><span class="kpi-label">存貨週轉天數 (DIO)</span><span class="kpi-sub">2025 vs 2024 55天</span></div>
+      <div class="kpi"><span class="kpi-val">40天</span><span class="kpi-label">應收帳款周轉(DSO)</span><span class="kpi-sub">歷史均值45天 ✅</span></div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:24px;">
+      <div class="card">
+        <div class="card-title">資產負債表健康指標</div>
+        <table class="data-table">
+          <thead><tr><th>指標</th><th>2023</th><th>2024</th><th>2025</th><th>評級</th></tr></thead>
+          <tbody>
+            <tr><td>淨現金部位(NT$億)</td><td class="td-num">1,650</td><td class="td-num">2,010</td><td class="td-num td-green">2,280</td><td><span class="hl">強健</span></td></tr>
+            <tr><td>D/E Ratio</td><td class="td-num">0.09</td><td class="td-num">0.06</td><td class="td-num td-green">0.05</td><td><span class="hl">極低</span></td></tr>
+            <tr><td>商譽(NT$億)</td><td class="td-num">318</td><td class="td-num">315</td><td class="td-num">312</td><td><span class="hl">穩定</span></td></tr>
+            <tr><td>無形資產(NT$億)</td><td class="td-num">165</td><td class="td-num">152</td><td class="td-num">140</td><td><span class="hl">遞減正常</span></td></tr>
+            <tr><td>存貨(NT$億)</td><td class="td-num td-yellow">820</td><td class="td-num td-green">690</td><td class="td-num td-green">640</td><td><span class="hl">低位健康</span></td></tr>
+            <tr><td>流動比率</td><td class="td-num">2.6</td><td class="td-num">3.4</td><td class="td-num td-green">3.6</td><td><span class="hl">充足</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title">現金流量分析（NT$億）</div>
+        <table class="data-table">
+          <thead><tr><th>項目</th><th>2023</th><th>2024</th><th>2025</th></tr></thead>
+          <tbody>
+            <tr><td>營業現金流(OCF)</td><td class="td-num">850</td><td class="td-num td-green">1,420</td><td class="td-num td-green">1,380</td></tr>
+            <tr><td>淨利</td><td class="td-num">663</td><td class="td-num">1,071</td><td class="td-num">1,061</td></tr>
+            <tr><td>FCF轉換率</td><td class="td-num td-green">128%</td><td class="td-num td-green">117%</td><td class="td-num td-green">130%</td></tr>
+            <tr><td>資本支出(Capex)</td><td class="td-num">72</td><td class="td-num">88</td><td class="td-num">95</td></tr>
+            <tr><td>Capex/Rev</td><td class="td-num td-green">1.8%</td><td class="td-num td-green">1.7%</td><td class="td-num td-green">1.6%</td></tr>
+            <tr><td>自由現金流(FCF)</td><td class="td-num">778</td><td class="td-num td-green">1,332</td><td class="td-num td-green">1,285</td></tr>
+            <tr><td>股息發放(NT$億)</td><td class="td-num">480</td><td class="td-num">630</td><td class="td-num">780</td></tr>
+            <tr><td>股息/FCF覆蓋倍數</td><td class="td-num td-green">1.62x</td><td class="td-num td-green">2.11x</td><td class="td-num td-green">1.65x</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:14px; padding:12px; background:var(--green-dim); border-radius:4px; border:1px solid var(--green3);">
+          <p style="font-size:12px; color:var(--green);">✅ FCF轉換率持續>100%：表示盈餘品質極高，不存在應收帳款造假或存貨虛增問題</p>
+          <p style="font-size:12px; color:var(--green); margin-top:4px;">✅ Capex佔比僅1.7%：Fabless模式驗證，資產輕量化程度業界頂尖</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">財務紅旗清單 — 全面掃描</div>
+      <div class="grid-2">
+        <div>
+          <div class="flag-item">
+            <span class="flag-icon">🟢</span>
+            <div class="flag-text"><strong>OCF &lt; 淨利？ → 否</strong>2024年OCF NT$1,420億 vs 淨利NT$1,213億，OCF/淨利=117%，盈餘品質優秀</div>
+          </div>
+          <div class="flag-item">
+            <span class="flag-icon">🟢</span>
+            <div class="flag-text"><strong>存貨>前季20%成長？ → 否</strong>2024年存貨持續下降，由2022年峰值NT$980億降至NT$690億，需求放緩疑慮已解除</div>
+          </div>
+        </div>
+        <div>
+          <div class="flag-item">
+            <span class="flag-icon">🟢</span>
+            <div class="flag-text"><strong>應收帳款vs營收成長？ → 正常</strong>2024應收帳款成長+22% vs 營收+26%，DSO持平42天，客戶付款品質穩定</div>
+          </div>
+          <div class="flag-item">
+            <span class="flag-icon">🟢</span>
+            <div class="flag-text"><strong>現金流依賴融資活動？ → 否</strong>融資現金流為負（發股息/庫藏股），營業現金流自給自足，財務結構健全</div>
+          </div>
+        </div>
+      </div>
+      <div style="padding:16px; background:rgba(21,232,178,0.05); border-radius:4px; border:1px solid var(--green3); margin-top:16px; text-align:center;">
+        <span style="font-family:var(--mono); font-size:18px; color:var(--green);">財務健康評分：</span>
+        <span style="font-family:var(--mono); font-size:32px; font-weight:900; color:var(--green);">A+</span>
+        <span style="font-size:13px; color:var(--text2); margin-left:16px;">四項紅旗全數通過，現金流品質頂級</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 5: 估值評估
+══════════════════════════════════════════ -->
+<section class="section" id="valuation">
+  <div class="container">
+    <div class="section-number">05 · VALUATION</div>
+    <h2 class="section-title">全面估值評估</h2>
+    <p class="section-desc">相對估值 + DCF絕對估值雙軌驗證，判斷當前股價合理性。</p>
+
+    <!-- Peer Compare -->
+    <div style="margin-bottom:24px;">
+      <div class="peer-header">
+        <div class="peer-header-cell highlight">公司</div>
+        <div class="peer-header-cell">P/E (TTM)</div>
+        <div class="peer-header-cell">EV/EBITDA</div>
+        <div class="peer-header-cell">P/S</div>
+        <div class="peer-header-cell">ROE</div>
+      </div>
+      <div class="peer-row">
+        <div class="peer-cell" style="background:var(--green-dim); border-left:2px solid var(--green);">
+          <div class="peer-name" style="color:var(--green);">聯發科</div>
+          <div class="peer-ticker">2454.TW</div>
+        </div>
+        <div class="peer-cell td-green" style="background:var(--green-dim);"><strong>~47x</strong></div>
+        <div class="peer-cell td-green" style="background:var(--green-dim);"><strong>~28x</strong></div>
+        <div class="peer-cell td-green" style="background:var(--green-dim);"><strong>~5.6x</strong></div>
+        <div class="peer-cell td-green" style="background:var(--green-dim);"><strong>~25%</strong></div>
+      </div>
+      <div class="peer-row">
+        <div class="peer-cell"><div class="peer-name">高通</div><div class="peer-ticker">QCOM</div></div>
+        <div class="peer-cell td-num">~18x</td></div>
+        <div class="peer-cell td-num">~15x</td></div>
+        <div class="peer-cell td-num">~4.2x</td></div>
+        <div class="peer-cell td-num td-green">~29%</td></div>
+      </div>
+      <div class="peer-row">
+        <div class="peer-cell"><div class="peer-name">博通</div><div class="peer-ticker">AVGO</div></div>
+        <div class="peer-cell td-num">~32x</td></div>
+        <div class="peer-cell td-num">~22x</td></div>
+        <div class="peer-cell td-num">~16x</td></div>
+        <div class="peer-cell td-num td-green">~55%</td></div>
+      </div>
+      <div class="peer-row" style="background:rgba(30,37,48,0.5);">
+        <div class="peer-cell"><div class="peer-name" style="color:var(--text3);">半導體設計業歷史均值</div></div>
+        <div class="peer-cell td-num td-yellow">25–30x</td></div>
+        <div class="peer-cell td-num td-yellow">15–25x</td></div>
+        <div class="peer-cell td-num td-yellow">4–6x</td></div>
+        <div class="peer-cell td-num">25–35%</td></div>
+      </div>
+    </div>
+    <p style="font-size:12px; color:var(--text2); margin-bottom:24px;">📌 <strong style="color:var(--text);">估值重評價分析：</strong>2026年聯發科股價急速飆升（2月~NT$1,400→4月~NT$2,675→5月~NT$3,155），主因ASIC/TPU業務重新定價：廣發目標價2000元，美系外資上看2588元。Google TPU v8x Tapeout確認，2027年ASIC營收估17億美元，市場正從「手機AP公司」重新評估為「AI基礎設施供應商」。</p>
+
+    <!-- PEG -->
+    <div class="grid-3" style="margin-bottom:32px;">
+      <div class="kpi">
+        <span class="kpi-val">~47x</span>
+        <span class="kpi-label">Forward P/E (2026E)</span>
+        <span class="kpi-sub">EPS ~NT$64-68，AI ASIC重評價中</span>
+      </div>
+      <div class="kpi" style="border-color:var(--green3);">
+        <span class="kpi-val" style="color:var(--green);">~0.5x</span>
+        <span class="kpi-label">2027 PEG Ratio</span>
+        <span class="kpi-sub">基於2027E EPS ~NT$95.2，+44% YoY ASIC驅動</span>
+      </div>
+      <div class="kpi">
+        <span class="kpi-val">~28x</span>
+        <span class="kpi-label">EV/EBITDA (2025A)</span>
+        <span class="kpi-sub">AI轉型估值溢價大幅擴張</span>
+      </div>
+    </div>
+
+    <!-- DCF Scenarios -->
+    <div class="card" style="margin-bottom:24px;">
+      <div class="card-title">DCF三情境分析 — 2026年版內含價值估算</div>
+      <div class="scenario-grid" style="margin-top:16px;">
+        <div class="scenario scenario-bull">
+          <div class="scenario-label" style="color:var(--green);">🐂 樂觀情境</div>
+          <div class="scenario-price" style="color:var(--green);">NT$3,800</div>
+          <div class="scenario-updown" style="color:var(--green);">vs 當前 +20.4%</div>
+          <div class="scenario-row"><span class="scenario-key">營收CAGR</span><span class="scenario-val" style="color:var(--green);">+22%</span></div>
+          <div class="scenario-row"><span class="scenario-key">ASIC 2027E</span><span class="scenario-val">$80億USD</span></div>
+          <div class="scenario-row"><span class="scenario-key">WACC</span><span class="scenario-val">9%</span></div>
+          <div class="scenario-row"><span class="scenario-key">觸發條件</span><span class="scenario-val" style="font-size:11px; color:var(--text2);">Google/Microsoft ASIC全面放量+手機回溫</span></div>
+        </div>
+        <div class="scenario scenario-base">
+          <div class="scenario-label" style="color:var(--yellow);">⚖️ 基本情境</div>
+          <div class="scenario-price" style="color:var(--yellow);">NT$2,800</div>
+          <div class="scenario-updown" style="color:var(--yellow);">vs 當前 -11.2%</div>
+          <div class="scenario-row"><span class="scenario-key">營收CAGR</span><span class="scenario-val" style="color:var(--yellow);">+15%</span></div>
+          <div class="scenario-row"><span class="scenario-key">ASIC 2027E</span><span class="scenario-val">$17億USD</span></div>
+          <div class="scenario-row"><span class="scenario-key">WACC</span><span class="scenario-val">10%</span></div>
+          <div class="scenario-row"><span class="scenario-key">觸發條件</span><span class="scenario-val" style="font-size:11px; color:var(--text2);">手機2H反彈+ASIC穩健成長</span></div>
+        </div>
+        <div class="scenario scenario-bear">
+          <div class="scenario-label" style="color:var(--red);">🐻 悲觀情境</div>
+          <div class="scenario-price" style="color:var(--red);">NT$1,500</div>
+          <div class="scenario-updown" style="color:var(--red);">vs 當前 -52.5%</div>
+          <div class="scenario-row"><span class="scenario-key">營收CAGR</span><span class="scenario-val" style="color:var(--red);">+3%</span></div>
+          <div class="scenario-row"><span class="scenario-key">ASIC 2027E</span><span class="scenario-val">延遲/未達</span></div>
+          <div class="scenario-row"><span class="scenario-key">WACC</span><span class="scenario-val">11%</span></div>
+          <div class="scenario-row"><span class="scenario-key">觸發條件</span><span class="scenario-val" style="font-size:11px; color:var(--text2);">ASIC失利+出口管制+手機衰退</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Verdict -->
+    <div class="verdict-box">
+      <div>
+        <div class="verdict-rating" style="font-size:32px;">重評價</div>
+        <div class="verdict-label">AI ASIC轉型關鍵期</div>
+      </div>
+      <div class="verdict-body">
+        <strong>目標價區間：NT$2,800–3,800</strong>（12個月，基本至樂觀情境）<br><br>
+        2026年聯發科正經歷估值範式轉移：從手機AP廠（合理P/E 15-20x）升格為AI ASIC基礎設施供應商（P/E 40-60x）。<strong>Google TPU v8x/v8e合作確認</strong>是核心催化劑，2027年ASIC貢獻EPS估達NT$31元。當前股價（~NT$3,155）已大幅反映轉型預期，短期需等待2026H2業績兌現確認。<strong>手機業務回溫（2H2026）+ ASIC放量（2027）</strong>雙引擎若順利實現，股價有機會持續上攻。核心風險：ASIC延遲、出口管制升級、新台幣持續升值壓縮營收。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 5.5: 月營收 × 月均股價 互動圖表
+══════════════════════════════════════════ -->
+<section class="section" id="monthly-chart">
+  <div class="container">
+    <div class="section-number">05.5 · MONTHLY REVENUE × PRICE CHART</div>
+    <h2 class="section-title">月營收 × 月均股價 × YoY 互動圖表</h2>
+    <p class="section-desc">2024–2026年每月實際公告營收（台灣證交所資料）對應月均收盤股價，點選圖例切換顯示。</p>
+    <div class="card" style="padding:0; overflow:visible;">
+      <canvas id="monthlyChart" style="width:100%; height:420px; display:block; padding:24px; box-sizing:border-box;"></canvas>
+    </div>
+    <div style="display:grid; grid-template-columns: repeat(3,1fr); gap:16px; margin-top:20px;">
+      <div class="kpi" style="border-color:var(--green3);">
+        <span class="kpi-val" style="font-size:20px;">NT$5,960億</span>
+        <span class="kpi-label">2025全年營收</span>
+        <span class="kpi-sub" style="color:var(--green);">YoY +12.3% ✅</span>
+      </div>
+      <div class="kpi" style="border-color:rgba(255,179,71,0.4);">
+        <span class="kpi-val" style="font-size:20px;">NT$1,492億</span>
+        <span class="kpi-label">2026 Q1實際營收</span>
+        <span class="kpi-sub" style="color:var(--yellow);">YoY -2.7% ⚠️ 手機淡季</span>
+      </div>
+      <div class="kpi" style="border-color:var(--green3);">
+        <span class="kpi-val" style="font-size:20px;">NT$3,155</span>
+        <span class="kpi-label">當前股價（2026/05）</span>
+        <span class="kpi-sub" style="color:var(--green);">ASIC重評價 飆漲+153%</span>
+      </div>
+    </div>
+    <div class="card" style="margin-top:20px;">
+      <div class="card-title">月度資料明細表（公開資訊觀測站）</div>
+      <div style="overflow-x:auto; margin-top:12px;">
+        <table class="data-table" style="min-width:700px;">
+          <thead><tr><th>年月</th><th>月營收(億)</th><th>YoY%</th><th>月均股價(NT$)</th><th>備註</th></tr></thead>
+          <tbody>
+            <tr><td>2025/01</td><td class="td-num">511.4</td><td class="td-num td-green">+14.9%</td><td class="td-num">1,310</td><td style="font-size:11px; color:var(--text3);">年初旺季</td></tr>
+            <tr><td>2025/02</td><td class="td-num">461.7</td><td class="td-num td-green">+20.0%</td><td class="td-num">1,380</td><td style="font-size:11px; color:var(--text3);">農曆春節效應</td></tr>
+            <tr><td>2025/03</td><td class="td-num">560.1</td><td class="td-num td-green">+25.8%</td><td class="td-num">1,430</td><td style="font-size:11px; color:var(--text3);">Q1高峰，關稅拉貨</td></tr>
+            <tr><td>2025/04</td><td class="td-num">487.5</td><td class="td-num td-green">+16.0%</td><td class="td-num">1,200</td><td style="font-size:11px; color:var(--text3);">關稅衝擊股價</td></tr>
+            <tr><td>2025/05</td><td class="td-num">451.8</td><td class="td-num td-green">+7.2%</td><td class="td-num">1,220</td><td style="font-size:11px; color:var(--text3);">新台幣升值壓縮</td></tr>
+            <tr><td>2025/06</td><td class="td-num">564.3</td><td class="td-num td-green">+31.0%</td><td class="td-num">1,350</td><td style="font-size:11px; color:var(--text3);">32個月新高</td></tr>
+            <tr><td>2025/07</td><td class="td-num">432.2</td><td class="td-num td-red">-5.2%</td><td class="td-num">1,170</td><td style="font-size:11px; color:var(--text3);">淡季低點</td></tr>
+            <tr><td>2025/08</td><td class="td-num">445.5</td><td class="td-num td-green">+7.3%</td><td class="td-num">1,200</td><td style="font-size:11px; color:var(--text3);">天璣9500備貨</td></tr>
+            <tr><td>2025/09</td><td class="td-num">543.3</td><td class="td-num td-green">+21.6%</td><td class="td-num">1,280</td><td style="font-size:11px; color:var(--text3);">旗艦晶片量產</td></tr>
+            <tr><td>2025/10</td><td class="td-num">521.4</td><td class="td-num td-green">+15.3%</td><td class="td-num">1,260</td><td style="font-size:11px; color:var(--text3);">天璣9500放量</td></tr>
+            <tr><td>2025/11</td><td class="td-num">469.0</td><td class="td-num td-green">+3.7%</td><td class="td-num">1,255</td><td style="font-size:11px; color:var(--text3);">季節性放緩</td></tr>
+            <tr><td>2025/12</td><td class="td-num">512.7</td><td class="td-num td-green">+23.0%</td><td class="td-num">1,390</td><td style="font-size:11px; color:var(--text3);">Q4旗艦放量收官</td></tr>
+            <tr style="background:rgba(21,232,178,0.05);"><td>2026/01</td><td class="td-num">469.8</td><td class="td-num td-red">-8.1%</td><td class="td-num">1,410</td><td style="font-size:11px; color:var(--text3);">手機淡季</td></tr>
+            <tr style="background:rgba(21,232,178,0.05);"><td>2026/02</td><td class="td-num">389.5</td><td class="td-num td-red">-15.6%</td><td class="td-num">1,530</td><td style="font-size:11px; color:var(--text3);">法說會ASIC重評價起漲</td></tr>
+            <tr style="background:rgba(21,232,178,0.1);"><td><strong>2026/03</strong></td><td class="td-num td-green"><strong>632.2</strong></td><td class="td-num td-green"><strong>+12.9%</strong></td><td class="td-num td-green"><strong>2,280</strong></td><td style="font-size:11px; color:var(--green);">ASIC概念引爆 股價急飆</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 6: 產業分析
+══════════════════════════════════════════ -->
+<section class="section" id="industry">
+  <div class="container">
+    <div class="section-number">06 · INDUSTRY ANALYSIS</div>
+    <h2 class="section-title">產業競爭格局</h2>
+    <p class="section-desc">五力分析 + 主要競爭對手對比 + 成長催化劑時間表。</p>
+
+    <div class="grid-4" style="margin-bottom:32px;">
+      <div class="kpi"><span class="kpi-val">$580億</span><span class="kpi-label">2024 全球手機AP市場</span><span class="kpi-sub">CAGR +8% → 2027E $720億</span></div>
+      <div class="kpi"><span class="kpi-val">15%→45%</span><span class="kpi-label">AI手機滲透率</span><span class="kpi-sub">2024→2026E 高速擴張</span></div>
+      <div class="kpi"><span class="kpi-val">$420億</span><span class="kpi-label">2026E IoT晶片市場</span><span class="kpi-sub">邊緣AI驅動加速成長</span></div>
+      <div class="kpi"><span class="kpi-val">$800億</span><span class="kpi-label">2027E 車用晶片市場</span><span class="kpi-sub">ADAS/座艙進入放量期</span></div>
+    </div>
+
+    <!-- Five Forces -->
+    <div class="forces-grid" style="margin-bottom:32px;">
+      <div class="force-card">
+        <div class="force-header">
+          <div class="force-name">🏭 供應商議價力</div>
+          <div class="force-level level-high">高</div>
+        </div>
+        <div class="force-desc">台積電近乎壟斷先進製程代工，2nm產能稀缺，高通/蘋果/聯發科同台競爭配額。台積電具極強定價能力，聯發科代工成本幾乎無議價空間。封測供應商（日月光/矽品）集中度亦高。</div>
+      </div>
+      <div class="force-card">
+        <div class="force-header">
+          <div class="force-name">📱 客戶議價力</div>
+          <div class="force-level level-high">高</div>
+        </div>
+        <div class="force-desc">小米/OPPO/vivo等中國OEM具強大砍價能力，尤其在中低階競爭激烈時。然而，旗艦產品天璣9400的技術溢價讓OEM議價空間收窄。前五大客戶合計佔比約59%，集中度仍是風險點。</div>
+      </div>
+      <div class="force-card">
+        <div class="force-header">
+          <div class="force-name">🚪 新進入者威脅</div>
+          <div class="force-level level-med">中</div>
+        </div>
+        <div class="force-desc">紫光展銳獲中國政府補貼，在低階5G市場已佔7-8%份額，但旗艦段設計能力差距仍大。進入先進晶片設計需龐大IP積累（5-10年），資本門檻高。短期威脅有限，中期需持續關注。</div>
+      </div>
+      <div class="force-card">
+        <div class="force-header">
+          <div class="force-name">🔄 替代品威脅</div>
+          <div class="force-level level-med">中</div>
+        </div>
+        <div class="force-desc">小米澎湃S3（ISP晶片）、OPPO馬里亞納X（影像晶片）只威脅特定功能模組，而非整體AP。三星Exynos在旗艦段屢遭失敗。自研AP完整取代外採需5-8年，短期不構成實質威脅。</div>
+      </div>
+      <div class="force-card" style="grid-column: span 2;">
+        <div class="force-header">
+          <div class="force-name">⚔️ 現有競爭者強度</div>
+          <div class="force-level level-high">極高</div>
+        </div>
+        <div class="force-desc">高通在旗艦市場把持三星/品牌溢價，並以驍龍Elite以高性能CPU反擊聯發科NPU領先優勢。高通近年加大中低階投入（驍龍6/4系列），直接衝擊聯發科核心市場。定價競爭激烈程度歷史罕見，預計2025-2026年中低階毛利壓縮風險高。</div>
+      </div>
+    </div>
+
+    <!-- Threat Timeline -->
+    <div class="card">
+      <div class="card-title">威脅時間軸 — 分層識別</div>
+      <div class="grid-3">
+        <div>
+          <p style="font-family:var(--mono); font-size:11px; color:var(--red); margin-bottom:16px;">⚡ 短期（1年內）</p>
+          <div class="flag-item" style="border:none; padding:8px 0;">
+            <span class="flag-icon" style="font-size:14px;">🔴</span>
+            <div class="flag-text" style="font-size:12px;"><strong>高通中低階反擊</strong>驍龍7系列降價搶市占，壓縮聯發科中階毛利</div>
+          </div>
+          <div class="flag-item" style="border:none; padding:8px 0;">
+            <span class="flag-icon" style="font-size:14px;">🔴</span>
+            <div class="flag-text" style="font-size:12px;"><strong>美國出口管制更新</strong>Entity List可能新增中國客戶</div>
+          </div>
+          <div class="flag-item" style="border:none; padding:8px 0;">
+            <span class="flag-icon" style="font-size:14px;">🟡</span>
+            <div class="flag-text" style="font-size:12px;"><strong>手機出貨量低於預期</strong>IDC/Counterpoint下修可能</div>
+          </div>
+        </div>
+        <div>
+          <p style="font-family:var(--mono); font-size:11px; color:var(--yellow); margin-bottom:16px;">⚡ 中期（2–3年）</p>
+          <div class="flag-item" style="border:none; padding:8px 0;">
+            <span class="flag-icon" style="font-size:14px;">🟡</span>
+            <div class="flag-text" style="font-size:12px;"><strong>中國本土晶片崛起</strong>紫光展銳在中端市場競爭加劇</div>
+          </div>
+          <div class="flag-item" style="border:none; padding:8px 0;">
+            <span class="flag-icon" style="font-size:14px;">🟡</span>
+            <div class="flag-text" style="font-size:12px;"><strong>OEM自研晶片擴大</strong>小米/OPPO加碼ISP/NPU自研</div>
+          </div>
+          <div class="flag-item" style="border:none; padding:8px 0;">
+            <span class="flag-icon" style="font-size:14px;">🟡</span>
+            <div class="flag-text" style="font-size:12px;"><strong>台積電製程配額競爭</strong>N2稀缺影響旗艦供貨</div>
+          </div>
+        </div>
+        <div>
+          <p style="font-family:var(--mono); font-size:11px; color:var(--text3); margin-bottom:16px;">⚡ 長期（3年以上）</p>
+          <div class="flag-item" style="border:none; padding:8px 0;">
+            <span class="flag-icon" style="font-size:14px;">⚫</span>
+            <div class="flag-text" style="font-size:12px;"><strong>台海地緣政治升溫</strong>極端情境下的生產中斷風險</div>
+          </div>
+          <div class="flag-item" style="border:none; padding:8px 0;">
+            <span class="flag-icon" style="font-size:14px;">⚫</span>
+            <div class="flag-text" style="font-size:12px;"><strong>ARM生態碎片化</strong>RISC-V替代CPU架構的威脅</div>
+          </div>
+          <div class="flag-item" style="border:none; padding:8px 0;">
+            <span class="flag-icon" style="font-size:14px;">⚫</span>
+            <div class="flag-text" style="font-size:12px;"><strong>Hyperscaler自研SoC</strong>雲端廠商進入邊緣運算市場</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 7: 風險矩陣
+══════════════════════════════════════════ -->
+<section class="section" id="risks" style="border-bottom:none;">
+  <div class="container">
+    <div class="section-number">07 · RISK MATRIX</div>
+    <h2 class="section-title">風險情境全解析</h2>
+    <p class="section-desc">五大下行情境量化，搭配2×2風險矩陣，給出投資人對策。</p>
+
+    <!-- Risk Cards -->
+    <div class="grid-2" style="margin-bottom:32px;">
+      <div class="card" style="border-color:rgba(243,69,97,0.3);">
+        <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
+          <div class="card-title" style="color:var(--red);">風險 ①：地緣政治 / 出口管制</div>
+          <span style="font-family:var(--mono); font-size:10px; background:rgba(243,69,97,0.15); color:var(--red); padding:3px 10px; border-radius:3px;">HIGH</span>
+        </div>
+        <p style="font-size:13px; color:var(--text2); margin-bottom:12px;">美國進一步限制先進半導體對中出口，或台灣海峽緊張升溫。聯發科中國業務佔比約60%。</p>
+        <div style="background:rgba(243,69,97,0.06); border:1px solid rgba(243,69,97,0.15); border-radius:4px; padding:14px; margin-bottom:12px;">
+          <p style="font-family:var(--mono); font-size:12px; color:var(--red); margin-bottom:6px;">量化衝擊估算</p>
+          <p style="font-size:12px; color:var(--text2);">若中國業務下降30% → 營收損失約NT$930億 → EPS衝擊約 <strong style="color:var(--red);">-NT$33 (-29%)</strong></p>
+          <p style="font-size:12px; color:var(--text2); margin-top:4px;">若中國業務全面中斷 → EPS衝擊達 <strong style="color:var(--red);">-NT$65 (-58%)</strong></p>
+        </div>
+        <p style="font-size:11px; color:var(--text3);">觸發指標：商務部BIS Entity List更新 / 瓦聖納協議修訂 / 台海軍事演習升級</p>
+      </div>
+
+      <div class="card" style="border-color:rgba(243,69,97,0.2);">
+        <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
+          <div class="card-title" style="color:var(--yellow);">風險 ②：手機需求低迷</div>
+          <span style="font-family:var(--mono); font-size:10px; background:rgba(255,215,0,0.12); color:var(--yellow); padding:3px 10px; border-radius:3px;">MEDIUM</span>
+        </div>
+        <p style="font-size:13px; color:var(--text2); margin-bottom:12px;">全球手機出貨量低於預期，庫存去化不如預期，高通降價搶市導致毛利壓縮。</p>
+        <div style="background:rgba(255,215,0,0.04); border:1px solid rgba(255,215,0,0.15); border-radius:4px; padding:14px; margin-bottom:12px;">
+          <p style="font-family:var(--mono); font-size:12px; color:var(--yellow); margin-bottom:6px;">量化衝擊估算</p>
+          <p style="font-size:12px; color:var(--text2);">出貨量每↓5% → 毛利率邊際壓縮約 <strong style="color:var(--yellow);">0.8-1.2ppt</strong></p>
+          <p style="font-size:12px; color:var(--text2); margin-top:4px;">若毛利率跌回46% → EPS衝擊約 <strong style="color:var(--yellow);">-NT$18 (-16%)</strong></p>
+        </div>
+        <p style="font-size:11px; color:var(--text3);">觸發指標：IDC/Counterpoint季度出貨量下修 &gt;5% / 渠道庫存DIO突破75天</p>
+      </div>
+
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
+          <div class="card-title" style="color:var(--yellow);">風險 ③：高通技術突破 / 市占侵蝕</div>
+          <span style="font-family:var(--mono); font-size:10px; background:rgba(255,215,0,0.12); color:var(--yellow); padding:3px 10px; border-radius:3px;">MEDIUM</span>
+        </div>
+        <p style="font-size:13px; color:var(--text2); margin-bottom:12px;">高通以更低成本方案在中低階搶奪聯發科核心市場。歷史參考：2015-2018年高通曾短暫侵蝕。</p>
+        <div style="background:rgba(255,215,0,0.04); border:1px solid rgba(255,215,0,0.15); border-radius:4px; padding:14px; margin-bottom:12px;">
+          <p style="font-family:var(--mono); font-size:12px; color:var(--yellow); margin-bottom:6px;">量化衝擊估算</p>
+          <p style="font-size:12px; color:var(--text2);">中低階市占損失10ppt → 年營收損失約 <strong style="color:var(--yellow);">NT$290億</strong> → EPS衝擊 <strong style="color:var(--yellow);">-NT$10 (-9%)</strong></p>
+        </div>
+        <p style="font-size:11px; color:var(--text3);">觸發指標：Counterpoint季度市占報告 / 主要OEM採購轉移消息</p>
+      </div>
+
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
+          <div class="card-title" style="color:var(--text2);">風險 ④：台積電製程供給瓶頸</div>
+          <span style="font-family:var(--mono); font-size:10px; background:rgba(100,100,100,0.15); color:var(--text2); padding:3px 10px; border-radius:3px;">LOW-MED</span>
+        </div>
+        <p style="font-size:13px; color:var(--text2); margin-bottom:12px;">3nm/2nm產能緊縮，聯發科無法取得足夠先進製程配額，Dimensity 9系列旗艦出貨受阻。</p>
+        <div style="background:rgba(100,100,100,0.06); border:1px solid var(--border); border-radius:4px; padding:14px; margin-bottom:12px;">
+          <p style="font-size:12px; color:var(--text2);">旗艦Dimensity 9400若供給減少30% → 高端ASP組合下移 → 毛利率壓縮約 <strong>1.5-2ppt</strong></p>
+          <p style="font-size:12px; color:var(--text2); margin-top:4px;">緩解因素：聯發科為台積電長期優先客戶，歷史上配額穩定</p>
+        </div>
+        <p style="font-size:11px; color:var(--text3);">觸發指標：台積電法說會CoWoS/N3產能分配說明 / 蘋果新品備料新聞</p>
+      </div>
+    </div>
+
+    <!-- Risk 5 -->
+    <div class="card" style="margin-bottom:32px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
+        <div class="card-title" style="color:var(--text2);">風險 ⑤：管理層 & 執行風險</div>
+        <span style="font-family:var(--mono); font-size:10px; background:rgba(100,100,100,0.15); color:var(--text2); padding:3px 10px; border-radius:3px;">LOW</span>
+      </div>
+      <div class="grid-2">
+        <div>
+          <p style="font-size:13px; color:var(--text2); margin-bottom:12px;">蔡明介（創辦人）已於2022年卸任董事長，由蔡力行（前台積電CEO）接任。交棒過程平穩，無明顯文化斷層。</p>
+          <div class="flag-item" style="border:none; padding:6px 0;">
+            <span class="flag-icon" style="font-size:14px;">✅</span>
+            <div class="flag-text" style="font-size:12px;"><strong>接班人計劃清晰</strong>蔡力行具豐富半導體產業管理經歷</div>
+          </div>
+          <div class="flag-item" style="border:none; padding:6px 0;">
+            <span class="flag-icon" style="font-size:14px;">⚠️</span>
+            <div class="flag-text" style="font-size:12px;"><strong>關鍵研發主管留任</strong>核心SoC設計人才競爭激烈，TSMC/Arm/競爭對手招募積極</div>
+          </div>
+        </div>
+        <div style="padding:20px; background:rgba(255,215,0,0.04); border:1px solid rgba(255,215,0,0.1); border-radius:4px;">
+          <p style="font-size:12px; color:var(--yellow); font-family:var(--mono); margin-bottom:8px;">管理層風險評分</p>
+          <p style="font-size:32px; font-weight:900; color:var(--yellow); font-family:var(--mono); margin-bottom:4px;">LOW</p>
+          <p style="font-size:12px; color:var(--text2);">交棒完成，組織穩定；主要風險為中階核心工程師流失，而非高層異動</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Risk Matrix 2x2 -->
+    <div class="card">
+      <div class="card-title">2×2 風險矩陣（發生機率 × 衝擊程度）</div>
+      <div style="margin-top:20px;">
+        <div class="risk-matrix">
+          <div class="rm-corner"></div>
+          <div class="rm-xlabel" style="font-size:11px;">低衝擊</div>
+          <div class="rm-xlabel" style="font-size:11px;">高衝擊</div>
+
+          <div class="rm-ylabel" style="font-size:11px;">高機率</div>
+          <div class="rm-cell rm-yellow">
+            <span class="rm-badge rm-badge-yellow">監控</span>
+            <div class="rm-risk">
+              <strong style="font-size:12px; color:var(--text);">②</strong> 手機需求低迷<br>
+              <strong style="font-size:12px; color:var(--text);">③</strong> 高通市占侵蝕
+            </div>
+          </div>
+          <div class="rm-cell rm-red">
+            <span class="rm-badge rm-badge-red">優先應對</span>
+            <div class="rm-risk">
+              <strong style="font-size:12px; color:var(--text);">①</strong> 地緣政治/出口管制升級<br>
+              <span style="font-size:11px;">→ 對策：分散客戶地理 + 持倉比例控制</span>
+            </div>
+          </div>
+
+          <div class="rm-ylabel" style="font-size:11px;">低機率</div>
+          <div class="rm-cell rm-green">
+            <span class="rm-badge rm-badge-green">可忽略</span>
+            <div class="rm-risk">
+              <strong style="font-size:12px; color:var(--text);">⑤</strong> 管理層執行風險
+            </div>
+          </div>
+          <div class="rm-cell rm-yellow">
+            <span class="rm-badge rm-badge-yellow">情境監控</span>
+            <div class="rm-risk">
+              <strong style="font-size:12px; color:var(--text);">④</strong> 台積電製程瓶頸<br>
+              <span style="font-size:11px;">→ 對策：設置台積電法說關鍵字觸發</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-top:20px;">
+          <div style="padding:12px; background:rgba(21,232,178,0.05); border:1px solid var(--green3); border-radius:4px;">
+            <p style="font-family:var(--mono); font-size:10px; color:var(--green); margin-bottom:6px;">🟢 低機率/低衝擊 → 可忽略</p>
+            <p style="font-size:11px; color:var(--text2);">正常持倉，季度追蹤即可</p>
+          </div>
+          <div style="padding:12px; background:rgba(255,215,0,0.04); border:1px solid rgba(255,215,0,0.15); border-radius:4px;">
+            <p style="font-family:var(--mono); font-size:10px; color:var(--yellow); margin-bottom:6px;">🟡 中度風險 → 設定預警指標</p>
+            <p style="font-size:11px; color:var(--text2);">DIO突破70天或市占跌破35%觸發減碼</p>
+          </div>
+          <div style="padding:12px; background:rgba(243,69,97,0.06); border:1px solid rgba(243,69,97,0.2); border-radius:4px;">
+            <p style="font-family:var(--mono); font-size:10px; color:var(--red); margin-bottom:6px;">🔴 高機率/高衝擊 → 對沖配置</p>
+            <p style="font-size:11px; color:var(--text2);">建議搭配高通/博通多元化，聯發科單一部位勿超過組合15%</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- FOOTER -->
+<footer style="background:var(--bg2); border-top:1px solid var(--border); padding:40px; text-align:center;">
+  <div style="font-family:var(--mono); font-size:10px; color:var(--text3); letter-spacing:0.1em;">
+    <p style="margin-bottom:8px;">深度研究報告 · MediaTek 2454.TW · 資深分析師視角</p>
+    <p>⚠️ 本報告僅供研究參考，不構成投資建議。投資有風險，請自行評估。</p>
+    <p style="margin-top:8px; color:var(--text3);">數據來源：公司財報、IDC、Counterpoint Research、CME FedWatch、TradingView</p>
+  </div>
+</footer>
+
+<script>
+  // Animate bars on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.querySelectorAll('.bar-fill, .moat-fill, .score-bar').forEach(el => {
+          const w = el.style.width;
+          el.style.width = '0';
+          setTimeout(() => el.style.width = w, 100);
+        });
+      }
+    });
+  }, { threshold: 0.2 });
+
+  document.querySelectorAll('.card, .section').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

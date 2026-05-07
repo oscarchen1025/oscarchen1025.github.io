@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QuantHero 頻道成長研究 · YouTube Strategy Report</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --bg2: #10151b;
+      --bg3: #13181f;
+      --surface: #15191e;
+      --surface2: #1a1f26;
+      --border: #1e2530;
+      --border2: #252d3a;
+      --green: #15e8b2;
+      --green2: #10c994;
+      --green3: #0a8060;
+      --green-dim: rgba(21,232,178,0.08);
+      --green-glow: rgba(21,232,178,0.15);
+      --red: #f34561;
+      --red-dim: rgba(243,69,97,0.1);
+      --yellow: #ffb347;
+      --text: #ffffff;
+      --text2: #a8b8c8;
+      --text3: #4d5f72;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Noto Sans TC', sans-serif;
+      --body: 'Noto Sans TC', sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--body);
+      line-height: 1.75;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 55% 45% at 50% 8%, rgba(21,232,178,0.11), transparent 66%),
+        radial-gradient(ellipse 45% 35% at 78% 35%, rgba(21,232,178,0.05), transparent 70%),
+        linear-gradient(180deg, rgba(13,17,23,0.82), rgba(13,17,23,1));
+      z-index: -2;
+    }
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.014) 1px, transparent 1px);
+      background-size: 46px 46px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,.5), rgba(0,0,0,.08));
+      pointer-events: none;
+      z-index: -1;
+    }
+    a { color: inherit; text-decoration: none; }
+    .ticker {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 34px;
+      overflow: hidden;
+      background: rgba(13,17,23,0.96);
+      border-bottom: 1px solid var(--border);
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .04em;
+      color: var(--text2);
+    }
+    .ticker-track {
+      display: flex;
+      min-width: max-content;
+      animation: ticker 34s linear infinite;
+    }
+    .ticker-item { display: inline-flex; gap: 8px; align-items: center; padding: 0 22px; white-space: nowrap; }
+    .ticker-item strong { color: var(--text); }
+    .chg-pos { color: var(--green); }
+    .chg-neg { color: var(--red); }
+    @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    .sticky-nav {
+      position: fixed;
+      top: 34px;
+      left: 0;
+      right: 0;
+      height: 58px;
+      background: rgba(13,17,23,0.93);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      z-index: 40;
+    }
+    .nav-inner {
+      width: min(1180px, calc(100% - 36px));
+      margin: 0 auto;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand { display:flex; align-items:center; gap:10px; font-family: var(--sans); font-weight: 800; letter-spacing: .03em; }
+    .brand-mark {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 1px solid var(--green3);
+      display:grid; place-items:center;
+      color: var(--green);
+      background: var(--green-dim);
+      box-shadow: 0 0 28px rgba(21,232,178,.14);
+      font-family: var(--mono);
+      font-weight: 700;
+    }
+    .nav-links { display: flex; gap: 22px; align-items:center; font-family: var(--mono); font-size: 11px; color: var(--text3); }
+    .nav-links a { border-bottom: 1px solid transparent; padding-bottom: 3px; transition:.2s; }
+    .nav-links a:hover { color: var(--green); border-color: var(--green); }
+
+    .hero {
+      min-height: 100vh;
+      padding: 132px 18px 60px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      position: relative;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border: 1px solid var(--green3);
+      border-radius: 999px;
+      color: var(--green);
+      background: rgba(21,232,178,0.05);
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    .badge::before { content:""; width:6px; height:6px; border-radius:50%; background:var(--green); box-shadow:0 0 15px var(--green); }
+    .hero-title {
+      margin: 26px 0 18px;
+      font-family: var(--sans);
+      font-size: clamp(52px, 9vw, 126px);
+      line-height: .9;
+      letter-spacing: -0.07em;
+      font-weight: 900;
+    }
+    .hero-title .line1 { display:block; color: #fff; }
+    .hero-title .line2 { display:block; color: var(--green); text-shadow: 0 0 42px rgba(21,232,178,.18); }
+    .hero-sub {
+      max-width: 880px;
+      margin: 0 auto;
+      color: var(--text2);
+      font-size: 18px;
+      line-height: 1.9;
+    }
+    .hero-sub strong { color: var(--text); }
+    .hero-kpis {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      width: min(980px, 100%);
+      margin: 50px auto 0;
+      border: 1px solid var(--border);
+      background: rgba(13,17,23,.48);
+    }
+    .hero-kpi { padding: 24px 20px; border-right:1px solid var(--border); }
+    .hero-kpi:last-child { border-right:0; }
+    .kpi-value { font-family: var(--mono); font-size: clamp(24px, 3vw, 34px); color: var(--green); font-weight: 800; }
+    .kpi-label { color: var(--text3); font-size: 12px; margin-top: 7px; }
+    .scroll-hint { margin-top: 70px; color: var(--text3); font-family: var(--mono); font-size: 10px; letter-spacing: .22em; }
+
+    .section { padding: 88px 0; border-bottom: 1px solid var(--border); }
+    .container { width: min(1180px, calc(100% - 36px)); margin: 0 auto; }
+    .section-head { display:flex; align-items:end; gap:26px; margin-bottom: 36px; }
+    .section-code { font-family:var(--mono); font-size: 12px; color: var(--green); letter-spacing:.18em; text-transform:uppercase; white-space:nowrap; }
+    .section-title { margin: 0; font-family: var(--sans); font-size: clamp(34px, 5vw, 58px); line-height:1; letter-spacing:-.04em; }
+    .section-line { flex:1; height:1px; background: var(--border); margin-bottom:10px; }
+    .lead { color: var(--text2); max-width: 900px; font-size: 16px; }
+    .grid { display:grid; gap:22px; }
+    .grid.two { grid-template-columns: 1fr 1fr; }
+    .grid.three { grid-template-columns: repeat(3, 1fr); }
+    .grid.five { grid-template-columns: repeat(5, 1fr); }
+    .card {
+      position: relative;
+      background: linear-gradient(180deg, rgba(26,31,38,.92), rgba(21,25,30,.88));
+      border: 1px solid var(--border);
+      padding: 26px;
+      border-radius: 6px;
+      box-shadow: 0 20px 80px rgba(0,0,0,.22);
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+    .glass-effect {
+      backdrop-filter: blur(20px);
+      background: linear-gradient(135deg, rgba(26,31,38,.5), rgba(21,25,30,.4));
+      border: 1px solid rgba(255,255,255,0.15);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 1px 1px rgba(255,255,255,0.1);
+      border-radius: 10px;
+    }
+    .card::before {
+      content:"";
+      position:absolute;
+      top:0; left:0;
+      width:100%; height:2px;
+      background: linear-gradient(90deg, var(--green), transparent);
+    }
+    .card h3, .card h4 { margin: 0 0 14px; font-family: var(--sans); letter-spacing: -.02em; }
+    .card p { margin: 0; color: var(--text2); font-size: 14px; }
+    .mono-label { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; color: var(--green); text-transform: uppercase; margin-bottom: 10px; }
+    .note { border-left: 3px solid var(--green); background: var(--green-dim); padding: 18px 20px; color: var(--text2); margin-top: 22px; }
+    .chart-card { min-height: 420px; }
+    canvas { width: 100% !important; height: 320px !important; max-height: 320px !important; min-height: 0 !important; display: block; }
+
+    .recommend-box {
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 22px;
+      align-items: stretch;
+    }
+    .score-list { display:grid; gap:18px; }
+    .score-row { display:grid; grid-template-columns: 160px 1fr 58px; gap:12px; align-items:center; }
+    .score-name { color: var(--text2); font-size: 13px; }
+    .bar-bg { height: 9px; background: var(--bg3); border-radius:999px; overflow:hidden; }
+    .bar-fill { height:100%; background: linear-gradient(90deg, var(--green3), var(--green)); border-radius:999px; }
+    .score-num { font-family: var(--mono); color: var(--green); font-size:12px; text-align:right; }
+
+    .strategy {
+      counter-reset: strategy;
+    }
+    .strategy-card { padding-left: 76px; min-height: 210px; }
+    .strategy-card::after {
+      counter-increment: strategy;
+      content: counter(strategy, decimal-leading-zero);
+      position:absolute;
+      top: 24px;
+      left: 24px;
+      font-family: var(--mono);
+      font-size: 28px;
+      color: rgba(21,232,178,.18);
+      font-weight: 800;
+    }
+    .metric-pill {
+      display:inline-flex;
+      margin-top: 16px;
+      border:1px solid rgba(21,232,178,.18);
+      background:rgba(21,232,178,.05);
+      color:var(--green);
+      font-family:var(--mono);
+      font-size:11px;
+      padding:6px 10px;
+      border-radius:999px;
+    }
+
+    .tabs { display:flex; flex-wrap:wrap; gap:10px; margin-bottom: 20px; }
+    .tab-btn {
+      cursor:pointer;
+      background: var(--surface);
+      color: var(--text2);
+      border:1px solid var(--border);
+      padding:10px 16px;
+      border-radius:6px;
+      font-family:var(--sans);
+      font-size:13px;
+      transition:.2s;
+    }
+    .tab-btn:hover { background:var(--surface2); color:var(--text); }
+    .tab-btn.active { background:var(--green-dim); color:var(--green); border-color:var(--green); }
+    .video-panel { display:none; }
+    .video-panel.active { display:block; }
+    .video-table { width:100%; border-collapse:collapse; margin-top:16px; }
+    .video-table th, .video-table td { padding:12px; text-align:left; border-bottom:1px solid var(--border); color:var(--text2); font-size:13px; }
+    .video-table th { background:rgba(21,232,178,.05); color:var(--green); font-weight:700; }
+    .video-table td strong { color:var(--text); }
+
+    .roadmap { display:grid; gap:18px; }
+    .roadmap-item { padding:20px; background:rgba(21,232,178,.05); border-left:3px solid var(--green); border-radius:4px; }
+    .roadmap-date { font-family:var(--mono); font-size:11px; color:var(--green); letter-spacing:.12em; text-transform:uppercase; }
+    .roadmap-title { font-weight:700; margin:8px 0; color:var(--text); }
+    .roadmap-desc { color:var(--text2); font-size:13px; line-height:1.6; }
+
+    .data-table { width:100%; border-collapse:collapse; margin-top:16px; }
+    .data-table th, .data-table td { padding:14px; text-align:left; border-bottom:1px solid var(--border); color:var(--text2); font-size:13px; }
+    .data-table th { background:rgba(21,232,178,.05); color:var(--green); font-weight:700; }
+    .data-table td:first-child { color:var(--text); font-weight:600; }
+    .td-num { font-family:var(--mono); color:var(--green); font-weight:700; }
+
+    .ideas-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px; margin-top:22px; }
+    .idea-card { padding:18px; background:rgba(21,232,178,.05); border:1px solid rgba(21,232,178,.2); border-radius:6px; }
+    .idea-num { font-family:var(--mono); font-size:11px; color:var(--green); letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; }
+    .idea-title { font-weight:700; color:var(--text); font-size:13px; margin-bottom:10px; line-height:1.4; }
+    .idea-outline { color:var(--text2); font-size:12px; line-height:1.5; }
+
+    .footer { text-align:center; padding:40px 20px; color:var(--text3); font-family:var(--mono); font-size:11px; border-top:1px solid var(--border); }
+
+    @media (max-width: 768px) {
+      .grid.two { grid-template-columns:1fr; }
+      .grid.three { grid-template-columns:1fr; }
+      .hero-kpis { grid-template-columns:repeat(2, 1fr); }
+      .section-head { flex-direction:column; align-items:flex-start; gap:12px; }
+      .section-line { display:none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="ticker">
+    <div class="ticker-track">
+      <div class="ticker-item"><strong>QuantHero 成長策略</strong> · 335 訂閱 · 530 影片 · <span class="chg-pos">+15%</span> 月成長</div>
+      <div class="ticker-item"><strong>QuantHero 成長策略</strong> · 335 訂閱 · 530 影片 · <span class="chg-pos">+15%</span> 月成長</div>
+    </div>
+  </div>
+
+  <nav class="sticky-nav">
+    <div class="nav-inner">
+      <div class="brand">
+        <div class="brand-mark">Q</div>
+        <span>QuantHero Growth Lab</span>
+      </div>
+      <div class="nav-links">
+        <a href="#overview">概況</a>
+        <a href="#growth">策略</a>
+        <a href="#videos">內容</a>
+        <a href="#ideas">50 構想</a>
+        <a href="#market">市場</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div>
+      <div class="badge">YouTube 頻道成長研究</div>
+      <h1 class="hero-title">
+        <span class="line1">QuantHero 頻道</span>
+        <span class="line2">成長加速計劃</span>
+      </h1>
+      <p class="hero-sub">深度分析量化交易頻道的內容機會、變現潛力與受眾缺口，提供 50 個高吸引力影片構想與 90 日執行路線。</p>
+      <div class="hero-kpis">
+        <div class="hero-kpi">
+          <div class="kpi-value">335</div>
+          <div class="kpi-label">頻道訂閱</div>
+        </div>
+        <div class="hero-kpi">
+          <div class="kpi-value">530</div>
+          <div class="kpi-label">影片庫存</div>
+        </div>
+        <div class="hero-kpi">
+          <div class="kpi-value">1.5K</div>
+          <div class="kpi-label">最高觀看</div>
+        </div>
+        <div class="hero-kpi">
+          <div class="kpi-value">高</div>
+          <div class="kpi-label">變現潛力</div>
+        </div>
+      </div>
+      <div class="scroll-hint">向下滑動探索</div>
+    </div>
+  </section>
+
+  <section id="overview" class="section">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-code">01 · CHANNEL OVERVIEW</div>
+        <h2 class="section-title">頻道推薦理由</h2>
+        <div class="section-line"></div>
+      </div>
+      <p class="lead">QuantHero 是台灣少數專注「量化交易 × Python × 台股」的教育型頻道。頻道內容涵蓋選股策略、投資流言破解、市場數據分析與實盤追蹤，面向具備一定投資基礎但渴望「科學化決策」的中階投資者。</p>
+      <div class="grid three" style="margin-top:28px;">
+        <div class="card glass-effect">
+          <div class="mono-label">Strength 01</div>
+          <h3>專業深度</h3>
+          <p>結合程式、數據與投資實戰，內容不流於表面，適合對「為什麼」有追求的觀眾。</p>
+        </div>
+        <div class="card glass-effect">
+          <div class="mono-label">Strength 02</div>
+          <h3>高價值受眾</h3>
+          <p>量化交易受眾多為高淨值或願意投入學習成本的族群，是金融廣告 CPM 最高的目標客群。</p>
+        </div>
+        <div class="card glass-effect">
+          <div class="mono-label">Strength 03</div>
+          <h3>變現潛力</h3>
+          <p>可開發訂閱策略、線上課程、軟體工具、業配合作等多元變現路徑，年化收入潛力可達百萬級。</p>
+        </div>
+      </div>
+      <p class="lead" style="margin-top:28px;">公開頁面顯示，QuantHero 擁有大量影片庫存，但近期長影片觀看數普遍偏低；相對地，Shorts 樣本中有數支明顯高於長片平均，代表短影音與議題切片是目前最立即的流量入口。</p>
+      <div class="grid two" style="margin-top:28px;">
+        <div class="card chart-card"><div class="mono-label">View sample comparison</div><h3>熱門長片 vs 近期長片 vs Shorts</h3><canvas id="viewsChart"></canvas></div>
+        <div class="card chart-card"><div class="mono-label">Benchmark</div><h3>QuantHero 頻道公開規模對照</h3><canvas id="benchmarkChart"></canvas></div>
+      </div>
+      <div class="grid three" style="margin-top:22px;">
+        <div class="card glass-effect"><div class="mono-label">Signal 01</div><h3>短片先行</h3><p>Shorts 最高約 1K views，明顯高於近期多數長片。建議每支長片至少拆成三支短影音，建立「短影音觸及 → 長片深讀 → 訂閱」漏斗。</p></div>
+        <div class="card glass-effect"><div class="mono-label">Signal 02</div><h3>工具型題材勝出</h3><p>「五分鐘讓 python 給你飆股」與「ChatGPT 選股」、「Python 回測」題材均顯示，觀眾偏好能帶走方法與工具的影片。</p></div>
+        <div class="card glass-effect"><div class="mono-label">Signal 03</div><h3>迷思破解有效</h3><p>「處置股」、「外資連續買超」、「ETF 真相」等主題具備大眾痛點與搜尋需求，適合做成固定系列。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="growth" class="section">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-code">02 · GROWTH PLAYBOOK</div>
+        <h2 class="section-title">衝高訂閱與觀看的 5 個建議</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="grid strategy two">
+        <div class="card strategy-card"><h3>標題改成「工具 + 結果 + 時間承諾」</h3><p>將「台股怎麼看」改為「10分鐘用Python回測台積電：這個指標避開幾次大跌？」。讓觀眾一眼知道影片能得到什麼工具、什麼結果、花多少時間。</p><span class="metric-pill">KPI · CTR / 搜尋流量</span></div>
+        <div class="card strategy-card"><h3>將 Shorts 當成流量漏斗</h3><p>每支長片剪成三支 Shorts：一支結論、一支數據、一支反直覺觀點。結尾固定導向完整影片與播放清單。</p><span class="metric-pill">KPI · Shorts導流 / 訂閱轉換</span></div>
+        <div class="card strategy-card"><h3>建立五大固定系列</h3><p>固定推出 Python選股、投資流言終結者、台股數據週報、策略實盤追蹤、AI量化實驗室，讓觀眾知道每週回來看什麼。</p><span class="metric-pill">KPI · 回訪觀眾比例</span></div>
+        <div class="card strategy-card"><h3>提供可下載或可保存素材</h3><p>教學型影片附上回測圖、策略清單、程式碼摘要或一頁式筆記，提高收藏、分享與專業信任。</p><span class="metric-pill">KPI · 收藏率 / 分享率</span></div>
+        <div class="card strategy-card"><h3>封面與前 15 秒標準化</h3><p>封面固定大字鉤子、單一數字與強對比圖；開場 15 秒先給結論、圖表與影片承諾，降低跳出率。</p><span class="metric-pill">KPI · 30秒留存率</span></div>
+        <div class="card glass-effect"><div class="mono-label">Priority matrix</div><h3>策略優先順序</h3><canvas id="priorityChart"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="videos" class="section">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-code">03 · FUTURE VIDEO MATRIX</div>
+        <h2 class="section-title">未來 5 大影片類型與企劃</h2>
+        <div class="section-line"></div>
+      </div>
+      <p class="lead">以下企劃參考熱門影片公式：用 AI、Python、回測、年化報酬、免費工具、從 0 開始、附程式碼等元素降低理解門檻，並提升搜尋與保存價值。</p>
+      <div class="card glass-effect" style="margin-top:26px;">
+        <div class="tabs" role="tablist" aria-label="影片類型切換">
+          <button class="tab-btn active" data-tab="tab-ai">AI / Python 量化</button>
+          <button class="tab-btn" data-tab="tab-myth">投資流言終結者</button>
+          <button class="tab-btn" data-tab="tab-weekly">台股數據週報</button>
+          <button class="tab-btn" data-tab="tab-live">策略實盤追蹤</button>
+          <button class="tab-btn" data-tab="tab-basic">新手量化課</button>
+        </div>
+        <div id="tab-ai" class="video-panel active"><h3>AI / Python 量化實作系列</h3><table class="video-table"><tr><th>影片標題</th><th>影片大綱</th></tr><tr><td><strong>10分鐘用 Python 找出台股強勢股：回測勝率到底有多高？</strong></td><td>開場展示回測績效；說明強勢股因子；用簡化範例跑選股；展示績效、最大回撤與失敗情境；總結適合與不適合的市場。</td></tr><tr><td><strong>用 ChatGPT 寫一個台股選股策略：AI 選股真的有用嗎？</strong></td><td>讓 ChatGPT 產出策略假設；轉成可回測邏輯；比較人工調整前後績效；指出 AI 不能取代風控；提供策略檢查清單。</td></tr><tr><td><strong>從 0 開始做台積電回測：什麼指標最能避開大跌？</strong></td><td>介紹移動平均、成交量、外資買賣超；逐一回測；比較報酬與回撤；用圖表呈現最佳/最差情境。</td></tr></table></div>
+        <div id="tab-myth" class="video-panel"><h3>投資流言終結者系列</h3><table class="video-table"><tr><th>影片標題</th><th>影片大綱</th></tr><tr><td><strong>外資連買三天一定會漲？用 20 年台股資料驗證給你看</strong></td><td>提出迷思；定義外資連買條件；回測 1 日、5 日、20 日報酬；拆解哪些產業有效；給出結論與使用限制。</td></tr><tr><td><strong>處置股是政府認證飆股？數據告訴你追進去會怎樣</strong></td><td>說明處置股規則；統計處置前後報酬；比較高量與低量個股；整理三種不能追的情況。</td></tr><tr><td><strong>ETF 閉眼買就會賺？用回測看 0050、0056 與高股息 ETF 真相</strong></td><td>介紹常見 ETF 迷思；比較定期定額、單筆、危機買進；討論配息與總報酬；建立新手 ETF 檢查表。</td></tr></table></div>
+        <div id="tab-weekly" class="video-panel"><h3>台股數據週報 / 月報系列</h3><table class="video-table"><tr><th>影片標題</th><th>影片大綱</th></tr><tr><td><strong>本週台股量化儀表板：資金流、強勢族群、風險分數一次看</strong></td><td>開場三大結論；呈現大盤趨勢、族群輪動、外資期貨、強弱勢排行；給出下週觀察清單。</td></tr><tr><td><strong>台積電到關鍵位置了嗎？用五個指標判斷追價風險</strong></td><td>分析估值、技術面、籌碼、營收、法人預期；建立紅黃綠燈評分；提出不同投資人情境。</td></tr><tr><td><strong>量化週報：這週策略買了什麼？賣了什麼？為什麼？</strong></td><td>揭示策略訊號；說明進出場邏輯；比較與大盤差異；追蹤上週建議的結果；建立透明度。</td></tr></table></div>
+        <div id="tab-live" class="video-panel"><h3>策略實盤追蹤 / 透明帳本系列</h3><table class="video-table"><tr><th>影片標題</th><th>影片大綱</th></tr><tr><td><strong>這個量化策略實盤 30 天結果公開：賺錢靠運氣還是邏輯？</strong></td><td>展示策略初始假設；公開交易紀錄摘要；拆解獲利與虧損來源；檢討是否要調整策略。</td></tr><tr><td><strong>我們的策略連虧三次怎麼辦？量化交易真正的風控流程</strong></td><td>說明連虧是策略常態；介紹停損、部位、回撤警戒；示範何時停止策略；教育觀眾不要只看勝率。</td></tr><tr><td><strong>月獲利超過 500 萬是真的嗎？拆解報酬、風險與資金規模</strong></td><td>釐清絕對獲利與報酬率差異；拆解資金部位、槓桿、回撤；說明普通投資人如何等比例理解。</td></tr></table></div>
+        <div id="tab-basic" class="video-panel"><h3>新手量化投資課 / 觀念教學系列</h3><table class="video-table"><tr><th>影片標題</th><th>影片大綱</th></tr><tr><td><strong>量化交易到底是什麼？新手用一張圖搞懂策略、回測與實盤</strong></td><td>用生活化例子解釋量化；說明策略假設、資料、回測、交易成本；提醒過度擬合風險；給入門路線圖。</td></tr><tr><td><strong>勝率高不代表會賺錢：新手最常誤會的 5 個回測指標</strong></td><td>介紹勝率、期望值、最大回撤、夏普值、交易次數；用簡單例子比較；建立讀懂績效表的方法。</td></tr><tr><td><strong>不會寫程式也能做量化嗎？三種入門方法一次比較</strong></td><td>比較 Excel、無程式平台、Python；說明適合對象；示範最小可行流程；引導觀眾逐步進階。</td></tr></table></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-code">04 · CONTENT BENCHMARK</div>
+        <h2 class="section-title">熱門題材對照表</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="card glass-effect">
+        <table class="data-table">
+          <thead><tr><th>頻道</th><th>熱門影片或內容形式</th><th>觀看數樣本</th><th>可複製元素</th></tr></thead>
+          <tbody>
+            <tr><td>QuantHero</td><td>沒有了 ECFA，台灣會更好！？</td><td class="td-num">1.5K</td><td>議題鮮明、立場有張力、短時長</td></tr>
+            <tr><td>QuantHero</td><td>五分鐘讓 python 給你飆股</td><td class="td-num">635</td><td>時間承諾、Python、飆股關鍵字</td></tr>
+            <tr><td>QuantHero</td><td>懶人投資 — 買 ETF 就能賺大錢？</td><td class="td-num">465</td><td>新手痛點、ETF、用數據講真相</td></tr>
+            <tr><td>QuantHero</td><td>❖ 投資流言終結者 ❖ 處置股是政府認證的飆股？</td><td class="td-num">256</td><td>投資流言終結者、問題式標題</td></tr>
+            <tr><td>QuantHero</td><td>❖ 投資流言終結者 ❖ 外資連續買超，可以跟嗎？</td><td class="td-num">251</td><td>投資流言終結者、問題式標題</td></tr>
+            <tr><td>QuantHero</td><td>❖ podcasts ❖ 中國人，你們真的很幸福。中國股市買點浮現！？</td><td class="td-num">250</td><td>議題鮮明、立場有張力</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="ideas" class="section">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-code">05 · 50 VIDEO IDEAS</div>
+        <h2 class="section-title">50 個高吸引力影片構想</h2>
+        <div class="section-line"></div>
+      </div>
+      <p class="lead">以下 50 個影片構想聚焦於引發好奇心、解決真實投資問題與述說精彩故事，旨在提升觀看與互動。構想涵蓋 AI/Python 量化、投資流言破解、台股數據分析、實盤追蹤與新手教育五大類別。</p>
+      <div class="ideas-grid" style="margin-top:28px;">
+        <div class="idea-card">
+          <div class="idea-num">01</div>
+          <div class="idea-title">Python 一行程式碼，找出下週飆股！回測勝率高達 80%？</div>
+          <div class="idea-outline">揭露簡單卻高效的 Python 選股邏輯，展示回測數據，分析適用情境與潛在風險。強調「小白也能上手」的實用性。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">02</div>
+          <div class="idea-title">ChatGPT 幫我寫了台股交易策略，結果竟然…？</div>
+          <div class="idea-outline">從零開始利用 ChatGPT 生成台股交易策略並進行回測。分享 AI 策略的優缺點，以及如何人工優化。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">03</div>
+          <div class="idea-title">量化交易新手必看：用 Python 打造第一個自動交易機器人</div>
+          <div class="idea-outline">逐步教學如何使用 Python 串接券商 API，實現簡單的自動買賣。強調風險管理與程式碼實用性。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">04</div>
+          <div class="idea-title">台積電股價預測大挑戰：Python LSTM 模型真的能預測未來嗎？</div>
+          <div class="idea-outline">介紹 LSTM 深度學習模型，用台積電歷史數據進行股價預測，公開預測結果與模型限制。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">05</div>
+          <div class="idea-title">告別盯盤！用 Python 實現「條件單」自動下單，解放時間！</div>
+          <div class="idea-outline">教學如何設定 Python 程式，當股價達到特定條件時自動發出交易指令，適合上班族投資者。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">06</div>
+          <div class="idea-title">從 Excel 到 Python：數據分析效率提升 10 倍的秘密武器！</div>
+          <div class="idea-outline">對比 Excel 與 Python 在處理大量金融數據上的效率差異，示範如何用 Pandas 快速整理分析台股數據。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">07</div>
+          <div class="idea-title">你的交易策略「過擬合」了嗎？Python 交叉驗證找出真正賺錢的策略！</div>
+          <div class="idea-outline">解釋過擬合概念，教學如何用 Python 進行策略的交叉驗證，避免紙上富貴。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">08</div>
+          <div class="idea-title">AI 幫你讀財報：用 NLP 找出被低估的潛力股！</div>
+          <div class="idea-outline">示範如何用 Python NLP 技術分析公司財報、新聞，挖掘市場情緒與潛力標的。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">09</div>
+          <div class="idea-title">Python 打造專屬「台股漲跌幅預警系統」：盤中異動第一時間通知你！</div>
+          <div class="idea-outline">教學如何用 Python 監控台股即時數據，並在股價異動時透過 Line 或 Email 發送通知。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">10</div>
+          <div class="idea-title">量化交易的聖杯？Python 實現「網格交易」策略，震盪盤也能賺！</div>
+          <div class="idea-outline">介紹網格交易原理，用 Python 實作，展示其在震盪市場中的表現與風險控制。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">11</div>
+          <div class="idea-title">外資買超就是利多？數據打臉：外資「假買超」的真實目的！</div>
+          <div class="idea-outline">分析外資買賣超數據背後的複雜性，揭露外資利用假買超出貨或洗盤的案例，教觀眾如何辨識。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">12</div>
+          <div class="idea-title">0050 真的穩賺不賠？數據揭露：你不知道的 ETF 隱藏風險！</div>
+          <div class="idea-outline">深入分析 0050 等熱門 ETF 的成分股、費用、追蹤誤差，以及在極端市場下的表現。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">13</div>
+          <div class="idea-title">處置股是飆股保證？數據打臉：90% 的處置股都讓你住套房！</div>
+          <div class="idea-outline">分析處置股的特性與歷史數據，揭露處置股的真實風險，並提供避開陷阱的方法。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">14</div>
+          <div class="idea-title">技術指標鈍化就沒用？錯！這樣用 RSI/MACD 讓你抓住反轉點！</div>
+          <div class="idea-outline">重新解讀常見技術指標的「鈍化」現象，分享進階應用技巧，讓指標在極端行情下也能發揮作用。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">15</div>
+          <div class="idea-title">聽說內線消息就能賺大錢？揭露內線交易的法律風險與真實獲利機率！</div>
+          <div class="idea-outline">探討內線消息的來源、風險，以及為何普通投資者難以從中獲利，強調合法合規的重要性。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">16</div>
+          <div class="idea-title">少年股神的故事都是真的？揭露「短期暴富」背後的殘酷真相！</div>
+          <div class="idea-outline">分析短期暴富案例的不可複製性與高風險，強調長期穩健投資的重要性。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">17</div>
+          <div class="idea-title">殖利率越高越好？小心！高殖利率股的「價值陷阱」！</div>
+          <div class="idea-outline">解釋高殖利率股的潛在風險，如股價下跌侵蝕股息、公司營運惡化等，教觀眾如何綜合判斷。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">18</div>
+          <div class="idea-title">股市萬點就是高點？數據打臉：台股歷史上的「萬點行情」與機會！</div>
+          <div class="idea-outline">回顧台股歷史上多次突破萬點後的走勢，分析不同時期萬點的意義，打破「萬點魔咒」的心理障礙。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">19</div>
+          <div class="idea-title">主力作手真的能操縱股價？揭露市場背後的「看不見的手」！</div>
+          <div class="idea-outline">探討市場上是否存在主力作手，以及他們可能採用的手法，教觀眾如何識別異常交易行為。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">20</div>
+          <div class="idea-title">跟著法人買股票就對了？數據揭露：法人也會被套牢！</div>
+          <div class="idea-outline">分析法人進出的數據，指出法人並非萬能，也會有判斷失誤的時候，強調獨立思考的重要性。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">21</div>
+          <div class="idea-title">台股下週漲跌關鍵！三大法人籌碼動向深度解析</div>
+          <div class="idea-outline">每週更新三大法人買賣超、期貨未平倉量等數據，分析其對下週台股走勢的影響，提供數據圖表。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">22</div>
+          <div class="idea-title">獨家！台股產業輪動訊號：這個板塊下週可能要噴了！</div>
+          <div class="idea-outline">透過量化模型分析各產業板塊的資金流向與動能，預測潛在的產業輪動機會。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">23</div>
+          <div class="idea-title">台股散戶指標大公開：散戶在買什麼？我們該跟還是該跑？</div>
+          <div class="idea-outline">分析融資融券、借券等散戶指標，揭示散戶情緒與市場反向操作的機會。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">24</div>
+          <div class="idea-title">台股加權指數「死亡交叉」警報？歷史數據告訴你該怎麼辦！</div>
+          <div class="idea-outline">分析加權指數均線死亡交叉的歷史案例，提供應對策略與風險管理建議。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">25</div>
+          <div class="idea-title">揭秘！台股「主力成本線」：找出主力佈局的關鍵價位！</div>
+          <div class="idea-outline">介紹如何估算主力成本線，示範如何利用這一指標判斷股票的支撐與壓力。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">26</div>
+          <div class="idea-title">台股財報季來了！用 Python 快速篩選「獲利成長股」！</div>
+          <div class="idea-outline">教學如何利用公開財報數據，用 Python 程式快速篩選出符合特定條件的獲利成長股。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">27</div>
+          <div class="idea-title">台股除權息旺季：這樣操作讓你「領息又賺價差」！</div>
+          <div class="idea-outline">分析除權息行情，提供如何在除權息前後進行操作，實現領息與價差雙贏的策略。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">28</div>
+          <div class="idea-title">台股「高股息 ETF」怎麼選？數據分析 0056, 00878, 00929 誰更優？</div>
+          <div class="idea-outline">深度比較熱門高股息 ETF 的成分股、配息政策、歷史績效與風險，幫助觀眾做出選擇。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">29</div>
+          <div class="idea-title">台股「期貨選擇權」數據解讀：散戶多空比透露了什麼天機？</div>
+          <div class="idea-outline">教學如何解讀期貨選擇權的籌碼數據，判斷市場大戶與散戶的多空傾向。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">30</div>
+          <div class="idea-title">台股「法說會」前瞻：哪些公司值得關注？財報利多利空搶先看！</div>
+          <div class="idea-outline">整理近期法說會資訊，分析重點公司營運展望，預測潛在的股價波動。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">31</div>
+          <div class="idea-title">我的 Python 自動交易策略，實盤一個月賺了多少錢？公開對帳單！</div>
+          <div class="idea-outline">公開一個 Python 自動交易策略的實盤操作與對帳單，分享獲利與虧損的真實情況。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">32</div>
+          <div class="idea-title">量化策略「最大回撤」怎麼控制？我的實盤經驗與風險管理心法！</div>
+          <div class="idea-outline">分享在實盤操作中如何控制策略的最大回撤，避免大賠，並提供具體的風險管理技巧。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">33</div>
+          <div class="idea-title">公開！我的「多因子選股策略」實盤表現，為什麼它能持續獲利？</div>
+          <div class="idea-outline">詳細介紹一個多因子選股策略的邏輯，公開其在實盤中的表現，分析其優勢與局限性。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">34</div>
+          <div class="idea-title">當量化策略遇到「黑天鵝」：我是如何應對突發事件的？</div>
+          <div class="idea-outline">分享在實盤中遇到重大突發事件時，如何調整策略、控制風險，並從中學習的經驗。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">35</div>
+          <div class="idea-title">我的「期貨當沖策略」實盤揭秘：高頻交易真的能賺錢嗎？</div>
+          <div class="idea-outline">公開一個期貨當沖策略的實盤操作，分析其高風險高報酬的特性，並提供操作建議。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">36</div>
+          <div class="idea-title">量化策略「停損停利」設定藝術：實盤數據告訴你最佳參數！</div>
+          <div class="idea-outline">探討不同停損停利設定對策略績效的影響，結合實盤數據提供最佳參數選擇建議。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">37</div>
+          <div class="idea-title">公開！我的「波段交易策略」實盤追蹤：如何抓住趨勢大行情？</div>
+          <div class="idea-outline">分享一個波段交易策略的邏輯與實盤表現，教學如何判斷趨勢並進行波段操作。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">38</div>
+          <div class="idea-title">量化策略「資金管理」的秘密：這樣分配資金讓你穩健獲利！</div>
+          <div class="idea-outline">介紹多種資金管理方法，如固定比例、凱利公式等，結合實盤經驗分享如何有效分配資金。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">39</div>
+          <div class="idea-title">我的「ETF 套利策略」實盤報告：低風險穩定獲利的秘密？</div>
+          <div class="idea-outline">公開一個 ETF 套利策略的實盤操作，分析其低風險特性與獲利來源，並指出潛在風險。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">40</div>
+          <div class="idea-title">量化策略「進化論」：我是如何不斷優化我的交易系統的？</div>
+          <div class="idea-outline">分享從策略開發到實盤運行的整個優化過程，包括數據清洗、參數調整、模型更新等。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">41</div>
+          <div class="idea-title">量化交易是什麼？新手入門必看：從零開始建立你的量化思維！</div>
+          <div class="idea-outline">用最白話的方式解釋量化交易的核心概念、優勢與應用，幫助新手建立正確的量化思維。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">42</div>
+          <div class="idea-title">Python 金融數據分析入門：第一堂課就讓你學會抓取台股數據！</div>
+          <div class="idea-outline">教學如何安裝 Python 環境，用簡單的程式碼抓取台股歷史數據，為後續分析打下基礎。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">43</div>
+          <div class="idea-title">K 線圖怎麼看？量化視角帶你解讀 K 線背後的「主力訊號」！</div>
+          <div class="idea-outline">從量化角度重新解讀 K 線圖，結合成交量與籌碼數據，找出 K 線背後的主力操作痕跡。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">44</div>
+          <div class="idea-title">均線、KD、MACD 怎麼用？新手必學：量化指標的正確打開方式！</div>
+          <div class="idea-outline">詳細介紹常見技術指標的原理與應用，指出新手常犯的錯誤，教導正確的量化使用方法。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">45</div>
+          <div class="idea-title">你的第一支「量化選股程式」：用 Python 篩選出基本面好股！</div>
+          <div class="idea-outline">教學如何用 Python 程式篩選出符合基本面條件（如 EPS、營收成長）的股票，適合新手入門。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">46</div>
+          <div class="idea-title">量化交易的「風險管理」：新手必學的保命第一課！</div>
+          <div class="idea-outline">強調風險管理的重要性，介紹停損、資金控管、部位管理等基本概念，避免新手大賠。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">47</div>
+          <div class="idea-title">量化交易「回測」是什麼？手把手教你驗證策略的真實有效性！</div>
+          <div class="idea-outline">解釋回測的原理與步驟，示範如何用簡單工具進行策略回測，評估策略的歷史表現。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">48</div>
+          <div class="idea-title">量化交易「數據陷阱」：新手常犯的錯誤與如何避免！</div>
+          <div class="idea-outline">揭露量化交易中常見的數據陷阱，如未來函數、倖存者偏差等，教新手如何避免。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">49</div>
+          <div class="idea-title">量化交易「交易心理學」：如何克服貪婪與恐懼，保持交易紀律？</div>
+          <div class="idea-outline">探討交易心理對量化交易的影響，提供克服情緒干擾、保持交易紀律的方法。</div>
+        </div>
+        <div class="idea-card">
+          <div class="idea-num">50</div>
+          <div class="idea-title">量化交易「學習路徑」：從零到專業，我該怎麼開始？</div>
+          <div class="idea-outline">為量化交易新手規劃一個清晰的學習路徑，包括知識、技能、工具與實踐建議。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="market" class="section">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-code">06 · MARKET ANALYSIS</div>
+        <h2 class="section-title">變現潛力與市場機會</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="grid two" style="margin-top:28px;">
+        <div class="card glass-effect">
+          <div class="mono-label">Demand Signal</div>
+          <h3>需求與搜尋量分析</h3>
+          <p><strong>強勁需求：</strong>台股投資者對「如何科學選股」與「避開大跌」有極高需求。QuantHero 的「英雄選股」與「投資流言終結者」系列正中痛點。</p>
+          <p style="margin-top:12px;"><strong>搜尋量訊號：</strong></p>
+          <ul style="margin:8px 0; padding-left:20px; color:var(--text2); font-size:13px;">
+            <li>Python 選股：高搜尋價值，但競爭者眾</li>
+            <li>AI 投資/ChatGPT 選股：2024-2026 年爆發性關鍵字</li>
+            <li>特定議題（ECFA、處置股）：帶來爆發性流量</li>
+          </ul>
+        </div>
+        <div class="card glass-effect">
+          <div class="mono-label">Monetization</div>
+          <h3>變現潛力判斷</h3>
+          <p><strong>高價值受眾：</strong>量化交易受眾通常具備較高資產或願意投入學習成本，屬於金融廣告 CPM 最高的族群。</p>
+          <p style="margin-top:12px;"><strong>變現路徑：</strong></p>
+          <ul style="margin:8px 0; padding-left:20px; color:var(--text2); font-size:13px;">
+            <li>訂閱制策略服務（如「英雄選股」策略訂閱）</li>
+            <li>線上課程（Python 基礎到進階量化策略開發）</li>
+            <li>軟體/工具銷售（自動化交易插件或數據分析工具）</li>
+            <li>業配合作（券商開戶、金融軟體、硬體設備）</li>
+          </ul>
+        </div>
+      </div>
+      <div class="grid two" style="margin-top:22px;">
+        <div class="card glass-effect">
+          <div class="mono-label">Audience Interest</div>
+          <h3>受眾興趣與內容缺口</h3>
+          <p><strong>受眾興趣：</strong></p>
+          <ul style="margin:8px 0; padding-left:20px; color:var(--text2); font-size:13px;">
+            <li>實戰感：想看「真的賺錢」的證明（實盤追蹤）</li>
+            <li>簡單化：雖然是量化，但希望過程越簡單越好</li>
+          </ul>
+          <p style="margin-top:12px;"><strong>內容缺口：</strong></p>
+          <ul style="margin:8px 0; padding-left:20px; color:var(--text2); font-size:13px;">
+            <li>新手友善度：缺乏「從 0 到 1」的系統化新手引導</li>
+            <li>視覺化吸引力：封面與標題的「鉤子」不夠強</li>
+            <li>互動性故事：缺乏「失敗經驗分享」或「策略演化故事」</li>
+            <li>AI 深度整合：可開發「AI 代理人自動交易」等前衛題材</li>
+          </ul>
+        </div>
+        <div class="card glass-effect">
+          <div class="mono-label">Growth Potential</div>
+          <h3>年化收入潛力估算</h3>
+          <p style="margin-bottom:12px;">基於量化交易受眾的高價值特性：</p>
+          <div style="display:grid; gap:10px; margin-top:12px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:12px; background:rgba(21,232,178,.05); border-radius:4px;">
+              <div>
+                <div style="font-size:11px; color:var(--green); font-family:var(--mono); text-transform:uppercase; letter-spacing:.12em; margin-bottom:4px;">訂閱制收入</div>
+                <div style="font-size:18px; font-weight:700; color:var(--green);">¥50-100K/月</div>
+              </div>
+              <div>
+                <div style="font-size:11px; color:var(--green); font-family:var(--mono); text-transform:uppercase; letter-spacing:.12em; margin-bottom:4px;">課程銷售</div>
+                <div style="font-size:18px; font-weight:700; color:var(--green);">¥30-80K/月</div>
+              </div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:12px; background:rgba(21,232,178,.05); border-radius:4px;">
+              <div>
+                <div style="font-size:11px; color:var(--green); font-family:var(--mono); text-transform:uppercase; letter-spacing:.12em; margin-bottom:4px;">業配合作</div>
+                <div style="font-size:18px; font-weight:700; color:var(--green);">¥20-50K/月</div>
+              </div>
+              <div>
+                <div style="font-size:11px; color:var(--green); font-family:var(--mono); text-transform:uppercase; letter-spacing:.12em; margin-bottom:4px;">工具銷售</div>
+                <div style="font-size:18px; font-weight:700; color:var(--green);">¥10-40K/月</div>
+              </div>
+            </div>
+          </div>
+          <p style="margin-top:12px; font-size:12px; color:var(--text2);"><strong>年化潛力：</strong>¥1.2M - 3.6M（基於保守到樂觀情景）</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="roadmap" class="section">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-code">07 · 90-DAY EXECUTION</div>
+        <h2 class="section-title">90 日內容執行路線</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="grid two">
+        <div class="card glass-effect">
+          <div class="roadmap">
+            <div class="roadmap-item"><div class="roadmap-date">DAY 01–14</div><div class="roadmap-title">重整頻道門面與播放清單</div><div class="roadmap-desc">建立五大系列播放清單；將熱門影片重新命名或優化描述；整理頻道首頁，讓新觀眾一進來就知道從哪裡看。</div></div>
+            <div class="roadmap-item"><div class="roadmap-date">DAY 15–35</div><div class="roadmap-title">推出第一波高搜尋教學片</div><div class="roadmap-desc">製作 Python 回測、ChatGPT 選股、外資連買驗證三支主打影片，每支同步剪成三支 Shorts。</div></div>
+            <div class="roadmap-item"><div class="roadmap-date">DAY 36–60</div><div class="roadmap-title">建立週報型固定節目</div><div class="roadmap-desc">每週固定發布台股量化儀表板，結構固定為大盤、族群、籌碼、策略訊號與下週風險。</div></div>
+            <div class="roadmap-item"><div class="roadmap-date">DAY 61–90</div><div class="roadmap-title">實盤追蹤與社群轉換</div><div class="roadmap-desc">公開策略追蹤紀錄，建立社群提問與投票機制，將高互動問題轉成下一支影片。</div></div>
+          </div>
+        </div>
+        <div class="card chart-card"><div class="mono-label">Expected content mix</div><h3>建議影片組合</h3><canvas id="mixChart"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">QuantHero Growth Lab · Static HTML Research Report · Built for interactive exploration, trend understanding, and easy sharing.</footer>
+
+  <script>
+    const green = '#15e8b2';
+    const green2 = '#10c994';
+    const green3 = '#0a8060';
+    const red = '#f34561';
+    const yellow = '#ffb347';
+    const text2 = '#a8b8c8';
+    const grid = 'rgba(168,184,200,0.12)';
+
+    Chart.defaults.color = text2;
+    Chart.defaults.font.family = "Noto Sans TC, sans-serif";
+    Chart.defaults.plugins.legend.labels.boxWidth = 12;
+    Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(13,17,23,0.96)';
+    Chart.defaults.plugins.tooltip.borderColor = '#1e2530';
+    Chart.defaults.plugins.tooltip.borderWidth = 1;
+
+    new Chart(document.getElementById('viewsChart'), {
+      type: 'bar',
+      data: {
+        labels: ['熱門長片', 'Python選股', 'ETF真相', '近期Podcast高值', 'Shorts高值'],
+        datasets: [{
+          label: '觀看數樣本',
+          data: [1500, 635, 465, 46, 1000],
+          backgroundColor: [green, green2, green3, yellow, green],
+          borderColor: 'rgba(255,255,255,0.08)',
+          borderWidth: 1,
+          borderRadius: 6
+        }]
+      },
+      options: { responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:true, grid:{color:grid}, ticks:{ callback:v => v>=1000 ? (v/1000)+'K' : v } }, x:{ grid:{display:false} } }, plugins:{ legend:{display:false} } }
+    });
+
+    new Chart(document.getElementById('benchmarkChart'), {
+      type: 'bar',
+      data: {
+        labels: ['QuantHero訂閱', 'QuantHero影片', '訂閱', '影片'],
+        datasets: [{
+          label: '公開顯示數值',
+          data: [335, 530, 18300, 34],
+          backgroundColor: [green2, green3, green, yellow],
+          borderRadius: 6
+        }]
+      },
+      options: { indexAxis:'y', responsive:true, maintainAspectRatio:false, scales:{ x:{ type:'logarithmic', grid:{color:grid}, ticks:{ callback:v => Number(v).toLocaleString() } }, y:{ grid:{display:false} } }, plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:ctx => ctx.raw.toLocaleString() } } } }
+    });
+
+    new Chart(document.getElementById('priorityChart'), {
+      type: 'radar',
+      data: {
+        labels: ['影響力', '執行難度低', '搜尋價值', '品牌一致', '短期見效'],
+        datasets: [
+          { label:'Shorts漏斗', data:[9,8,7,8,9], borderColor:green, backgroundColor:'rgba(21,232,178,.16)', pointBackgroundColor:green },
+          { label:'Python教學', data:[9,6,10,9,7], borderColor:yellow, backgroundColor:'rgba(255,179,71,.08)', pointBackgroundColor:yellow }
+        ]
+      },
+      options: { responsive:true, maintainAspectRatio:false, scales:{ r:{ min:0, max:10, grid:{color:grid}, angleLines:{color:grid}, pointLabels:{color:text2} } } }
+    });
+
+    new Chart(document.getElementById('mixChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['AI/Python量化', '投資流言終結者', '台股數據週報', '策略實盤追蹤', '新手量化課'],
+        datasets: [{ data:[25,20,25,15,15], backgroundColor:[green, green2, green3, yellow, red], borderColor:'#15191e', borderWidth:3 }]
+      },
+      options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom' } }, cutout:'62%' }
+    });
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.video-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
