@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>量化通 QuantPass｜頻道深度分析報告</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600;700;900&family=Noto+Sans+TC:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #1a2744;
+  --accent: #2563eb;
+  --accent2: #0ea5e9;
+  --gold: #f59e0b;
+  --white: #ffffff;
+  --light: #f0f4ff;
+  --muted: #94a3b8;
+  --dark: #0f172a;
+  --glass-bg: rgba(255,255,255,0.08);
+  --glass-border: rgba(255,255,255,0.18);
+  --glass-shadow: 0 8px 32px rgba(37,99,235,0.18);
+  --grad1: linear-gradient(135deg, #1a2744 0%, #0a1628 60%, #0f1e3a 100%);
+  --grad2: linear-gradient(135deg, #2563eb22 0%, #0ea5e922 100%);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  background: var(--dark);
+  color: var(--white);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Background Mesh ── */
+.bg-mesh {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: var(--grad1);
+  pointer-events: none;
+}
+.bg-mesh::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 60% at 15% 20%, rgba(37,99,235,0.22) 0%, transparent 65%),
+    radial-gradient(ellipse 55% 50% at 85% 75%, rgba(14,165,233,0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 60% 10%, rgba(245,158,11,0.1) 0%, transparent 55%);
+}
+.bg-mesh::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(255,255,255,0.025) 60px),
+    repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(255,255,255,0.025) 60px);
+}
+
+/* ── Floating Orbs ── */
+.orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  animation: drift 18s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+}
+.orb1 { width: 500px; height: 500px; background: rgba(37,99,235,0.15); top: -10%; left: -10%; animation-duration: 20s; }
+.orb2 { width: 400px; height: 400px; background: rgba(14,165,233,0.12); bottom: 5%; right: -8%; animation-duration: 25s; animation-delay: -8s; }
+.orb3 { width: 300px; height: 300px; background: rgba(245,158,11,0.08); top: 50%; left: 50%; animation-duration: 30s; animation-delay: -15s; }
+
+@keyframes drift {
+  0% { transform: translate(0,0) scale(1); }
+  100% { transform: translate(40px, 30px) scale(1.08); }
+}
+
+/* ── Liquid Glass Mixin ── */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,0.12);
+  border-radius: 20px;
+}
+.glass-strong {
+  background: rgba(255,255,255,0.10);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.22);
+  box-shadow: 0 12px 40px rgba(37,99,235,0.22), inset 0 1px 0 rgba(255,255,255,0.18);
+  border-radius: 24px;
+}
+
+/* ── Layout ── */
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ── Hero ── */
+.hero {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 100px 24px 60px;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: rgba(37,99,235,0.2);
+  border: 1px solid rgba(37,99,235,0.4);
+  border-radius: 99px;
+  font-size: 12px;
+  font-family: 'Space Mono', monospace;
+  color: var(--accent2);
+  letter-spacing: 0.08em;
+  margin-bottom: 28px;
+  animation: fadeDown 0.8s ease both;
+}
+.hero-badge::before { content: '●'; font-size: 8px; animation: pulse 2s infinite; color: #22c55e; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+.hero-title {
+  font-family: 'Noto Serif TC', serif;
+  font-size: clamp(2.4rem, 6vw, 4.2rem);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin-bottom: 20px;
+  animation: fadeDown 0.9s ease 0.1s both;
+}
+.hero-title .accent { color: var(--accent2); }
+.hero-title .gold { color: var(--gold); }
+
+.hero-subtitle {
+  font-size: 1.1rem;
+  color: var(--muted);
+  max-width: 600px;
+  margin: 0 auto 40px;
+  line-height: 1.8;
+  animation: fadeDown 1s ease 0.2s both;
+}
+
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 60px;
+  animation: fadeDown 1.1s ease 0.3s both;
+}
+.stat-card {
+  padding: 20px 32px;
+  text-align: center;
+  min-width: 140px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.stat-card:hover { transform: translateY(-4px); box-shadow: 0 20px 50px rgba(37,99,235,0.3); }
+.stat-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--accent2);
+  display: block;
+}
+.stat-label { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+
+/* ── Section Common ── */
+section { position: relative; z-index: 1; padding: 60px 0; }
+.section-header { text-align: center; margin-bottom: 48px; }
+.section-tag {
+  display: inline-block;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--accent2);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  opacity: 0.8;
+}
+.section-title {
+  font-family: 'Noto Serif TC', serif;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1.3;
+}
+.section-title .highlight {
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.section-desc { color: var(--muted); margin-top: 12px; font-size: 0.95rem; line-height: 1.8; max-width: 680px; margin-left: auto; margin-right: auto; }
+
+/* ── Why Recommend ── */
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+.why-card {
+  padding: 32px 28px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.why-card:hover { transform: translateY(-6px); }
+.why-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 3px 3px 0 0;
+}
+.why-icon {
+  font-size: 2rem;
+  margin-bottom: 16px;
+  display: block;
+}
+.why-card h3 {
+  font-family: 'Noto Serif TC', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: var(--white);
+}
+.why-card p { font-size: 0.88rem; color: var(--muted); line-height: 1.8; }
+
+/* ── Tips ── */
+.tips-list { display: flex; flex-direction: column; gap: 16px; }
+.tip-item {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  padding: 24px 28px;
+  transition: transform 0.3s;
+}
+.tip-item:hover { transform: translateX(8px); }
+.tip-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 2rem;
+  font-weight: 700;
+  color: rgba(37,99,235,0.4);
+  line-height: 1;
+  min-width: 48px;
+  user-select: none;
+}
+.tip-content h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 6px; color: var(--accent2); }
+.tip-content p { font-size: 0.88rem; color: var(--muted); line-height: 1.8; }
+
+/* ── Video Categories ── */
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+}
+.cat-card {
+  padding: 32px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.cat-card:hover { transform: translateY(-8px); box-shadow: 0 24px 60px rgba(37,99,235,0.25); }
+.cat-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--cat-color, linear-gradient(90deg,var(--accent),var(--accent2)));
+}
+.cat-number {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+.cat-title {
+  font-family: 'Noto Serif TC', serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--white);
+}
+.cat-video-title {
+  font-size: 0.9rem;
+  color: var(--accent2);
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  background: rgba(14,165,233,0.1);
+  border-radius: 8px;
+  border-left: 2px solid var(--accent2);
+}
+.cat-outline { font-size: 0.82rem; color: var(--muted); line-height: 1.8; margin-top: 12px; }
+
+/* ── 20 Ideas ── */
+.ideas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+.idea-card {
+  padding: 24px 20px;
+  position: relative;
+  transition: transform 0.3s, box-shadow 0.3s;
+  cursor: default;
+}
+.idea-card:hover { transform: scale(1.03); box-shadow: 0 16px 40px rgba(37,99,235,0.25); }
+.idea-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+.idea-card h4 { font-size: 0.95rem; font-weight: 700; line-height: 1.5; margin-bottom: 8px; }
+.idea-card p { font-size: 0.78rem; color: var(--muted); line-height: 1.7; }
+.idea-tag {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 3px 10px;
+  background: rgba(37,99,235,0.2);
+  border-radius: 99px;
+  font-size: 0.72rem;
+  color: var(--accent2);
+}
+
+/* ── Demand Analysis ── */
+.demand-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+.demand-card {
+  padding: 28px 24px;
+  text-align: center;
+  transition: transform 0.3s;
+}
+.demand-card:hover { transform: translateY(-4px); }
+.demand-score {
+  font-family: 'Space Mono', monospace;
+  font-size: 2.6rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: block;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.demand-card h4 { font-size: 0.9rem; font-weight: 700; margin-bottom: 6px; }
+.demand-card p { font-size: 0.78rem; color: var(--muted); line-height: 1.7; }
+
+.bar-chart { margin-top: 32px; }
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+.bar-label { font-size: 0.82rem; min-width: 140px; color: var(--muted); }
+.bar-track {
+  flex: 1;
+  height: 8px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  animation: barIn 1.2s cubic-bezier(.22,1,.36,1) both;
+  transform-origin: left;
+}
+@keyframes barIn { from{transform:scaleX(0)} to{transform:scaleX(1)} }
+.bar-pct { font-family: 'Space Mono', monospace; font-size: 0.78rem; color: var(--accent2); min-width: 38px; text-align: right; }
+
+/* ── Strategy ── */
+.strategy-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+@media(max-width:700px){ .strategy-grid{ grid-template-columns:1fr; } }
+.strategy-card {
+  padding: 32px 28px;
+  transition: transform 0.3s;
+}
+.strategy-card:hover { transform: translateY(-4px); }
+.strategy-icon { font-size: 1.6rem; margin-bottom: 14px; }
+.strategy-card h3 {
+  font-family: 'Noto Serif TC', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--accent2);
+}
+.strategy-card ul { list-style: none; padding: 0; }
+.strategy-card li {
+  font-size: 0.85rem;
+  color: var(--muted);
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  line-height: 1.7;
+  display: flex;
+  gap: 8px;
+}
+.strategy-card li::before { content: '→'; color: var(--accent); flex-shrink: 0; }
+
+/* ── Competitor Table ── */
+.comp-table-wrap { overflow-x: auto; border-radius: 16px; }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+th {
+  background: rgba(37,99,235,0.2);
+  padding: 14px 16px;
+  text-align: left;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--accent2);
+  letter-spacing: 0.06em;
+}
+td { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--muted); }
+tr:hover td { background: rgba(255,255,255,0.03); }
+.comp-name { color: var(--white); font-weight: 700; }
+.tag-pill {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 99px;
+  font-size: 0.72rem;
+  font-family: 'Space Mono', monospace;
+}
+.tag-high { background: rgba(34,197,94,0.15); color: #22c55e; }
+.tag-med { background: rgba(245,158,11,0.15); color: #f59e0b; }
+.tag-low { background: rgba(239,68,68,0.15); color: #ef4444; }
+
+/* ── CTA ── */
+.cta-section {
+  text-align: center;
+  padding: 80px 24px;
+  position: relative;
+  z-index: 1;
+}
+.cta-box {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 56px 48px;
+}
+.cta-box h2 {
+  font-family: 'Noto Serif TC', serif;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  font-weight: 900;
+  margin-bottom: 16px;
+}
+.cta-box p { color: var(--muted); line-height: 1.8; margin-bottom: 32px; }
+.cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 32px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: white;
+  text-decoration: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  transition: transform 0.3s, box-shadow 0.3s;
+  box-shadow: 0 8px 24px rgba(37,99,235,0.4);
+}
+.cta-btn:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(37,99,235,0.5); }
+
+/* ── Nav ── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(15,23,42,0.7);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.nav-brand {
+  font-family: 'Noto Serif TC', serif;
+  font-weight: 900;
+  font-size: 1.05rem;
+  color: var(--white);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav-brand span { color: var(--accent2); }
+.nav-links {
+  display: flex;
+  gap: 24px;
+  list-style: none;
+}
+.nav-links a {
+  font-size: 0.82rem;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--white); }
+@media(max-width:600px){ .nav-links{ display:none; } }
+
+/* ── Divider ── */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(37,99,235,0.3), transparent);
+  margin: 20px 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Scroll reveal ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+@keyframes fadeDown {
+  from { opacity:0; transform:translateY(-20px); }
+  to { opacity:1; transform:translateY(0); }
+}
+
+/* ── Footer ── */
+footer {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 32px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+footer a { color: var(--accent2); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="bg-mesh"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-brand" href="#">量化通 <span>QuantPass</span> 分析報告</a>
+  <ul class="nav-links">
+    <li><a href="#why">推薦理由</a></li>
+    <li><a href="#tips">成長建議</a></li>
+    <li><a href="#categories">影片類型</a></li>
+    <li><a href="#ideas">影片構想</a></li>
+    <li><a href="#demand">需求分析</a></li>
+    <li><a href="#strategy">頻道策略</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="container">
+    <div class="hero-badge">YOUTUBE CHANNEL ANALYSIS REPORT 2026</div>
+    <h1 class="hero-title">
+      量化通 <span class="accent">QuantPass</span><br>
+      <span class="gold">頻道深度策略分析</span>
+    </h1>
+    <p class="hero-subtitle">
+      台灣最具代表性的量化交易教育平台，結合程式交易、AI投資與金融科技，<br>
+      為散戶投資人打開自動化交易的大門。
+    </p>
+    <div class="hero-stats">
+      <div class="stat-card glass">
+        <span class="stat-num">🔵</span>
+        <div class="stat-label">TradingView 台灣第一</div>
+      </div>
+      <div class="stat-card glass">
+        <span class="stat-num">5K+</span>
+        <div class="stat-label">LINE 社群成員</div>
+      </div>
+      <div class="stat-card glass">
+        <span class="stat-num">10+</span>
+        <div class="stat-label">量化交易課程</div>
+      </div>
+      <div class="stat-card glass">
+        <span class="stat-num">★★★★</span>
+        <div class="stat-label">跨平台教學資源</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- WHY RECOMMEND -->
+<section id="why">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-tag">// WHY WE RECOMMEND</div>
+      <h2 class="section-title">為何強力推薦<span class="highlight">量化通 QuantPass</span>？</h2>
+      <p class="section-desc">在程式交易與 AI 投資浪潮席捲全球的今天，量化通是台灣少數同時做到「深度、廣度、實用性」兼備的量化金融知識平台。</p>
+    </div>
+    <div class="why-grid">
+      <div class="why-card glass reveal">
+        <span class="why-icon">🎯</span>
+        <h3>零基礎也能上手的系統化學習</h3>
+        <p>從「什麼是量化交易」到「全自動下單」，內容層次分明，無論你是完全沒有程式基礎的新手，還是已有交易經驗的老手，都能找到適合自己的進入點，學習曲線平滑而有效。</p>
+      </div>
+      <div class="why-card glass reveal">
+        <span class="why-icon">🛠️</span>
+        <h3>多平台工具全覆蓋，實戰派教學</h3>
+        <p>涵蓋 TradingView、MultiCharts、Python、MT4/MT5 等主流量化工具，並搭配台股、美股、期貨、加密貨幣等各類金融商品。不只教觀念，更手把手帶你實作到能夠真正下單執行。</p>
+      </div>
+      <div class="why-card glass reveal">
+        <span class="why-icon">🌐</span>
+        <h3>完整的生態系與社群支持</h3>
+        <p>YouTube 影片、官網文章、LINE 社群、Instagram、定期免費直播講座，形成一個完整的學習生態。5,000+ 人的社群讓學習者不孤單，專業講師即時回覆問題，學習效果加倍。</p>
+      </div>
+      <div class="why-card glass reveal">
+        <span class="why-icon">🤖</span>
+        <h3>緊跟 AI 與金融科技趨勢</h3>
+        <p>頻道持續更新加密貨幣量化、網格交易、AI 輔助選股等前沿主題。在全球量化交易規模快速增長的時代，量化通讓台灣投資人得以用低門檻方式接觸機構級的交易思維。</p>
+      </div>
+      <div class="why-card glass reveal">
+        <span class="why-icon">💡</span>
+        <h3>打破人性弱點，讓投資更科學</h3>
+        <p>量化交易最大的優勢是克服人性弱點——恐懼、貪婪、凹單。量化通以簡單易懂的方式傳授這一核心理念，幫助投資者建立更理性、更一致的交易系統，而非追求短線明牌。</p>
+      </div>
+      <div class="why-card glass reveal">
+        <span class="why-icon">📈</span>
+        <h3>變現潛力強大，內容有商業護城河</h3>
+        <p>從免費內容到付費課程、社群會員，量化通建立了可持續的商業模式。創作者和觀眾都能從中獲得明確的價值——學習者習得可落地的技能，品牌則形成高忠誠度的付費用戶群。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- TIPS -->
+<section id="tips">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-tag">// GROWTH STRATEGIES</div>
+      <h2 class="section-title">衝高<span class="highlight">訂閱數與觀看數</span>的 5 個實用建議</h2>
+      <p class="section-desc">根據量化通現有內容風格與受眾特性，這 5 個具體策略能顯著提升頻道曝光與互動率。</p>
+    </div>
+    <div class="tips-list">
+      <div class="tip-item glass reveal">
+        <div class="tip-num">01</div>
+        <div class="tip-content">
+          <h3>打造「結果導向」的縮圖與標題系統</h3>
+          <p>量化交易受眾最在乎的是「能不能賺錢、能省多少時間」。縮圖應直接呈現績效數字或操作截圖（例如回測報表、自動下單執行畫面），標題採用「30 天實測／一鍵自動化／零程式」等關鍵詞組合，能大幅提升點擊率（CTR）。建議為每支影片製作 A/B 測試縮圖，並利用 YouTube Studio 分析哪種風格對量化交易族群最有吸引力。</p>
+        </div>
+      </div>
+      <div class="tip-item glass reveal">
+        <div class="tip-num">02</div>
+        <div class="tip-content">
+          <h3>推出固定系列欄目，建立觀眾收看習慣</h3>
+          <p>散點式影片難以養成訂閱動機，但「每週量化週報」、「每月回測實測」這類固定欄目能讓觀眾期待下一集。建議建立 2-3 個固定系列，例如：每週市場量化解析（時事結合策略）、每月策略績效公開（透明化展示），以及「量化新手挑戰」系列（從零到自動交易的完整記錄）。固定發布節奏也有助於 YouTube 演算法的推廣。</p>
+        </div>
+      </div>
+      <div class="tip-item glass reveal">
+        <div class="tip-num">03</div>
+        <div class="tip-content">
+          <h3>深度運用 YouTube Shorts 擴大漏斗頂端</h3>
+          <p>量化交易術語與工具有大量可切割的「60 秒小知識」，非常適合 Shorts 格式。例如「停損為何這麼重要？30 秒讓你秒懂」或「TradingView 這個功能 90% 的人不知道」。Shorts 能觸及不熟悉量化交易的新受眾，引導他們點進主頻道長影片，形成強力的用戶獲取漏斗，且製作成本相對低廉。</p>
+        </div>
+      </div>
+      <div class="tip-item glass reveal">
+        <div class="tip-num">04</div>
+        <div class="tip-content">
+          <h3>舉辦策略實測挑戰賽，激活社群互動</h3>
+          <p>公開邀請觀眾參與「量化策略 30 天實測挑戰」，讓社群成員分享各自的回測結果與心得。這類 UGC（用戶生成內容）活動能大幅提升留言、分享與社群互動，同時讓頻道內容產出更具真實感與公信力。配合每月成果直播公布，可進一步帶動頻道訂閱轉化，並強化 LINE 社群的活躍度。</p>
+        </div>
+      </div>
+      <div class="tip-item glass reveal">
+        <div class="tip-num">05</div>
+        <div class="tip-content">
+          <h3>跨平台聯乘與 KOL 合作，突破同溫層</h3>
+          <p>量化通的受眾與「個人理財」、「被動收入」、「Python 程式教學」族群高度重疊，但目前受眾圈較為封閉。建議主動與台灣財經 YouTuber、程式教學頻道進行聯名合作影片，或邀請知名交易者進行對談，互相引流。同時在 PTT 股板、Dcard 財經板、巴哈姆特等論壇分享精華片段，擴大有機觸及範圍。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- VIDEO CATEGORIES -->
+<section id="categories">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-tag">// FUTURE CONTENT ROADMAP</div>
+      <h2 class="section-title">未來發展<span class="highlight">5 大影片類型</span></h2>
+      <p class="section-desc">根據量化通的品牌風格與目標受眾，以下 5 個影片方向能有效填補市場內容缺口並擴大受眾群。</p>
+    </div>
+    <div class="cat-grid">
+
+      <div class="cat-card glass-strong reveal">
+        <div class="cat-number">CATEGORY 01 ·</div>
+        <div class="cat-title">🔬 AI × 量化交易實驗室</div>
+        <div class="cat-video-title">📹 推薦影片標題：「我用 ChatGPT 寫出一支量化策略，實測 3 個月後的真實績效」</div>
+        <div class="cat-outline">
+          <strong>影片大綱：</strong><br>
+          ① 開場：AI 輔助交易的現況與機遇<br>
+          ② 實作：用 ChatGPT 輔助撰寫 Pine Script 策略<br>
+          ③ 回測：以 TradingView 跑歷史回測，解讀報表<br>
+          ④ 真實部署：串接 API 進行模擬下單<br>
+          ⑤ 3 個月後揭曉：真實績效 vs 回測預期的差距與反思<br>
+          ⑥ 結語：AI 時代量化交易者該有的正確心態
+        </div>
+      </div>
+
+      <div class="cat-card glass-strong reveal">
+        <div class="cat-number">CATEGORY 02 ·</div>
+        <div class="cat-title">📊 策略解密：真實案例大公開</div>
+        <div class="cat-video-title">📹 推薦影片標題：「這支策略讓我在震盪行情中穩定獲利，完整參數與邏輯公開」</div>
+        <div class="cat-outline">
+          <strong>影片大綱：</strong><br>
+          ① 為何大多數人的策略在實盤中失效？<br>
+          ② 本策略核心邏輯：趨勢 + 濾網 + 停損模組<br>
+          ③ TradingView 實作示範：參數設定與優化<br>
+          ④ 回測績效解析：夏普比率、最大回撤的意義<br>
+          ⑤ 常見錯誤：過度最佳化的陷阱<br>
+          ⑥ 延伸應用：如何將此邏輯套用到其他商品
+        </div>
+      </div>
+
+      <div class="cat-card glass-strong reveal">
+        <div class="cat-number">CATEGORY 03 ·</div>
+        <div class="cat-title">🌏 全球市場量化週報</div>
+        <div class="cat-video-title">📹 推薦影片標題：「本週美股 + 加密貨幣量化信號全掃描，程式交易者該注意什麼？」</div>
+        <div class="cat-outline">
+          <strong>影片大綱：</strong><br>
+          ① 本週全球市場回顧（美股、台股、幣市）<br>
+          ② 量化指標掃描：均線乖離、波動率、成交量異常<br>
+          ③ 本週策略信號：哪些商品出現入場機會？<br>
+          ④ 策略績效追蹤：上週信號的結果如何？<br>
+          ⑤ 下週關鍵事件：財報季、Fed 決策、總經數據<br>
+          ⑥ 觀眾問答：社群本週熱門問題解答
+        </div>
+      </div>
+
+      <div class="cat-card glass-strong reveal">
+        <div class="cat-number">CATEGORY 04 ·</div>
+        <div class="cat-title">🧑‍💻 新手快速啟動系列</div>
+        <div class="cat-video-title">📹 推薦影片標題：「完全不會寫程式？45 分鐘從零打造你的第一個自動下單機器人」</div>
+        <div class="cat-outline">
+          <strong>影片大綱：</strong><br>
+          ① 為什麼連工程師都在做量化交易？<br>
+          ② 工具選擇：TradingView vs Python，你適合哪個？<br>
+          ③ 手把手實作：10 行程式碼建立第一個策略<br>
+          ④ 串接下單：免費帳號如何申請交易所 API<br>
+          ⑤ 實際測試：讓程式跑起來的完整流程<br>
+          ⑥ 接下來的學習路徑：進階資源推薦
+        </div>
+      </div>
+
+      <div class="cat-card glass-strong reveal">
+        <div class="cat-number">CATEGORY 05 ·</div>
+        <div class="cat-title">💰 量化被動收入藍圖</div>
+        <div class="cat-video-title">📹 推薦影片標題：「我如何用量化交易建立每月穩定現金流？實際帳戶完整揭露」</div>
+        <div class="cat-outline">
+          <strong>影片大綱：</strong><br>
+          ① 被動收入的真實面貌：量化交易不是印鈔機<br>
+          ② 我的量化組合架構：3 種策略 × 3 類商品<br>
+          ③ 實際帳戶截圖公開：過去 6 個月損益<br>
+          ④ 風險控管實務：如何設定最大虧損上限<br>
+          ⑤ 起始資金建議與預期報酬的合理設定<br>
+          ⑥ 觀眾最常問的 5 個關於量化被動收入的問題
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 20 IDEAS -->
+<section id="ideas">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-tag">// HIGH-IMPACT VIDEO IDEAS</div>
+      <h2 class="section-title">20 個<span class="highlight">極具吸引力</span>的影片構想</h2>
+      <p class="section-desc">聚焦好奇心驅動、解決真實痛點與精彩故事敘事，以下主題均針對量化通品牌風格深度優化。</p>
+    </div>
+    <div class="ideas-grid">
+
+      <div class="idea-card glass reveal">
+        <div class="idea-num">IDEA · 01</div>
+        <h4>「我把 100 萬交給程式交易，一年後的真實結果」</h4>
+        <p>完整揭露真實帳戶的年度績效，包含虧損月份與心路歷程，高透明度引爆討論。</p>
+        <span class="idea-tag">真實故事</span>
+      </div>
+
+      <div class="idea-card glass reveal">
+        <div class="idea-num">IDEA · 02</div>
+        <h4>「網路上 5 個量化交易謊言，害多少人白白虧損？」</h4>
+        <p>破除市場上常見的量化交易迷思，結合真實案例，吸引反向操作觀眾的好奇心。</p>
+        <span class="idea-tag">破解迷思</span>
+      </div>
+
+      <div class="idea-card glass reveal">
+        <div class="idea-num">IDEA · 03</div>
+        <h4>「台灣散戶 vs 量化程式：誰在真正賺錢？」</h4>
+        <p>用數據比較散戶與程式交易的長期績效，帶出量化的必要性，製造強烈的認知衝擊。</p>
+        <span class="idea-tag">數據揭密</span>
+      </div>
+
+      <div class="idea-card glass reveal">
+        <div class="idea-num">IDEA · 04</div>
+        <h4>「程式下單半年，我犯過最慘的 3 個錯誤」</h4>
+        <p>誠實分享失敗經驗，極易引發共鳴。「失敗故事」往往比成功案例更具說服力與互動率。</p>
+        <span class="idea-tag">真實故事</span>
+      </div>
+
+      <div class="idea-card glass reveal">
+        <div class="idea-num">IDEA · 05</div>
+        <h4>「2026 年最值得學的量化工具排行榜」</h4>
+        <p>以年度排名形式呈現 TradingView、Python、MultiCharts 的比較，SEO 流量潛力極高。</p>
+        <span class="idea-tag">工具評測</span>
+      </div>
+
+      <div class="idea-card glass reveal">
+        <div class="idea-num">IDEA · 06</div>
+        <h4>「用 Python 10 行程式碼打造一個選股機器人」</h4>
+        <p>極短程式碼帶來的「wow moment」是最強的新手獲取工具，降低學習門檻感受。</p>
+        <span class="idea-tag">實作教學</span>
+      </div>
+
+      <div class="idea-card glass reveal">
+        <div class="idea-num">IDEA · 07</div>
+        <h4>「當比特幣崩盤時，量化策略如何自動停損？全程錄影」</h4>
+        <p>記錄真實市場崩跌瞬間，展示自動停損運作，戲劇張力十足。</p>
+        <span class="idea-tag">真實故事</span>
+      </div>
+
+      <div class="idea-card glass reveal">
+        <div class="idea-num">IDEA · 08</div>
+        <h4>「我請 ChatGPT 幫我分析台股，結果出乎意料⋯」</h4>
+        <p>AI × 投資的跨界主題，能同時吸引量化族群與 AI 科技愛好者，受眾範圍大幅擴展。</p>
+        <span class="idea-tag">AI 應用</span>
+      </div>
+
+      <div class="idea-card glass reveal">
+        <div class="idea-num">IDEA · 09</div>
+        <h4>「這個免費 TradingView 功能，讓我的勝率提升 30%」</h4>
+        <p>「免費」+「具體提升數字」是點擊率最強的標題公式，適合 Shorts 或短影片。</p>
+        <span class="idea-tag">工具技巧</span>
+      </div>
+
+      <div class="idea-card glass reveal">
+        <div class="idea-num">IDEA · 10</div>
+        <h4>「量化交易到底需要多少本金？從 3 萬到 300 萬的完整規劃」</h4>
+        <p>解答新手最常問的問題，提供分層次的具體數字建議，SEO 搜尋量高。</p>
+        <span class="idea-tag">新手指南</span>
+      </div>
+
+      <div class="idea-card glass reveal">
+        <div class="idea-num">IDEA · 11</div>
+        <h4>「高盛為何讓程式取代 99% 的交易員？散戶能學什麼？」</h4>
+        <p>從全球頂尖機構的策略切入，讓觀眾感受量化趨勢的不可逆性。</p>
+        <span class="idea-tag">宏觀視角</span>
+      </div>
+
+      <div class="idea-card glass reveal">
+        <div class="idea-num">IDEA · 12</div>
+        <h4>「網格交易的真實風險：我差點被清倉的那一天」</h4>
+        <p>以親身危機經歷帶出風險管理重要性，情感張力能大幅提升完整觀看率。</p>
+        <span class="idea-tag">真實故事</span>
+      </div>
+
+      <div class="idea-card glass reveal">
+        <div class="idea-num">IDEA · 13</div>
+        <h4>「一個普通上班族如何用下班 2 小時建立量化系統？」</h4>
+        <p>強調時間效率，精準打中「沒時間盯盤」的上班族痛點，轉換率極高。</p>
+        <span class="idea-tag">生活應用</span>
+      </div>
+
+      <div class="idea-card glass reveal">
+        <div class="idea-num">IDEA · 14</div>
+        <h4>「回測賺很多，實盤卻虧損？揭密 3 大落差原因」</h4>
+        <p>解決量化新手的最大困惑，「回測 vs 實盤」是高搜尋量、高共鳴的永恆話題。</p>
+        <span class="idea-tag">問題解決</span>
+      </div>
+
+      <div class="idea-card glass reveal">
+        <div class="idea-num">IDEA · 15</div>
+        <h4>「邀請量化對沖基金經理人：他們用的策略跟你想的完全不同」</h4>
+        <p>業內對談引入權威背書，突破同溫層，為頻道帶來高品質外部流量。</p>
+        <span class="idea-tag">專家對談</span>
+      </div>
+
+      <div class="idea-card glass reveal">
+        <div class="idea-num">IDEA · 16</div>
+        <h4>「TradingView vs MultiCharts：花錢前你必須知道的差異」</h4>
+        <p>工具選擇是新手最早遇到的決策困境，比較型影片 SEO 效果強，導流課程效率高。</p>
+        <span class="idea-tag">工具評測</span>
+      </div>
+
+      <div class="idea-card glass reveal">
+        <div class="idea-num">IDEA · 17</div>
+        <h4>「我的量化交易每月損益公開：連續 12 個月透明化記錄」</h4>
+        <p>長期系列型內容建立深度信任，透明化是最強的社群黏著劑與課程轉換動力。</p>
+        <span class="idea-tag">透明追蹤</span>
+      </div>
+
+      <div class="idea-card glass reveal">
+        <div class="idea-num">IDEA · 18</div>
+        <h4>「台灣量化交易社群的 10 個奇葩問題，我來一一解答」</h4>
+        <p>從 LINE 社群與觀眾留言萃取真實問題，高參與感與共鳴感，易引發分享。</p>
+        <span class="idea-tag">社群互動</span>
+      </div>
+
+      <div class="idea-card glass reveal">
+        <div class="idea-num">IDEA · 19</div>
+        <h4>「如果我重新開始學量化交易，我會這樣規劃學習路徑」</h4>
+        <p>以「反思過去」視角給新手最直接的路徑建議，知識密度高且可重複觀看。</p>
+        <span class="idea-tag">學習路徑</span>
+      </div>
+
+      <div class="idea-card glass reveal">
+        <div class="idea-num">IDEA · 20</div>
+        <h4>「量化交易能養活自己嗎？全職量化交易者的一天」</h4>
+        <p>Vlog 形式呈現全職量化交易者的日常，滿足觀眾的好奇心，引發生涯思考。</p>
+        <span class="idea-tag">生活故事</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DEMAND ANALYSIS -->
+<section id="demand">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-tag">// MARKET DEMAND ANALYSIS</div>
+      <h2 class="section-title">需求、搜尋量與<span class="highlight">變現潛力</span>分析</h2>
+      <p class="section-desc">量化通所處的「量化交易教育」利基市場，擁有強勁的搜尋需求與高度的變現可行性。</p>
+    </div>
+    <div class="demand-grid">
+      <div class="demand-card glass reveal">
+        <span class="demand-score">★★★★★</span>
+        <h4>搜尋需求強度</h4>
+        <p>「程式交易」「量化交易」「TradingView 教學」在台灣均有穩定高搜尋量，且隨加密貨幣與 AI 浪潮持續攀升。</p>
+      </div>
+      <div class="demand-card glass reveal">
+        <span class="demand-score">★★★★</span>
+        <h4>受眾購買意願</h4>
+        <p>量化交易族群以投資為目的，對能提升績效的知識與工具有高度付費意願，課程客單價可達數千至萬元以上。</p>
+      </div>
+      <div class="demand-card glass reveal">
+        <span class="demand-score">★★★★★</span>
+        <h4>長尾關鍵字機會</h4>
+        <p>大量工具類長尾詞（TradingView Pine Script 教學、MultiCharts 回測等）競爭度低但需求精準，SEO 流量潛力極大。</p>
+      </div>
+      <div class="demand-card glass reveal">
+        <span class="demand-score">★★★★</span>
+        <h4>廣告與聯盟變現</h4>
+        <p>金融類 YouTube 廣告 CPM 為台灣平均最高，量化工具（TradingView、交易所）均有高額聯盟分潤方案，頻道變現天花板高。</p>
+      </div>
+    </div>
+
+    <div class="bar-chart glass reveal" style="padding:32px 36px; margin-top:8px;">
+      <h3 style="font-family:'Noto Serif TC',serif; margin-bottom:24px; font-size:1.1rem;">各主題搜尋量與互動潛力評估</h3>
+      <div class="bar-row">
+        <div class="bar-label">TradingView 教學</div>
+        <div class="bar-track"><div class="bar-fill" style="width:92%;"></div></div>
+        <div class="bar-pct">92%</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Python 量化交易</div>
+        <div class="bar-track"><div class="bar-fill" style="width:85%;"></div></div>
+        <div class="bar-pct">85%</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">加密貨幣量化策略</div>
+        <div class="bar-track"><div class="bar-fill" style="width:80%;"></div></div>
+        <div class="bar-pct">80%</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">AI 選股投資</div>
+        <div class="bar-track"><div class="bar-fill" style="width:88%;"></div></div>
+        <div class="bar-pct">88%</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">回測策略開發</div>
+        <div class="bar-track"><div class="bar-fill" style="width:75%;"></div></div>
+        <div class="bar-pct">75%</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">被動收入量化</div>
+        <div class="bar-track"><div class="bar-fill" style="width:90%;"></div></div>
+        <div class="bar-pct">90%</div>
+      </div>
+    </div>
+
+    <div style="margin-top:32px;" class="glass reveal" style="padding:32px;">
+      <div style="padding:32px 36px;">
+        <h3 style="font-family:'Noto Serif TC',serif; margin-bottom:16px; font-size:1.1rem; color: var(--accent2);">📍 受眾興趣地圖 × 內容缺口分析</h3>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+          <div>
+            <h4 style="font-size:0.9rem; color:var(--gold); margin-bottom:12px;">✅ 現有強項（已覆蓋）</h4>
+            <ul style="list-style:none; font-size:0.83rem; color:var(--muted); line-height:2;">
+              <li>→ TradingView 入門到進階教學</li>
+              <li>→ MultiCharts 程式交易</li>
+              <li>→ 加密貨幣量化策略</li>
+              <li>→ 免費直播與社群經營</li>
+              <li>→ 工具平台比較與選擇建議</li>
+            </ul>
+          </div>
+          <div>
+            <h4 style="font-size:0.9rem; color:#ef4444; margin-bottom:12px;">🔴 內容缺口（待填補）</h4>
+            <ul style="list-style:none; font-size:0.83rem; color:var(--muted); line-height:2;">
+              <li>→ AI/LLM 輔助量化交易系列</li>
+              <li>→ 真實帳戶長期績效追蹤</li>
+              <li>→ 風險管理與資金控管深度教學</li>
+              <li>→ 台股籌碼量化分析</li>
+              <li>→ 量化交易心理學與行為財務</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- STRATEGY -->
+<section id="strategy">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-tag">// CHANNEL STRATEGY</div>
+      <h2 class="section-title">頻道<span class="highlight">完整策略藍圖</span></h2>
+      <p class="section-desc">從利基定位到競爭者分析，建立清晰可執行的頻道成長策略。</p>
+    </div>
+
+    <div class="strategy-grid">
+      <div class="strategy-card glass reveal">
+        <div class="strategy-icon">🎯</div>
+        <h3>頻道定位策略</h3>
+        <ul>
+          <li>台灣最親民的量化金融教育第一品牌，從新手到進階一站學習</li>
+          <li>強調「可落地執行」：學完就能動手操作，而非純觀念教學</li>
+          <li>「科學投資」形象：以數據與回測取代主觀猜測，建立品牌公信力</li>
+          <li>跨工具、跨商品的全方位量化交易平台，而非單一工具的教學頻道</li>
+        </ul>
+      </div>
+      <div class="strategy-card glass reveal">
+        <div class="strategy-icon">👥</div>
+        <h3>目標受眾鎖定</h3>
+        <ul>
+          <li>主要受眾：25–45 歲有投資需求、希望節省盯盤時間的上班族</li>
+          <li>次要受眾：對程式交易好奇但尚未入門的投資新手</li>
+          <li>進階受眾：已有交易經驗、希望提升策略穩定性的資深投資者</li>
+          <li>潛在受眾：對 AI 與自動化感興趣的工程師與科技從業者</li>
+        </ul>
+      </div>
+      <div class="strategy-card glass reveal">
+        <div class="strategy-icon">📌</div>
+        <h3>核心內容主題柱</h3>
+        <ul>
+          <li>工具教學柱：TradingView / Python / MultiCharts 深度課程</li>
+          <li>策略實戰柱：回測案例、真實績效揭露、策略模組拆解</li>
+          <li>市場解析柱：時事結合量化視角的週報與特別節目</li>
+          <li>新手入門柱：降低門檻的快速啟動系列，擴大漏斗頂端</li>
+          <li>AI 未來柱：ChatGPT × 量化、機器學習選股等前沿主題</li>
+        </ul>
+      </div>
+      <div class="strategy-card glass reveal">
+        <div class="strategy-icon">🚀</div>
+        <h3>成長機會優先序</h3>
+        <ul>
+          <li>① 建立 Shorts 頻道，快速擴大漏斗頂端，觸及更廣泛受眾</li>
+          <li>② 投資 AI × 量化主題影片，搶佔高成長賽道的早期優勢</li>
+          <li>③ 建立透明化損益追蹤系列，強化品牌信任度與社群黏性</li>
+          <li>④ 積極與財經 KOL 跨界合作，突破既有受眾同溫層</li>
+          <li>⑤ 深化課程生態系，從 YouTube 流量到高客單課程的完整漏斗</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="glass reveal" style="margin-top:28px; padding:32px 36px;">
+      <h3 style="font-family:'Noto Serif TC',serif; margin-bottom:24px; font-size:1.1rem; color:var(--accent2);">🥊 競爭者分析</h3>
+      <div class="comp-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>頻道 / 品牌</th>
+              <th>主要定位</th>
+              <th>內容特色</th>
+              <th>量化通優勢</th>
+              <th>威脅程度</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="comp-name">台灣財經 YouTubers</td>
+              <td>個股分析、存股</td>
+              <td>基本面、技術面分析</td>
+              <td>量化工具深度遠超一般財經頻道</td>
+              <td><span class="tag-pill tag-low">低</span></td>
+            </tr>
+            <tr>
+              <td class="comp-name">Python 程式教學頻道</td>
+              <td>程式技能</td>
+              <td>一般 Python 教學</td>
+              <td>量化通有金融 × 程式雙領域整合</td>
+              <td><span class="tag-pill tag-low">低</span></td>
+            </tr>
+            <tr>
+              <td class="comp-name">幣圈交易 KOL</td>
+              <td>加密貨幣交易</td>
+              <td>行情分析、喊單</td>
+              <td>量化通以科學策略取代主觀喊單</td>
+              <td><span class="tag-pill tag-med">中</span></td>
+            </tr>
+            <tr>
+              <td class="comp-name">中國量化教育平台</td>
+              <td>量化交易教育</td>
+              <td>深度量化課程</td>
+              <td>語言在地化、台股商品專屬內容</td>
+              <td><span class="tag-pill tag-med">中</span></td>
+            </tr>
+            <tr>
+              <td class="comp-name">國際 Algo Trading 頻道</td>
+              <td>英文量化教育</td>
+              <td>Python、機器學習策略</td>
+              <td>中文市場缺乏同質競爭，量化通有先行優勢</td>
+              <td><span class="tag-pill tag-low">低</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CTA -->
+<div class="cta-section">
+  <div class="cta-box glass-strong">
+    <h2>準備好讓量化交易<span style="color:var(--accent2);">為你工作</span>了嗎？</h2>
+    <p>加入量化通社群，從零開始學習如何用程式建立屬於自己的自動化投資系統。無論你是完全的新手，還是希望提升績效的老手，量化通都有適合你的學習路徑。</p>
+    <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+      <a class="cta-btn" href="https://www.youtube.com/@QuantPass" target="_blank">
+        ▶ 訂閱 YouTube 頻道
+      </a>
+      <a class="cta-btn" href="https://quantpass.org" target="_blank" style="background:rgba(255,255,255,0.1); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,0.2); box-shadow:none;">
+        🌐 前往量化通官網
+      </a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="container">
+    <p>本報告由第三方獨立分析製作 · 資料來源：量化通官網 <a href="https://quantpass.org" target="_blank">quantpass.org</a> 及 YouTube 公開資訊 · 分析日期：2026 年 5 月</p>
+    <p style="margin-top:8px; opacity:0.5;">本報告內容係獨立分析觀點，非量化通官方文件，不構成投資建議。</p>
+  </div>
+</footer>
+
+<script>
+// Scroll reveal
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), i * 60);
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+reveals.forEach(el => observer.observe(el));
+
+// Bar animation delay
+document.querySelectorAll('.bar-fill').forEach((bar, i) => {
+  bar.style.animationDelay = `${i * 0.15 + 0.3}s`;
+});
+
+// Parallax orbs on mouse
+document.addEventListener('mousemove', (e) => {
+  const mx = (e.clientX / window.innerWidth - 0.5) * 20;
+  const my = (e.clientY / window.innerHeight - 0.5) * 20;
+  document.querySelector('.orb1').style.transform = `translate(${mx*0.5}px,${my*0.5}px)`;
+  document.querySelector('.orb2').style.transform = `translate(${-mx*0.3}px,${-my*0.3}px)`;
+});
+</script>
+</body>
+</html>
