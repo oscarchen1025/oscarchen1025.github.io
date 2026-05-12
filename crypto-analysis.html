@@ -10,15 +10,15 @@
 :root {
   --green: #14e8b3;
   --red: #ff4c68;
-  --bg: #0a0e0d;
-  --bg2: #111714;
-  --bg3: #161c19;
-  --card: #141a17;
-  --border: rgba(20,232,179,0.12);
-  --border2: rgba(255,255,255,0.06);
-  --text: #e8ede9;
-  --text2: #8a9e94;
-  --text3: #5a7066;
+  --bg: #0d1117;
+  --bg2: #10151b;
+  --bg3: #13181f;
+  --card: #15191e;
+  --border: rgba(20,232,179,0.15);
+  --border2: rgba(255,255,255,0.08);
+  --text: #d4dce8;
+  --text2: #8fa0b4;
+  --text3: #526070;
   --amber: #f0a500;
   --blue: #3b82f6;
   --purple: #a855f7;
@@ -90,7 +90,7 @@ nav a.active { color: var(--green); border-bottom-color: var(--green); }
 .hero::before {
   content: '';
   position: absolute; inset: 0;
-  background: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(20,232,179,0.06) 0%, transparent 70%);
+  background: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(20,232,179,0.08) 0%, transparent 70%);
   pointer-events: none;
 }
 .hero-badge {
@@ -113,7 +113,15 @@ nav a.active { color: var(--green); border-bottom-color: var(--green); }
   font-family: 'Noto Sans TC', sans-serif;
   color: #fff;
 }
-.hero h1 span { color: var(--green); display: block; }
+.hero h1 span {
+  color: var(--green);
+  display: block;
+  text-shadow:
+    0 0 80px rgba(20,232,179,0.95),
+    0 0 0px rgba(20,232,179,0.65),
+    0 0 0px rgba(20,232,179,0.38),
+    0 0 200px rgba(20,232,179,0.18);
+}
 .hero p {
   font-size: 15px;
   color: var(--text2);
@@ -972,7 +980,15 @@ p.footnote { font-size: 11px; color: var(--text3); font-family: 'Noto Sans TC', 
 
   <div class="grid3" style="margin-bottom:24px;">
     <div class="card" style="border-color:rgba(20,232,179,0.3);">
-      <div class="card-title">🟢 多頭情境</div>
+      <div class="card-title" style="display:flex;align-items:center;gap:8px;">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+          <circle cx="9" cy="9" r="5" fill="#14e8b3"/>
+          <circle cx="9" cy="9" r="8" stroke="#14e8b3" stroke-width="1" stroke-opacity="0.3"/>
+          <circle cx="9" cy="9" r="5" fill="#14e8b3" filter="url(#glow-bull)"/>
+          <defs><filter id="glow-bull" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        </svg>
+        多頭情境
+      </div>
       <div class="check-item">
         <div class="check-icon pass">✓</div>
         <div><div class="check-title">成立條件</div><div class="check-body">日線站穩 200MA（$82,228）→ 突破 $84,000 阻力 → 成交量週均高於 30D 均量 120%</div></div>
@@ -987,7 +1003,15 @@ p.footnote { font-size: 11px; color: var(--text3); font-family: 'Noto Sans TC', 
       <p style="font-size:11px;color:var(--text3);margin-top:12px;font-family:'Noto Sans TC',sans-serif;">Polymarket 55% 機率 BTC 上行，Standard Chartered 目標 $150K 年底</p>
     </div>
     <div class="card" style="border-color:rgba(255,76,104,0.2);">
-      <div class="card-title">🔴 空頭情境</div>
+      <div class="card-title" style="display:flex;align-items:center;gap:8px;">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+          <circle cx="9" cy="9" r="5" fill="#ff4c68"/>
+          <circle cx="9" cy="9" r="8" stroke="#ff4c68" stroke-width="1" stroke-opacity="0.3"/>
+          <circle cx="9" cy="9" r="5" fill="#ff4c68" filter="url(#glow-bear)"/>
+          <defs><filter id="glow-bear" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        </svg>
+        空頭情境
+      </div>
       <div class="check-item">
         <div class="check-icon fail">✗</div>
         <div><div class="check-title">成立條件</div><div class="check-body">ETF 連續 5 日以上淨流出 → BTC 跌破 $78,000（100D EMA）→ 伊朗局勢升級導致美元走強</div></div>
@@ -1002,7 +1026,15 @@ p.footnote { font-size: 11px; color: var(--text3); font-family: 'Noto Sans TC', 
       <p style="font-size:11px;color:var(--text3);margin-top:12px;font-family:'Noto Sans TC',sans-serif;">65.5% 期貨空頭比率為最大潛在風險；宏觀惡化是主要觸發因素</p>
     </div>
     <div class="card">
-      <div class="card-title">⬜ 中性情境</div>
+      <div class="card-title" style="display:flex;align-items:center;gap:8px;">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+          <circle cx="9" cy="9" r="5" fill="#14e8b3"/>
+          <circle cx="9" cy="9" r="8" stroke="#14e8b3" stroke-width="1" stroke-opacity="0.25"/>
+          <circle cx="9" cy="9" r="5" fill="#14e8b3" filter="url(#glow-neu)"/>
+          <defs><filter id="glow-neu" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        </svg>
+        中性情境
+      </div>
       <div class="check-item">
         <div class="check-icon warn">!</div>
         <div><div class="check-title">成立條件</div><div class="check-body">BTC 在 $78K–$84K 區間震盪 → CLARITY Act 審議結果不確定 → 宏觀數據混合（就業穩定但通膨黏性）</div></div>
