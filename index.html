@@ -1,0 +1,1994 @@
+<!DOCTYPE html>
+
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Portfolio Report</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Noto+Sans+TC:wght@400;500&amp;display=swap" rel="stylesheet"/><style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #1c1719;
+    color: #ebf9ff;
+    font-family: "Inter","Noto Sans TC",sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 32px 24px;
+  }
+
+  .container {
+    display: flex;
+    align-items: center;
+    gap: 52px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* ── donut ── */
+  .donut-svg-wrap {
+    position: relative;
+    flex-shrink: 0;
+  }
+  .donut-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    gap: 7px;
+  }
+  /* 主標題：預設"當期損益"，hover 時換成股票名稱 */
+  .donut-center .main-label {
+    font-size: 16px;
+    font-weight: 500;
+    color: rgba(235,249,255,.55);
+    letter-spacing: .04em;
+    line-height: 1;
+    transition: color .15s;
+    max-width: 110px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* PnL 數值：始終顯示 */
+  .donut-center .pnl-value {
+    font-size: 22px;
+    font-weight: 600;
+    color: #ff627e;
+    letter-spacing: .02em;
+    line-height: 1;
+    transition: color .15s;
+  }
+
+  /* ── legend ── */
+  .legend {
+    display: flex;
+    flex-direction: column;
+    min-width: 240px;
+    max-height: 420px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(235,249,255,.1) transparent;
+  }
+  .legend-item {
+    display: grid;
+    grid-template-columns: 10px 1fr auto auto;
+    align-items: center;
+    column-gap: 14px;
+    padding: 6px 6px;
+    border-radius: 4px;
+    cursor: default;
+    transition: background .0s;
+  }
+  .legend-item:hover {
+    background: rgba(235,249,255,.05);
+  }
+  .legend-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+  }
+  .legend-name {
+    font-size: 14px;
+    font-weight: 400;
+    color: #ebf9ff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: .01em;
+  }
+  .legend-wt {
+    font-size: 12px;
+    color: rgba(235,249,255,.35);
+    text-align: right;
+    padding-right: 14px;
+    white-space: nowrap;
+  }
+  .legend-ret {
+    font-size: 14px;
+    font-weight: 500;
+    text-align: right;
+    white-space: nowrap;
+    min-width: 64px;
+  }
+
+  /* ── tooltip ── */
+  #tooltip {
+    position: fixed;
+    pointer-events: none;
+    background: rgba(28,23,25,.96);
+    border: 1px solid rgba(235,249,255,.1);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    line-height: 1.8;
+    z-index: 999;
+    display: none;
+    min-width: 160px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.5);
+    color: #ebf9ff;
+    font-family: "Inter","Noto Sans TC",sans-serif;
+  }
+  #tooltip .tt-name {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 3px;
+    letter-spacing: .03em;
+  }
+  #tooltip .tt-dim { color: rgba(235,249,255,.4); }
+</style><style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #1c1719;
+    color: #ebf9ff;
+    font-family: "Inter","Noto Sans TC",sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    min-height: 100vh;
+    padding: 32px 24px;
+    max-width: 1200px; /* 全版置中 */
+    margin: 0 auto; /* 全版置中 */
+  }
+
+  /* ── 上方摘要列 ── */
+  .summary-bar {
+    display: flex;
+    gap: 32px;
+    align-items: flex-start;   /* 子項頂端對齊 */
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+
+  .summary-card {
+    display: flex;
+    flex-direction: column;    /* 標籤與值上下排列 */
+    gap: 6px;
+    padding: 14px 20px;
+    background: rgba(255,255,255,0.04);
+    border: 0.5px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.0s;
+    min-width: 160px;
+  }
+  .summary-card:hover {
+    background: rgba(255,255,255,0.08);
+  }
+  .summary-card.active {
+    border-color: #ffffff60;
+    background: #ffffff10;
+  }
+
+  .card-label {
+    font-size: 13px;
+    font-weight: 400;
+    color: #a0a0a0;
+    letter-spacing: 0.04em;
+  }
+
+  .card-value {
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  /* ── table wrapper ── */
+  .table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  /* pandas 產生的 table 外層 div */
+  .table-wrapper > div { width: 100%; }
+</style><style>
+  /* 排序箭頭：預設隱藏 */
+  thead th::after {
+    content: '';
+    display: inline-block;
+    margin-left: 5px;
+    opacity: 0.3;
+    font-size: 10px;
+    vertical-align: middle;
+    color: #ebf9ff50 !important;
+  }
+  /* 滑鼠 hover：游標變 pointer、字色變藍 */
+  thead th:hover {
+    cursor: pointer;
+    color: #ebf9ff50 !important;
+    transition: color 0.15s ease;
+  }
+  thead th:hover::after {
+    content: '';
+    opacity: 0.6;
+    color: #ebf9ff50 !important;
+  }
+  /* 點擊按下瞬間（:active）：字色加深藍 */
+  thead th:active {
+    cursor: pointer;
+    color: #ebf9ff50 !important;
+  }
+  /* 升冪排序箭頭 */
+  thead th[data-sort="asc"]::after {
+    content: ' ▼';
+    opacity: 1;
+    color: #ebf9ff;
+  }
+  /* 降冪排序箭頭 */
+  thead th[data-sort="desc"]::after {
+    content: ' ▲';
+    opacity: 1;
+    color: #ebf9ff;
+  }
+</style><style>
+  /* ── 分頁容器 ── */
+  .pagination {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-top: 16px;
+    flex-wrap: wrap;
+    width: 100%;   /* [新增] 撐滿表格寬度，使按鈕群正確置中於表格 */
+  }
+
+  /* ── 分頁按鈕基底 ── */
+  .pagination button {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    color: #ebf9ff;
+    font-family: "Inter","Noto Sans TC",sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    padding: 5px 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+    min-width: 34px;
+  }
+
+  /* ── hover ── */
+  .pagination button:hover {
+    background: rgba(255,255,255,0.12);
+  }
+
+  /* ── 當前頁（active） ── */
+  .pagination button.active {
+    background: rgba(255,255,255,0.18);
+    border-color: rgba(255,255,255,0.40);
+    font-weight: 600;
+  }
+
+  /* ── 停用（上一頁 / 下一頁到邊界時） ── */
+  .pagination button:disabled {
+    opacity: 0.3;
+    cursor: default;
+    background: transparent;
+  }
+</style><style type="text/css">
+#T_6989d table {
+  border-collapse: separate;
+  width: 100%;
+  font-family: "Inter","Noto Sans TC",sans-serif;
+}
+#T_6989d thead th {
+  background: #1c1719;
+  color: #ebf9ff;
+  font-size: 14px;
+  font-weight: 400;
+  font-family: "Inter","Noto Sans TC",sans-serif;
+  padding: 12px 14px;
+  border-bottom: 1px solid #ebf9ff30;
+  text-align: center;
+}
+#T_6989d tbody tr {
+  background: #1c1719;
+}
+#T_6989d tbody tr:hover {
+  background: rgba(255,255,255,0.07);
+}
+#T_6989d tbody td {
+  border-bottom: 1px solid #ebf9ff10;
+  color: #ebf9ff;
+}
+#T_6989d tbody th {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: "Inter","Noto Sans TC",sans-serif;
+  color: #ebf9ff;
+  background: #1c1719;
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+#T_6989d_row0_col0, #T_6989d_row0_col1, #T_6989d_row0_col2, #T_6989d_row0_col3, #T_6989d_row0_col4, #T_6989d_row0_col5, #T_6989d_row1_col0, #T_6989d_row1_col1, #T_6989d_row1_col2, #T_6989d_row1_col3, #T_6989d_row1_col4, #T_6989d_row1_col5, #T_6989d_row2_col0, #T_6989d_row2_col1, #T_6989d_row2_col2, #T_6989d_row2_col3, #T_6989d_row2_col4, #T_6989d_row2_col5, #T_6989d_row3_col0, #T_6989d_row3_col1, #T_6989d_row3_col2, #T_6989d_row3_col3, #T_6989d_row3_col4, #T_6989d_row3_col5, #T_6989d_row4_col0, #T_6989d_row4_col1, #T_6989d_row4_col2, #T_6989d_row4_col3, #T_6989d_row4_col4, #T_6989d_row4_col5, #T_6989d_row5_col0, #T_6989d_row5_col1, #T_6989d_row5_col2, #T_6989d_row5_col3, #T_6989d_row5_col4, #T_6989d_row5_col5, #T_6989d_row6_col0, #T_6989d_row6_col1, #T_6989d_row6_col2, #T_6989d_row6_col3, #T_6989d_row6_col4, #T_6989d_row6_col5, #T_6989d_row7_col0, #T_6989d_row7_col1, #T_6989d_row7_col2, #T_6989d_row7_col3, #T_6989d_row7_col4, #T_6989d_row7_col5, #T_6989d_row8_col0, #T_6989d_row8_col1, #T_6989d_row8_col2, #T_6989d_row8_col3, #T_6989d_row8_col4, #T_6989d_row8_col5, #T_6989d_row9_col0, #T_6989d_row9_col1, #T_6989d_row9_col2, #T_6989d_row9_col3, #T_6989d_row9_col4, #T_6989d_row9_col5, #T_6989d_row10_col0, #T_6989d_row10_col1, #T_6989d_row10_col2, #T_6989d_row10_col3, #T_6989d_row10_col4, #T_6989d_row10_col5, #T_6989d_row11_col0, #T_6989d_row11_col1, #T_6989d_row11_col2, #T_6989d_row11_col3, #T_6989d_row11_col4, #T_6989d_row11_col5, #T_6989d_row12_col0, #T_6989d_row12_col1, #T_6989d_row12_col2, #T_6989d_row12_col3, #T_6989d_row12_col4, #T_6989d_row12_col5, #T_6989d_row13_col0, #T_6989d_row13_col1, #T_6989d_row13_col2, #T_6989d_row13_col3, #T_6989d_row13_col4, #T_6989d_row13_col5, #T_6989d_row14_col0, #T_6989d_row14_col1, #T_6989d_row14_col2, #T_6989d_row14_col3, #T_6989d_row14_col4, #T_6989d_row14_col5, #T_6989d_row15_col0, #T_6989d_row15_col1, #T_6989d_row15_col2, #T_6989d_row15_col3, #T_6989d_row15_col4, #T_6989d_row15_col5, #T_6989d_row16_col0, #T_6989d_row16_col1, #T_6989d_row16_col2, #T_6989d_row16_col3, #T_6989d_row16_col4, #T_6989d_row16_col5, #T_6989d_row17_col0, #T_6989d_row17_col1, #T_6989d_row17_col2, #T_6989d_row17_col3, #T_6989d_row17_col4, #T_6989d_row17_col5, #T_6989d_row18_col0, #T_6989d_row18_col1, #T_6989d_row18_col2, #T_6989d_row18_col3, #T_6989d_row18_col4, #T_6989d_row18_col5, #T_6989d_row19_col0, #T_6989d_row19_col1, #T_6989d_row19_col2, #T_6989d_row19_col3, #T_6989d_row19_col4, #T_6989d_row19_col5, #T_6989d_row20_col0, #T_6989d_row20_col1, #T_6989d_row20_col2, #T_6989d_row20_col3, #T_6989d_row20_col4, #T_6989d_row20_col5, #T_6989d_row21_col0, #T_6989d_row21_col1, #T_6989d_row21_col2, #T_6989d_row21_col3, #T_6989d_row21_col4, #T_6989d_row21_col5, #T_6989d_row22_col0, #T_6989d_row22_col1, #T_6989d_row22_col2, #T_6989d_row22_col3, #T_6989d_row22_col4, #T_6989d_row22_col5, #T_6989d_row23_col0, #T_6989d_row23_col1, #T_6989d_row23_col2, #T_6989d_row23_col3, #T_6989d_row23_col4, #T_6989d_row23_col5, #T_6989d_row24_col0, #T_6989d_row24_col1, #T_6989d_row24_col2, #T_6989d_row24_col3, #T_6989d_row24_col4, #T_6989d_row24_col5, #T_6989d_row25_col0, #T_6989d_row25_col1, #T_6989d_row25_col2, #T_6989d_row25_col3, #T_6989d_row25_col4, #T_6989d_row25_col5, #T_6989d_row26_col0, #T_6989d_row26_col1, #T_6989d_row26_col2, #T_6989d_row26_col3, #T_6989d_row26_col4, #T_6989d_row26_col5, #T_6989d_row27_col0, #T_6989d_row27_col1, #T_6989d_row27_col2, #T_6989d_row27_col3, #T_6989d_row27_col4, #T_6989d_row27_col5, #T_6989d_row28_col0, #T_6989d_row28_col1, #T_6989d_row28_col2, #T_6989d_row28_col3, #T_6989d_row28_col4, #T_6989d_row28_col5, #T_6989d_row29_col0, #T_6989d_row29_col1, #T_6989d_row29_col2, #T_6989d_row29_col3, #T_6989d_row29_col4, #T_6989d_row29_col5 {
+  text-align: center;
+  vertical-align: middle;
+  padding: 5px 14px;
+  font-size: 14px;
+  font-weight: 400;
+}
+</style><style type="text/css">
+#T_47105 table {
+  border-collapse: separate;
+  width: 100%;
+  font-family: "Inter","Noto Sans TC",sans-serif;
+}
+#T_47105 thead th {
+  background: #1c1719;
+  color: #ebf9ff;
+  font-size: 14px;
+  font-weight: 400;
+  font-family: "Inter","Noto Sans TC",sans-serif;
+  padding: 12px 14px;
+  border-bottom: 1px solid #ebf9ff30;
+  text-align: center;
+}
+#T_47105 tbody tr {
+  background: #1c1719;
+}
+#T_47105 tbody tr:hover {
+  background: rgba(255,255,255,0.07);
+}
+#T_47105 tbody td {
+  border-bottom: 1px solid #ebf9ff10;
+  color: #ebf9ff;
+}
+#T_47105 tbody th {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: "Inter","Noto Sans TC",sans-serif;
+  color: #ebf9ff;
+  background: #1c1719;
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+#T_47105_row0_col0, #T_47105_row0_col1, #T_47105_row0_col2, #T_47105_row0_col3, #T_47105_row0_col4, #T_47105_row0_col5, #T_47105_row1_col0, #T_47105_row1_col1, #T_47105_row1_col2, #T_47105_row1_col3, #T_47105_row1_col4, #T_47105_row1_col5, #T_47105_row2_col0, #T_47105_row2_col1, #T_47105_row2_col2, #T_47105_row2_col3, #T_47105_row2_col4, #T_47105_row2_col5, #T_47105_row3_col0, #T_47105_row3_col1, #T_47105_row3_col2, #T_47105_row3_col3, #T_47105_row3_col4, #T_47105_row3_col5, #T_47105_row4_col0, #T_47105_row4_col1, #T_47105_row4_col2, #T_47105_row4_col3, #T_47105_row4_col4, #T_47105_row4_col5, #T_47105_row5_col0, #T_47105_row5_col1, #T_47105_row5_col2, #T_47105_row5_col3, #T_47105_row5_col4, #T_47105_row5_col5, #T_47105_row6_col0, #T_47105_row6_col1, #T_47105_row6_col2, #T_47105_row6_col3, #T_47105_row6_col4, #T_47105_row6_col5, #T_47105_row7_col0, #T_47105_row7_col1, #T_47105_row7_col2, #T_47105_row7_col3, #T_47105_row7_col4, #T_47105_row7_col5, #T_47105_row8_col0, #T_47105_row8_col1, #T_47105_row8_col2, #T_47105_row8_col3, #T_47105_row8_col4, #T_47105_row8_col5, #T_47105_row9_col0, #T_47105_row9_col1, #T_47105_row9_col2, #T_47105_row9_col3, #T_47105_row9_col4, #T_47105_row9_col5, #T_47105_row10_col0, #T_47105_row10_col1, #T_47105_row10_col2, #T_47105_row10_col3, #T_47105_row10_col4, #T_47105_row10_col5, #T_47105_row11_col0, #T_47105_row11_col1, #T_47105_row11_col2, #T_47105_row11_col3, #T_47105_row11_col4, #T_47105_row11_col5, #T_47105_row12_col0, #T_47105_row12_col1, #T_47105_row12_col2, #T_47105_row12_col3, #T_47105_row12_col4, #T_47105_row12_col5, #T_47105_row13_col0, #T_47105_row13_col1, #T_47105_row13_col2, #T_47105_row13_col3, #T_47105_row13_col4, #T_47105_row13_col5, #T_47105_row14_col0, #T_47105_row14_col1, #T_47105_row14_col2, #T_47105_row14_col3, #T_47105_row14_col4, #T_47105_row14_col5, #T_47105_row15_col0, #T_47105_row15_col1, #T_47105_row15_col2, #T_47105_row15_col3, #T_47105_row15_col4, #T_47105_row15_col5, #T_47105_row16_col0, #T_47105_row16_col1, #T_47105_row16_col2, #T_47105_row16_col3, #T_47105_row16_col4, #T_47105_row16_col5, #T_47105_row17_col0, #T_47105_row17_col1, #T_47105_row17_col2, #T_47105_row17_col3, #T_47105_row17_col4, #T_47105_row17_col5, #T_47105_row18_col0, #T_47105_row18_col1, #T_47105_row18_col2, #T_47105_row18_col3, #T_47105_row18_col4, #T_47105_row18_col5, #T_47105_row19_col0, #T_47105_row19_col1, #T_47105_row19_col2, #T_47105_row19_col3, #T_47105_row19_col4, #T_47105_row19_col5, #T_47105_row20_col0, #T_47105_row20_col1, #T_47105_row20_col2, #T_47105_row20_col3, #T_47105_row20_col4, #T_47105_row20_col5, #T_47105_row21_col0, #T_47105_row21_col1, #T_47105_row21_col2, #T_47105_row21_col3, #T_47105_row21_col4, #T_47105_row21_col5, #T_47105_row22_col0, #T_47105_row22_col1, #T_47105_row22_col2, #T_47105_row22_col3, #T_47105_row22_col4, #T_47105_row22_col5, #T_47105_row23_col0, #T_47105_row23_col1, #T_47105_row23_col2, #T_47105_row23_col3, #T_47105_row23_col4, #T_47105_row23_col5, #T_47105_row24_col0, #T_47105_row24_col1, #T_47105_row24_col2, #T_47105_row24_col3, #T_47105_row24_col4, #T_47105_row24_col5, #T_47105_row25_col0, #T_47105_row25_col1, #T_47105_row25_col2, #T_47105_row25_col3, #T_47105_row25_col4, #T_47105_row25_col5, #T_47105_row26_col0, #T_47105_row26_col1, #T_47105_row26_col2, #T_47105_row26_col3, #T_47105_row26_col4, #T_47105_row26_col5, #T_47105_row27_col0, #T_47105_row27_col1, #T_47105_row27_col2, #T_47105_row27_col3, #T_47105_row27_col4, #T_47105_row27_col5, #T_47105_row28_col0, #T_47105_row28_col1, #T_47105_row28_col2, #T_47105_row28_col3, #T_47105_row28_col4, #T_47105_row28_col5, #T_47105_row29_col0, #T_47105_row29_col1, #T_47105_row29_col2, #T_47105_row29_col3, #T_47105_row29_col4, #T_47105_row29_col5, #T_47105_row30_col0, #T_47105_row30_col1, #T_47105_row30_col2, #T_47105_row30_col3, #T_47105_row30_col4, #T_47105_row30_col5, #T_47105_row31_col0, #T_47105_row31_col1, #T_47105_row31_col2, #T_47105_row31_col3, #T_47105_row31_col4, #T_47105_row31_col5, #T_47105_row32_col0, #T_47105_row32_col1, #T_47105_row32_col2, #T_47105_row32_col3, #T_47105_row32_col4, #T_47105_row32_col5, #T_47105_row33_col0, #T_47105_row33_col1, #T_47105_row33_col2, #T_47105_row33_col3, #T_47105_row33_col4, #T_47105_row33_col5, #T_47105_row34_col0, #T_47105_row34_col1, #T_47105_row34_col2, #T_47105_row34_col3, #T_47105_row34_col4, #T_47105_row34_col5, #T_47105_row35_col0, #T_47105_row35_col1, #T_47105_row35_col2, #T_47105_row35_col3, #T_47105_row35_col4, #T_47105_row35_col5, #T_47105_row36_col0, #T_47105_row36_col1, #T_47105_row36_col2, #T_47105_row36_col3, #T_47105_row36_col4, #T_47105_row36_col5, #T_47105_row37_col0, #T_47105_row37_col1, #T_47105_row37_col2, #T_47105_row37_col3, #T_47105_row37_col4, #T_47105_row37_col5, #T_47105_row38_col0, #T_47105_row38_col1, #T_47105_row38_col2, #T_47105_row38_col3, #T_47105_row38_col4, #T_47105_row38_col5, #T_47105_row39_col0, #T_47105_row39_col1, #T_47105_row39_col2, #T_47105_row39_col3, #T_47105_row39_col4, #T_47105_row39_col5, #T_47105_row40_col0, #T_47105_row40_col1, #T_47105_row40_col2, #T_47105_row40_col3, #T_47105_row40_col4, #T_47105_row40_col5, #T_47105_row41_col0, #T_47105_row41_col1, #T_47105_row41_col2, #T_47105_row41_col3, #T_47105_row41_col4, #T_47105_row41_col5, #T_47105_row42_col0, #T_47105_row42_col1, #T_47105_row42_col2, #T_47105_row42_col3, #T_47105_row42_col4, #T_47105_row42_col5, #T_47105_row43_col0, #T_47105_row43_col1, #T_47105_row43_col2, #T_47105_row43_col3, #T_47105_row43_col4, #T_47105_row43_col5, #T_47105_row44_col0, #T_47105_row44_col1, #T_47105_row44_col2, #T_47105_row44_col3, #T_47105_row44_col4, #T_47105_row44_col5, #T_47105_row45_col0, #T_47105_row45_col1, #T_47105_row45_col2, #T_47105_row45_col3, #T_47105_row45_col4, #T_47105_row45_col5, #T_47105_row46_col0, #T_47105_row46_col1, #T_47105_row46_col2, #T_47105_row46_col3, #T_47105_row46_col4, #T_47105_row46_col5, #T_47105_row47_col0, #T_47105_row47_col1, #T_47105_row47_col2, #T_47105_row47_col3, #T_47105_row47_col4, #T_47105_row47_col5, #T_47105_row48_col0, #T_47105_row48_col1, #T_47105_row48_col2, #T_47105_row48_col3, #T_47105_row48_col4, #T_47105_row48_col5, #T_47105_row49_col0, #T_47105_row49_col1, #T_47105_row49_col2, #T_47105_row49_col3, #T_47105_row49_col4, #T_47105_row49_col5, #T_47105_row50_col0, #T_47105_row50_col1, #T_47105_row50_col2, #T_47105_row50_col3, #T_47105_row50_col4, #T_47105_row50_col5, #T_47105_row51_col0, #T_47105_row51_col1, #T_47105_row51_col2, #T_47105_row51_col3, #T_47105_row51_col4, #T_47105_row51_col5, #T_47105_row52_col0, #T_47105_row52_col1, #T_47105_row52_col2, #T_47105_row52_col3, #T_47105_row52_col4, #T_47105_row52_col5, #T_47105_row53_col0, #T_47105_row53_col1, #T_47105_row53_col2, #T_47105_row53_col3, #T_47105_row53_col4, #T_47105_row53_col5, #T_47105_row54_col0, #T_47105_row54_col1, #T_47105_row54_col2, #T_47105_row54_col3, #T_47105_row54_col4, #T_47105_row54_col5 {
+  text-align: center;
+  vertical-align: middle;
+  padding: 5px 14px;
+  font-size: 14px;
+  font-weight: 400;
+}
+</style><style>
+body {
+display: block !important;
+align-items: unset !important;
+justify-content: unset !important;
+max-width: 1200px;
+margin: 0 auto;
+padding: 32px 24px;
+}
+/* 圓餅圖區塊：靠左對齊表格 */
+.pie-section {
+display: flex;
+justify-content: flex-start;
+margin-bottom: 36px;
+}
+.pie-section .container {
+justify-content: flex-start !important;
+}
+/* 表格區塊 */
+.df-section {
+width: 100%;
+}
+</style></head>
+<body><div class="pie-section">
+<div class="container">
+<div class="donut-svg-wrap">
+<svg height="280" id="chart" viewbox="0 0 280 280" width="280"></svg>
+<div class="donut-center">
+<div class="main-label" id="mainLabel">當期損益</div>
+<div class="pnl-value" id="pnlValue">+8.27%</div>
+</div>
+</div>
+<div class="legend" id="legend"></div>
+</div>
+<div id="tooltip"></div>
+<script>
+const DATA       = [{"name": "3090 日電貿", "weight": 4.023, "return": 81.9438, "pct": 4.023, "color": "#ff627eFF"}, {"name": "6834 天二科技", "weight": 6.4368, "return": 48.6791, "pct": 6.4368, "color": "#ff627eFF"}, {"name": "4127 天良", "weight": 0.5747, "return": 40.6727, "pct": 0.5747, "color": "#ff627eFF"}, {"name": "6166 凌華", "weight": 10.9195, "return": 31.4187, "pct": 10.9195, "color": "#ff627eFF"}, {"name": "3209 全科", "weight": 2.8736, "return": 20.3846, "pct": 2.8736, "color": "#ff627eFF"}, {"name": "2302 麗正", "weight": 1.7241, "return": 18.6468, "pct": 1.7241, "color": "#ff627eF5"}, {"name": "8926 台汽電", "weight": 0.5747, "return": 15.8347, "pct": 0.5747, "color": "#ff627eE0"}, {"name": "3055 蔚華科", "weight": 0.5747, "return": 10.6402, "pct": 0.5747, "color": "#ff627eB5"}, {"name": "3036 文曄", "weight": 5.1724, "return": 6.8845, "pct": 5.1724, "color": "#ff627e90"}, {"name": "1560 中砂", "weight": 0.5747, "return": 6.3498, "pct": 0.5747, "color": "#ff627e8A"}, {"name": "3006 晶豪科", "weight": 1.7241, "return": 4.4765, "pct": 1.7241, "color": "#ff627e74"}, {"name": "4576 大銀微系統", "weight": 4.5977, "return": 3.828, "pct": 4.5977, "color": "#ff627e6B"}, {"name": "2408 南亞科", "weight": 0.5747, "return": -0.7816, "pct": 0.5747, "color": "#0fd9a636"}, {"name": "2376 技嘉", "weight": 7.5862, "return": -1.667, "pct": 7.5862, "color": "#0fd9a649"}, {"name": "6005 群益證", "weight": 9.3103, "return": -1.6835, "pct": 9.3103, "color": "#0fd9a64A"}, {"name": "3691 碩禾", "weight": 1.2644, "return": -2.5201, "pct": 1.2644, "color": "#0fd9a658"}, {"name": "3354 律勝", "weight": 3.5632, "return": -2.5267, "pct": 3.5632, "color": "#0fd9a658"}, {"name": "2395 研華", "weight": 5.1724, "return": -3.8333, "pct": 5.1724, "color": "#0fd9a66B"}, {"name": "5289 宜鼎", "weight": 0.5747, "return": -5.3548, "pct": 0.5747, "color": "#0fd9a67F"}, {"name": "2059 川湖", "weight": 5.1724, "return": -6.7386, "pct": 5.1724, "color": "#0fd9a68F"}, {"name": "6417 韋僑", "weight": 4.5977, "return": -6.8231, "pct": 4.5977, "color": "#0fd9a68F"}, {"name": "2360 致茂", "weight": 0.5747, "return": -7.3469, "pct": 0.5747, "color": "#0fd9a695"}, {"name": "2345 智邦", "weight": 8.046, "return": -7.7951, "pct": 8.046, "color": "#0fd9a69A"}, {"name": "1590 亞德客-KY", "weight": 2.8736, "return": -9.7442, "pct": 2.8736, "color": "#0fd9a6AD"}, {"name": "2451 創見", "weight": 5.1724, "return": -10.2134, "pct": 5.1724, "color": "#0fd9a6B1"}, {"name": "6021 美好證", "weight": 1.1494, "return": -10.9155, "pct": 1.1494, "color": "#0fd9a6B8"}, {"name": "3229 晟鈦", "weight": 2.2989, "return": -12.7073, "pct": 2.2989, "color": "#0fd9a6C7"}, {"name": "3443 創意", "weight": 1.1494, "return": -13.7365, "pct": 1.1494, "color": "#0fd9a6D0"}, {"name": "8271 宇瞻", "weight": 0.5747, "return": -15.4037, "pct": 0.5747, "color": "#0fd9a6DD"}, {"name": "2301 光寶科", "weight": 0.5747, "return": -15.6306, "pct": 0.5747, "color": "#0fd9a6DF"}];
+const POS_COLOR  = '#ff627e';
+const NEG_COLOR  = '#0fd9a6';
+const PNL_COLOR  = '#ff627e';
+const PNL_STR    = '+8.27%';
+
+(function () {
+  const svg     = document.getElementById('chart');
+  const legend  = document.getElementById('legend');
+  const mainLbl = document.getElementById('mainLabel');
+  const pnlVal  = document.getElementById('pnlValue');
+  const tt      = document.getElementById('tooltip');
+
+  const cx = 140, cy = 140, R = 132, r = 82;
+  const GAP   = DATA.length > 1 ? 0.0 : 0;
+  const total = DATA.reduce((s, d) => s + d.pct, 0);
+  let angle = -90;
+
+  function xy(deg, rad) {
+    const a = deg * Math.PI / 180;
+    return [cx + rad * Math.cos(a), cy + rad * Math.sin(a)];
+  }
+  function arc(s, e) {
+    const [x1,y1]=xy(s,R),[x2,y2]=xy(e,R);
+    const [x3,y3]=xy(e,r),[x4,y4]=xy(s,r);
+    const lg = e - s > 180 ? 1 : 0;
+    return `M${x1},${y1} A${R},${R} 0 ${lg},1 ${x2},${y2} L${x3},${y3} A${r},${r} 0 ${lg},0 ${x4},${y4}Z`;
+  }
+
+  DATA.forEach(d => {
+    const sweep = (d.pct / total) * 360;
+    const s = angle + GAP / 2;
+    const e = angle + sweep - GAP / 2;
+    angle += sweep;
+
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", arc(s, e));
+    path.setAttribute("fill", d.color);
+    path.setAttribute("opacity", "0.9");
+    path.style.cursor = "pointer";
+    path.style.transition = "opacity .12s, filter .12s";
+
+    const retColor = d.return >= 0 ? POS_COLOR : NEG_COLOR;
+    const retStr   = (d.return >= 0 ? "+" : "") + d.return.toFixed(2) + "%";
+
+    function onEnter(ev) {
+      path.setAttribute("opacity", "1");
+      path.style.filter = "brightness(1.3)";
+
+      // 主標題換成股票名稱，PnL 換成該標的報酬率與顏色
+      mainLbl.textContent = d.name;
+      mainLbl.style.color = "rgba(235,249,255,.75)";
+      pnlVal.textContent  = retStr;
+      pnlVal.style.color  = retColor;
+
+      tt.style.display = "block";
+      tt.innerHTML = `<div class="tt-name">${d.name}</div>
+        <div style="color:${retColor};font-weight:500">${retStr}</div>
+        <div class="tt-dim">Weight&nbsp;&nbsp;${d.weight.toFixed(2)}%</div>
+        <div class="tt-dim">Portfolio ${d.pct.toFixed(2)}%</div>`;
+      if (ev && ev.clientX) {
+        tt.style.left = (ev.clientX + 14) + "px";
+        tt.style.top  = (ev.clientY - 10) + "px";
+      }
+    }
+    function onMove(ev) {
+      tt.style.left = (ev.clientX + 14) + "px";
+      tt.style.top  = (ev.clientY - 10) + "px";
+    }
+    function onLeave() {
+      path.setAttribute("opacity", "0.9");
+      path.style.filter = "";
+      mainLbl.textContent = "當期損益";
+      mainLbl.style.color = "rgba(235,249,255,.55)";
+      pnlVal.textContent  = PNL_STR;
+      pnlVal.style.color  = PNL_COLOR;
+      tt.style.display    = "none";
+    }
+
+    path.addEventListener("mouseenter", onEnter);
+    path.addEventListener("mousemove",  onMove);
+    path.addEventListener("mouseleave", onLeave);
+    svg.appendChild(path);
+
+    // legend row
+    const row = document.createElement("div");
+    row.className = "legend-item";
+    row.innerHTML = `
+      <div class="legend-swatch" style="background:${d.color}"></div>
+      <div class="legend-name" title="${d.name}">${d.name}</div>
+      <div class="legend-wt">${d.weight.toFixed(1)}%</div>
+      <div class="legend-ret" style="color:${retColor}">${retStr}</div>`;
+    row.addEventListener("mouseenter", onEnter);
+    row.addEventListener("mouseleave", onLeave);
+    legend.appendChild(row);
+  });
+
+  // inner bg circle
+  const bg = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  bg.setAttribute("cx", cx); bg.setAttribute("cy", cy);
+  bg.setAttribute("r", r - 1);
+  bg.setAttribute("fill", "#1c1719");
+  svg.appendChild(bg);
+})();
+</script>
+</div><div class="df-section">
+<!-- ═════════ 摘要列 ═════════ -->
+<div class="summary-bar">
+<!-- 當期損益 -->
+<div class="summary-card active" id="card-pnl" onclick="showTable('entry')">
+<span class="card-label">當期損益</span>
+<span class="card-value" style="color:#ff627e;">+8.27 %</span>
+</div>
+<!-- 近期換倉部位 -->
+<div class="summary-card" id="card-recent" onclick="showTable('full')">
+<span class="card-label">近期換倉部位</span>
+<span class="card-value">2026-05-11</span>
+</div>
+</div>
+<!-- ═════════ 表格區域 ═════════ -->
+<div class="table-wrapper">
+<!-- entry 表（預設顯示） -->
+<div id="tbl-entry">
+<table id="T_6989d">
+<thead>
+<tr>
+<th class="blank level0"> </th>
+<th class="col_heading level0 col0" id="T_6989d_level0_col0">status</th>
+<th class="col_heading level0 col1" id="T_6989d_level0_col1">weight</th>
+<th class="col_heading level0 col2" id="T_6989d_level0_col2">next_weight</th>
+<th class="col_heading level0 col3" id="T_6989d_level0_col3">entry_sig_date</th>
+<th class="col_heading level0 col4" id="T_6989d_level0_col4">exit_sig_date</th>
+<th class="col_heading level0 col5" id="T_6989d_level0_col5">return</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th class="row_heading level0 row0" id="T_6989d_level0_row0">1560 中砂</th>
+<td class="data row0 col0" id="T_6989d_row0_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row0 col1" id="T_6989d_row0_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row0 col2" id="T_6989d_row0_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row0 col3" id="T_6989d_row0_col3">2026-05-11</td>
+<td class="data row0 col4" id="T_6989d_row0_col4">NaT</td>
+<td class="data row0 col5" id="T_6989d_row0_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 6.35%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row1" id="T_6989d_level0_row1">1590 亞德客-KY</th>
+<td class="data row1 col0" id="T_6989d_row1_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row1 col1" id="T_6989d_row1_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">2.8%</span></td>
+<td class="data row1 col2" id="T_6989d_row1_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">2.8%</span></td>
+<td class="data row1 col3" id="T_6989d_row1_col3">2026-05-11</td>
+<td class="data row1 col4" id="T_6989d_row1_col4">NaT</td>
+<td class="data row1 col5" id="T_6989d_row1_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -9.74%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row2" id="T_6989d_level0_row2">2059 川湖</th>
+<td class="data row2 col0" id="T_6989d_row2_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row2 col1" id="T_6989d_row2_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">5.1%</span></td>
+<td class="data row2 col2" id="T_6989d_row2_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">5.1%</span></td>
+<td class="data row2 col3" id="T_6989d_row2_col3">2026-05-11</td>
+<td class="data row2 col4" id="T_6989d_row2_col4">NaT</td>
+<td class="data row2 col5" id="T_6989d_row2_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -6.74%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row3" id="T_6989d_level0_row3">2301 光寶科</th>
+<td class="data row3 col0" id="T_6989d_row3_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row3 col1" id="T_6989d_row3_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row3 col2" id="T_6989d_row3_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row3 col3" id="T_6989d_row3_col3">2026-05-11</td>
+<td class="data row3 col4" id="T_6989d_row3_col4">NaT</td>
+<td class="data row3 col5" id="T_6989d_row3_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -15.63%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row4" id="T_6989d_level0_row4">2302 麗正</th>
+<td class="data row4 col0" id="T_6989d_row4_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row4 col1" id="T_6989d_row4_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">1.7%</span></td>
+<td class="data row4 col2" id="T_6989d_row4_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">1.7%</span></td>
+<td class="data row4 col3" id="T_6989d_row4_col3">2026-05-11</td>
+<td class="data row4 col4" id="T_6989d_row4_col4">NaT</td>
+<td class="data row4 col5" id="T_6989d_row4_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 18.65%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row5" id="T_6989d_level0_row5">2345 智邦</th>
+<td class="data row5 col0" id="T_6989d_row5_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row5 col1" id="T_6989d_row5_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">8.0%</span></td>
+<td class="data row5 col2" id="T_6989d_row5_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">8.0%</span></td>
+<td class="data row5 col3" id="T_6989d_row5_col3">2026-05-11</td>
+<td class="data row5 col4" id="T_6989d_row5_col4">NaT</td>
+<td class="data row5 col5" id="T_6989d_row5_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -7.80%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row6" id="T_6989d_level0_row6">2360 致茂</th>
+<td class="data row6 col0" id="T_6989d_row6_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row6 col1" id="T_6989d_row6_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row6 col2" id="T_6989d_row6_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row6 col3" id="T_6989d_row6_col3">2026-05-11</td>
+<td class="data row6 col4" id="T_6989d_row6_col4">NaT</td>
+<td class="data row6 col5" id="T_6989d_row6_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -7.35%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row7" id="T_6989d_level0_row7">2376 技嘉</th>
+<td class="data row7 col0" id="T_6989d_row7_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row7 col1" id="T_6989d_row7_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">7.5%</span></td>
+<td class="data row7 col2" id="T_6989d_row7_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">7.5%</span></td>
+<td class="data row7 col3" id="T_6989d_row7_col3">2026-05-11</td>
+<td class="data row7 col4" id="T_6989d_row7_col4">NaT</td>
+<td class="data row7 col5" id="T_6989d_row7_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -1.67%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row8" id="T_6989d_level0_row8">2395 研華</th>
+<td class="data row8 col0" id="T_6989d_row8_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row8 col1" id="T_6989d_row8_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">5.1%</span></td>
+<td class="data row8 col2" id="T_6989d_row8_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">5.1%</span></td>
+<td class="data row8 col3" id="T_6989d_row8_col3">2026-05-11</td>
+<td class="data row8 col4" id="T_6989d_row8_col4">NaT</td>
+<td class="data row8 col5" id="T_6989d_row8_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -3.83%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row9" id="T_6989d_level0_row9">2408 南亞科</th>
+<td class="data row9 col0" id="T_6989d_row9_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row9 col1" id="T_6989d_row9_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row9 col2" id="T_6989d_row9_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row9 col3" id="T_6989d_row9_col3">2026-05-11</td>
+<td class="data row9 col4" id="T_6989d_row9_col4">NaT</td>
+<td class="data row9 col5" id="T_6989d_row9_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -0.78%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row10" id="T_6989d_level0_row10">2451 創見</th>
+<td class="data row10 col0" id="T_6989d_row10_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row10 col1" id="T_6989d_row10_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">5.1%</span></td>
+<td class="data row10 col2" id="T_6989d_row10_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">5.1%</span></td>
+<td class="data row10 col3" id="T_6989d_row10_col3">2026-05-11</td>
+<td class="data row10 col4" id="T_6989d_row10_col4">NaT</td>
+<td class="data row10 col5" id="T_6989d_row10_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -10.21%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row11" id="T_6989d_level0_row11">3006 晶豪科</th>
+<td class="data row11 col0" id="T_6989d_row11_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row11 col1" id="T_6989d_row11_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">1.7%</span></td>
+<td class="data row11 col2" id="T_6989d_row11_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">1.7%</span></td>
+<td class="data row11 col3" id="T_6989d_row11_col3">2026-05-11</td>
+<td class="data row11 col4" id="T_6989d_row11_col4">NaT</td>
+<td class="data row11 col5" id="T_6989d_row11_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 4.48%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row12" id="T_6989d_level0_row12">3036 文曄</th>
+<td class="data row12 col0" id="T_6989d_row12_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row12 col1" id="T_6989d_row12_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">5.1%</span></td>
+<td class="data row12 col2" id="T_6989d_row12_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">5.1%</span></td>
+<td class="data row12 col3" id="T_6989d_row12_col3">2026-05-11</td>
+<td class="data row12 col4" id="T_6989d_row12_col4">NaT</td>
+<td class="data row12 col5" id="T_6989d_row12_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 6.88%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row13" id="T_6989d_level0_row13">3055 蔚華科</th>
+<td class="data row13 col0" id="T_6989d_row13_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row13 col1" id="T_6989d_row13_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row13 col2" id="T_6989d_row13_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row13 col3" id="T_6989d_row13_col3">2026-05-11</td>
+<td class="data row13 col4" id="T_6989d_row13_col4">NaT</td>
+<td class="data row13 col5" id="T_6989d_row13_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 10.64%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row14" id="T_6989d_level0_row14">3090 日電貿</th>
+<td class="data row14 col0" id="T_6989d_row14_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row14 col1" id="T_6989d_row14_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">4.0%</span></td>
+<td class="data row14 col2" id="T_6989d_row14_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">4.0%</span></td>
+<td class="data row14 col3" id="T_6989d_row14_col3">2026-05-11</td>
+<td class="data row14 col4" id="T_6989d_row14_col4">NaT</td>
+<td class="data row14 col5" id="T_6989d_row14_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 81.94%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row15" id="T_6989d_level0_row15">3209 全科</th>
+<td class="data row15 col0" id="T_6989d_row15_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row15 col1" id="T_6989d_row15_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">2.8%</span></td>
+<td class="data row15 col2" id="T_6989d_row15_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">2.8%</span></td>
+<td class="data row15 col3" id="T_6989d_row15_col3">2026-05-11</td>
+<td class="data row15 col4" id="T_6989d_row15_col4">NaT</td>
+<td class="data row15 col5" id="T_6989d_row15_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 20.38%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row16" id="T_6989d_level0_row16">3229 晟鈦</th>
+<td class="data row16 col0" id="T_6989d_row16_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row16 col1" id="T_6989d_row16_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">2.2%</span></td>
+<td class="data row16 col2" id="T_6989d_row16_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">2.2%</span></td>
+<td class="data row16 col3" id="T_6989d_row16_col3">2026-05-11</td>
+<td class="data row16 col4" id="T_6989d_row16_col4">NaT</td>
+<td class="data row16 col5" id="T_6989d_row16_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -12.71%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row17" id="T_6989d_level0_row17">3354 律勝</th>
+<td class="data row17 col0" id="T_6989d_row17_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row17 col1" id="T_6989d_row17_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">3.5%</span></td>
+<td class="data row17 col2" id="T_6989d_row17_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">3.5%</span></td>
+<td class="data row17 col3" id="T_6989d_row17_col3">2026-05-11</td>
+<td class="data row17 col4" id="T_6989d_row17_col4">NaT</td>
+<td class="data row17 col5" id="T_6989d_row17_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -2.53%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row18" id="T_6989d_level0_row18">3443 創意</th>
+<td class="data row18 col0" id="T_6989d_row18_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row18 col1" id="T_6989d_row18_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">1.1%</span></td>
+<td class="data row18 col2" id="T_6989d_row18_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">1.1%</span></td>
+<td class="data row18 col3" id="T_6989d_row18_col3">2026-05-11</td>
+<td class="data row18 col4" id="T_6989d_row18_col4">NaT</td>
+<td class="data row18 col5" id="T_6989d_row18_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -13.74%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row19" id="T_6989d_level0_row19">3691 碩禾</th>
+<td class="data row19 col0" id="T_6989d_row19_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row19 col1" id="T_6989d_row19_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">1.2%</span></td>
+<td class="data row19 col2" id="T_6989d_row19_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">1.2%</span></td>
+<td class="data row19 col3" id="T_6989d_row19_col3">2026-05-11</td>
+<td class="data row19 col4" id="T_6989d_row19_col4">NaT</td>
+<td class="data row19 col5" id="T_6989d_row19_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -2.52%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row20" id="T_6989d_level0_row20">4127 天良</th>
+<td class="data row20 col0" id="T_6989d_row20_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row20 col1" id="T_6989d_row20_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row20 col2" id="T_6989d_row20_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row20 col3" id="T_6989d_row20_col3">2026-05-11</td>
+<td class="data row20 col4" id="T_6989d_row20_col4">NaT</td>
+<td class="data row20 col5" id="T_6989d_row20_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 40.67%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row21" id="T_6989d_level0_row21">4576 大銀微系統</th>
+<td class="data row21 col0" id="T_6989d_row21_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row21 col1" id="T_6989d_row21_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">4.5%</span></td>
+<td class="data row21 col2" id="T_6989d_row21_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">4.5%</span></td>
+<td class="data row21 col3" id="T_6989d_row21_col3">2026-05-11</td>
+<td class="data row21 col4" id="T_6989d_row21_col4">NaT</td>
+<td class="data row21 col5" id="T_6989d_row21_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 3.83%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row22" id="T_6989d_level0_row22">5289 宜鼎</th>
+<td class="data row22 col0" id="T_6989d_row22_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row22 col1" id="T_6989d_row22_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row22 col2" id="T_6989d_row22_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row22 col3" id="T_6989d_row22_col3">2026-05-11</td>
+<td class="data row22 col4" id="T_6989d_row22_col4">NaT</td>
+<td class="data row22 col5" id="T_6989d_row22_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -5.35%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row23" id="T_6989d_level0_row23">6005 群益證</th>
+<td class="data row23 col0" id="T_6989d_row23_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row23 col1" id="T_6989d_row23_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">9.3%</span></td>
+<td class="data row23 col2" id="T_6989d_row23_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">9.3%</span></td>
+<td class="data row23 col3" id="T_6989d_row23_col3">2026-05-11</td>
+<td class="data row23 col4" id="T_6989d_row23_col4">NaT</td>
+<td class="data row23 col5" id="T_6989d_row23_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -1.68%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row24" id="T_6989d_level0_row24">6021 美好證</th>
+<td class="data row24 col0" id="T_6989d_row24_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row24 col1" id="T_6989d_row24_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">1.1%</span></td>
+<td class="data row24 col2" id="T_6989d_row24_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">1.1%</span></td>
+<td class="data row24 col3" id="T_6989d_row24_col3">2026-05-11</td>
+<td class="data row24 col4" id="T_6989d_row24_col4">NaT</td>
+<td class="data row24 col5" id="T_6989d_row24_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -10.92%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row25" id="T_6989d_level0_row25">6166 凌華</th>
+<td class="data row25 col0" id="T_6989d_row25_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row25 col1" id="T_6989d_row25_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">10.9%</span></td>
+<td class="data row25 col2" id="T_6989d_row25_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">10.9%</span></td>
+<td class="data row25 col3" id="T_6989d_row25_col3">2026-05-11</td>
+<td class="data row25 col4" id="T_6989d_row25_col4">NaT</td>
+<td class="data row25 col5" id="T_6989d_row25_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 31.42%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row26" id="T_6989d_level0_row26">6417 韋僑</th>
+<td class="data row26 col0" id="T_6989d_row26_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row26 col1" id="T_6989d_row26_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">4.5%</span></td>
+<td class="data row26 col2" id="T_6989d_row26_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">4.5%</span></td>
+<td class="data row26 col3" id="T_6989d_row26_col3">2026-05-11</td>
+<td class="data row26 col4" id="T_6989d_row26_col4">NaT</td>
+<td class="data row26 col5" id="T_6989d_row26_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -6.82%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row27" id="T_6989d_level0_row27">6834 天二科技</th>
+<td class="data row27 col0" id="T_6989d_row27_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row27 col1" id="T_6989d_row27_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">6.4%</span></td>
+<td class="data row27 col2" id="T_6989d_row27_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">6.4%</span></td>
+<td class="data row27 col3" id="T_6989d_row27_col3">2026-05-11</td>
+<td class="data row27 col4" id="T_6989d_row27_col4">NaT</td>
+<td class="data row27 col5" id="T_6989d_row27_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 48.68%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row28" id="T_6989d_level0_row28">8271 宇瞻</th>
+<td class="data row28 col0" id="T_6989d_row28_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row28 col1" id="T_6989d_row28_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row28 col2" id="T_6989d_row28_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row28 col3" id="T_6989d_row28_col3">2026-05-11</td>
+<td class="data row28 col4" id="T_6989d_row28_col4">NaT</td>
+<td class="data row28 col5" id="T_6989d_row28_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -15.40%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row29" id="T_6989d_level0_row29">8926 台汽電</th>
+<td class="data row29 col0" id="T_6989d_row29_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row29 col1" id="T_6989d_row29_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row29 col2" id="T_6989d_row29_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row29 col3" id="T_6989d_row29_col3">2026-05-11</td>
+<td class="data row29 col4" id="T_6989d_row29_col4">NaT</td>
+<td class="data row29 col5" id="T_6989d_row29_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 15.83%</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- entry 分頁容器 -->
+<div class="pagination" id="pg-entry"></div>
+<!-- 完整表（預設隱藏） -->
+<div id="tbl-full" style="display:none;">
+<table id="T_47105">
+<thead>
+<tr>
+<th class="blank level0"> </th>
+<th class="col_heading level0 col0" id="T_47105_level0_col0">status</th>
+<th class="col_heading level0 col1" id="T_47105_level0_col1">weight</th>
+<th class="col_heading level0 col2" id="T_47105_level0_col2">next_weight</th>
+<th class="col_heading level0 col3" id="T_47105_level0_col3">entry_sig_date</th>
+<th class="col_heading level0 col4" id="T_47105_level0_col4">exit_sig_date</th>
+<th class="col_heading level0 col5" id="T_47105_level0_col5">return</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th class="row_heading level0 row0" id="T_47105_level0_row0">2305 全友</th>
+<td class="data row0 col0" id="T_47105_row0_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a660;color:#0fd9a6;font-weight:400;white-space:nowrap;">exit</span></td>
+<td class="data row0 col1" id="T_47105_row0_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row0 col2" id="T_47105_row0_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row0 col3" id="T_47105_row0_col3">2026-04-10</td>
+<td class="data row0 col4" id="T_47105_row0_col4">2026-05-11</td>
+<td class="data row0 col5" id="T_47105_row0_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -10.06%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row1" id="T_47105_level0_row1">2308 台達電</th>
+<td class="data row1 col0" id="T_47105_row1_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a660;color:#0fd9a6;font-weight:400;white-space:nowrap;">exit</span></td>
+<td class="data row1 col1" id="T_47105_row1_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row1 col2" id="T_47105_row1_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row1 col3" id="T_47105_row1_col3">2026-04-10</td>
+<td class="data row1 col4" id="T_47105_row1_col4">2026-05-11</td>
+<td class="data row1 col5" id="T_47105_row1_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 27.86%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row2" id="T_47105_level0_row2">2368 金像電</th>
+<td class="data row2 col0" id="T_47105_row2_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a660;color:#0fd9a6;font-weight:400;white-space:nowrap;">exit</span></td>
+<td class="data row2 col1" id="T_47105_row2_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row2 col2" id="T_47105_row2_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row2 col3" id="T_47105_row2_col3">2026-04-10</td>
+<td class="data row2 col4" id="T_47105_row2_col4">2026-05-11</td>
+<td class="data row2 col5" id="T_47105_row2_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 27.69%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row3" id="T_47105_level0_row3">2382 廣達</th>
+<td class="data row3 col0" id="T_47105_row3_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a660;color:#0fd9a6;font-weight:400;white-space:nowrap;">exit</span></td>
+<td class="data row3 col1" id="T_47105_row3_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row3 col2" id="T_47105_row3_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row3 col3" id="T_47105_row3_col3">2026-04-10</td>
+<td class="data row3 col4" id="T_47105_row3_col4">2026-05-11</td>
+<td class="data row3 col5" id="T_47105_row3_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 7.65%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row4" id="T_47105_level0_row4">2383 台光電</th>
+<td class="data row4 col0" id="T_47105_row4_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a660;color:#0fd9a6;font-weight:400;white-space:nowrap;">exit</span></td>
+<td class="data row4 col1" id="T_47105_row4_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row4 col2" id="T_47105_row4_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row4 col3" id="T_47105_row4_col3">2026-04-10</td>
+<td class="data row4 col4" id="T_47105_row4_col4">2026-05-11</td>
+<td class="data row4 col5" id="T_47105_row4_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 39.27%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row5" id="T_47105_level0_row5">2467 志聖</th>
+<td class="data row5 col0" id="T_47105_row5_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a660;color:#0fd9a6;font-weight:400;white-space:nowrap;">exit</span></td>
+<td class="data row5 col1" id="T_47105_row5_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row5 col2" id="T_47105_row5_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row5 col3" id="T_47105_row5_col3">2026-04-10</td>
+<td class="data row5 col4" id="T_47105_row5_col4">2026-05-11</td>
+<td class="data row5 col5" id="T_47105_row5_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 7.23%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row6" id="T_47105_level0_row6">3028 增你強</th>
+<td class="data row6 col0" id="T_47105_row6_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a660;color:#0fd9a6;font-weight:400;white-space:nowrap;">exit</span></td>
+<td class="data row6 col1" id="T_47105_row6_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row6 col2" id="T_47105_row6_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row6 col3" id="T_47105_row6_col3">2026-04-10</td>
+<td class="data row6 col4" id="T_47105_row6_col4">2026-05-11</td>
+<td class="data row6 col5" id="T_47105_row6_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 24.88%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row7" id="T_47105_level0_row7">3037 欣興</th>
+<td class="data row7 col0" id="T_47105_row7_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a660;color:#0fd9a6;font-weight:400;white-space:nowrap;">exit</span></td>
+<td class="data row7 col1" id="T_47105_row7_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row7 col2" id="T_47105_row7_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row7 col3" id="T_47105_row7_col3">2026-04-10</td>
+<td class="data row7 col4" id="T_47105_row7_col4">2026-05-11</td>
+<td class="data row7 col5" id="T_47105_row7_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 41.53%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row8" id="T_47105_level0_row8">3081 聯亞</th>
+<td class="data row8 col0" id="T_47105_row8_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a660;color:#0fd9a6;font-weight:400;white-space:nowrap;">exit</span></td>
+<td class="data row8 col1" id="T_47105_row8_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row8 col2" id="T_47105_row8_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row8 col3" id="T_47105_row8_col3">2026-04-10</td>
+<td class="data row8 col4" id="T_47105_row8_col4">2026-05-11</td>
+<td class="data row8 col5" id="T_47105_row8_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 27.34%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row9" id="T_47105_level0_row9">3171 炎洲流通</th>
+<td class="data row9 col0" id="T_47105_row9_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a660;color:#0fd9a6;font-weight:400;white-space:nowrap;">exit</span></td>
+<td class="data row9 col1" id="T_47105_row9_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row9 col2" id="T_47105_row9_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row9 col3" id="T_47105_row9_col3">2026-04-10</td>
+<td class="data row9 col4" id="T_47105_row9_col4">2026-05-11</td>
+<td class="data row9 col5" id="T_47105_row9_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -7.88%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row10" id="T_47105_level0_row10">3264 欣銓</th>
+<td class="data row10 col0" id="T_47105_row10_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a660;color:#0fd9a6;font-weight:400;white-space:nowrap;">exit</span></td>
+<td class="data row10 col1" id="T_47105_row10_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row10 col2" id="T_47105_row10_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row10 col3" id="T_47105_row10_col3">2026-04-10</td>
+<td class="data row10 col4" id="T_47105_row10_col4">2026-05-11</td>
+<td class="data row10 col5" id="T_47105_row10_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 18.41%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row11" id="T_47105_level0_row11">3491 昇達科</th>
+<td class="data row11 col0" id="T_47105_row11_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a660;color:#0fd9a6;font-weight:400;white-space:nowrap;">exit</span></td>
+<td class="data row11 col1" id="T_47105_row11_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row11 col2" id="T_47105_row11_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row11 col3" id="T_47105_row11_col3">2026-04-10</td>
+<td class="data row11 col4" id="T_47105_row11_col4">2026-05-11</td>
+<td class="data row11 col5" id="T_47105_row11_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 0.77%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row12" id="T_47105_level0_row12">4760 勤凱科技</th>
+<td class="data row12 col0" id="T_47105_row12_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a660;color:#0fd9a6;font-weight:400;white-space:nowrap;">exit</span></td>
+<td class="data row12 col1" id="T_47105_row12_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row12 col2" id="T_47105_row12_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row12 col3" id="T_47105_row12_col3">2026-04-10</td>
+<td class="data row12 col4" id="T_47105_row12_col4">2026-05-11</td>
+<td class="data row12 col5" id="T_47105_row12_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 5.21%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row13" id="T_47105_level0_row13">4764 雙鍵</th>
+<td class="data row13 col0" id="T_47105_row13_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a660;color:#0fd9a6;font-weight:400;white-space:nowrap;">exit</span></td>
+<td class="data row13 col1" id="T_47105_row13_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row13 col2" id="T_47105_row13_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row13 col3" id="T_47105_row13_col3">2026-04-10</td>
+<td class="data row13 col4" id="T_47105_row13_col4">2026-05-11</td>
+<td class="data row13 col5" id="T_47105_row13_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 112.33%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row14" id="T_47105_level0_row14">4949 有成精密</th>
+<td class="data row14 col0" id="T_47105_row14_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a660;color:#0fd9a6;font-weight:400;white-space:nowrap;">exit</span></td>
+<td class="data row14 col1" id="T_47105_row14_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row14 col2" id="T_47105_row14_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row14 col3" id="T_47105_row14_col3">2026-04-10</td>
+<td class="data row14 col4" id="T_47105_row14_col4">2026-05-11</td>
+<td class="data row14 col5" id="T_47105_row14_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 7.05%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row15" id="T_47105_level0_row15">5475 德宏</th>
+<td class="data row15 col0" id="T_47105_row15_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a660;color:#0fd9a6;font-weight:400;white-space:nowrap;">exit</span></td>
+<td class="data row15 col1" id="T_47105_row15_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row15 col2" id="T_47105_row15_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row15 col3" id="T_47105_row15_col3">2026-04-10</td>
+<td class="data row15 col4" id="T_47105_row15_col4">2026-05-11</td>
+<td class="data row15 col5" id="T_47105_row15_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 13.03%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row16" id="T_47105_level0_row16">6274 台燿</th>
+<td class="data row16 col0" id="T_47105_row16_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a660;color:#0fd9a6;font-weight:400;white-space:nowrap;">exit</span></td>
+<td class="data row16 col1" id="T_47105_row16_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row16 col2" id="T_47105_row16_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row16 col3" id="T_47105_row16_col3">2026-04-10</td>
+<td class="data row16 col4" id="T_47105_row16_col4">2026-05-11</td>
+<td class="data row16 col5" id="T_47105_row16_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 80.10%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row17" id="T_47105_level0_row17">6291 沛亨</th>
+<td class="data row17 col0" id="T_47105_row17_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a660;color:#0fd9a6;font-weight:400;white-space:nowrap;">exit</span></td>
+<td class="data row17 col1" id="T_47105_row17_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row17 col2" id="T_47105_row17_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row17 col3" id="T_47105_row17_col3">2026-04-10</td>
+<td class="data row17 col4" id="T_47105_row17_col4">2026-05-11</td>
+<td class="data row17 col5" id="T_47105_row17_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 21.59%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row18" id="T_47105_level0_row18">6640 均華</th>
+<td class="data row18 col0" id="T_47105_row18_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a660;color:#0fd9a6;font-weight:400;white-space:nowrap;">exit</span></td>
+<td class="data row18 col1" id="T_47105_row18_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row18 col2" id="T_47105_row18_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row18 col3" id="T_47105_row18_col3">2026-04-10</td>
+<td class="data row18 col4" id="T_47105_row18_col4">2026-05-11</td>
+<td class="data row18 col5" id="T_47105_row18_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -12.51%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row19" id="T_47105_level0_row19">6693 廣閎科</th>
+<td class="data row19 col0" id="T_47105_row19_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a660;color:#0fd9a6;font-weight:400;white-space:nowrap;">exit</span></td>
+<td class="data row19 col1" id="T_47105_row19_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row19 col2" id="T_47105_row19_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row19 col3" id="T_47105_row19_col3">2026-04-10</td>
+<td class="data row19 col4" id="T_47105_row19_col4">2026-05-11</td>
+<td class="data row19 col5" id="T_47105_row19_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 5.71%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row20" id="T_47105_level0_row20">6894 衛司特</th>
+<td class="data row20 col0" id="T_47105_row20_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a660;color:#0fd9a6;font-weight:400;white-space:nowrap;">exit</span></td>
+<td class="data row20 col1" id="T_47105_row20_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row20 col2" id="T_47105_row20_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row20 col3" id="T_47105_row20_col3">2026-04-10</td>
+<td class="data row20 col4" id="T_47105_row20_col4">2026-05-11</td>
+<td class="data row20 col5" id="T_47105_row20_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -18.85%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row21" id="T_47105_level0_row21">6903 巨漢</th>
+<td class="data row21 col0" id="T_47105_row21_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a660;color:#0fd9a6;font-weight:400;white-space:nowrap;">exit</span></td>
+<td class="data row21 col1" id="T_47105_row21_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row21 col2" id="T_47105_row21_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row21 col3" id="T_47105_row21_col3">2026-04-10</td>
+<td class="data row21 col4" id="T_47105_row21_col4">2026-05-11</td>
+<td class="data row21 col5" id="T_47105_row21_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -1.80%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row22" id="T_47105_level0_row22">8046 南電</th>
+<td class="data row22 col0" id="T_47105_row22_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a660;color:#0fd9a6;font-weight:400;white-space:nowrap;">exit</span></td>
+<td class="data row22 col1" id="T_47105_row22_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row22 col2" id="T_47105_row22_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row22 col3" id="T_47105_row22_col3">2026-04-10</td>
+<td class="data row22 col4" id="T_47105_row22_col4">2026-05-11</td>
+<td class="data row22 col5" id="T_47105_row22_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 38.32%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row23" id="T_47105_level0_row23">8091 翔名</th>
+<td class="data row23 col0" id="T_47105_row23_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a660;color:#0fd9a6;font-weight:400;white-space:nowrap;">exit</span></td>
+<td class="data row23 col1" id="T_47105_row23_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row23 col2" id="T_47105_row23_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row23 col3" id="T_47105_row23_col3">2026-04-10</td>
+<td class="data row23 col4" id="T_47105_row23_col4">2026-05-11</td>
+<td class="data row23 col5" id="T_47105_row23_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 5.30%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row24" id="T_47105_level0_row24">8996 高力</th>
+<td class="data row24 col0" id="T_47105_row24_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a660;color:#0fd9a6;font-weight:400;white-space:nowrap;">exit</span></td>
+<td class="data row24 col1" id="T_47105_row24_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row24 col2" id="T_47105_row24_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#a0a0a0;">0.0%</span></td>
+<td class="data row24 col3" id="T_47105_row24_col3">2026-04-10</td>
+<td class="data row24 col4" id="T_47105_row24_col4">2026-05-11</td>
+<td class="data row24 col5" id="T_47105_row24_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 3.68%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row25" id="T_47105_level0_row25">1560 中砂</th>
+<td class="data row25 col0" id="T_47105_row25_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row25 col1" id="T_47105_row25_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row25 col2" id="T_47105_row25_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row25 col3" id="T_47105_row25_col3">2026-05-11</td>
+<td class="data row25 col4" id="T_47105_row25_col4">NaT</td>
+<td class="data row25 col5" id="T_47105_row25_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 6.35%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row26" id="T_47105_level0_row26">1590 亞德客-KY</th>
+<td class="data row26 col0" id="T_47105_row26_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row26 col1" id="T_47105_row26_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">2.8%</span></td>
+<td class="data row26 col2" id="T_47105_row26_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">2.8%</span></td>
+<td class="data row26 col3" id="T_47105_row26_col3">2026-05-11</td>
+<td class="data row26 col4" id="T_47105_row26_col4">NaT</td>
+<td class="data row26 col5" id="T_47105_row26_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -9.74%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row27" id="T_47105_level0_row27">2059 川湖</th>
+<td class="data row27 col0" id="T_47105_row27_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row27 col1" id="T_47105_row27_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">5.1%</span></td>
+<td class="data row27 col2" id="T_47105_row27_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">5.1%</span></td>
+<td class="data row27 col3" id="T_47105_row27_col3">2026-05-11</td>
+<td class="data row27 col4" id="T_47105_row27_col4">NaT</td>
+<td class="data row27 col5" id="T_47105_row27_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -6.74%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row28" id="T_47105_level0_row28">2301 光寶科</th>
+<td class="data row28 col0" id="T_47105_row28_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row28 col1" id="T_47105_row28_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row28 col2" id="T_47105_row28_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row28 col3" id="T_47105_row28_col3">2026-05-11</td>
+<td class="data row28 col4" id="T_47105_row28_col4">NaT</td>
+<td class="data row28 col5" id="T_47105_row28_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -15.63%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row29" id="T_47105_level0_row29">2302 麗正</th>
+<td class="data row29 col0" id="T_47105_row29_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row29 col1" id="T_47105_row29_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">1.7%</span></td>
+<td class="data row29 col2" id="T_47105_row29_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">1.7%</span></td>
+<td class="data row29 col3" id="T_47105_row29_col3">2026-05-11</td>
+<td class="data row29 col4" id="T_47105_row29_col4">NaT</td>
+<td class="data row29 col5" id="T_47105_row29_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 18.65%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row30" id="T_47105_level0_row30">2345 智邦</th>
+<td class="data row30 col0" id="T_47105_row30_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row30 col1" id="T_47105_row30_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">8.0%</span></td>
+<td class="data row30 col2" id="T_47105_row30_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">8.0%</span></td>
+<td class="data row30 col3" id="T_47105_row30_col3">2026-05-11</td>
+<td class="data row30 col4" id="T_47105_row30_col4">NaT</td>
+<td class="data row30 col5" id="T_47105_row30_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -7.80%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row31" id="T_47105_level0_row31">2360 致茂</th>
+<td class="data row31 col0" id="T_47105_row31_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row31 col1" id="T_47105_row31_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row31 col2" id="T_47105_row31_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row31 col3" id="T_47105_row31_col3">2026-05-11</td>
+<td class="data row31 col4" id="T_47105_row31_col4">NaT</td>
+<td class="data row31 col5" id="T_47105_row31_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -7.35%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row32" id="T_47105_level0_row32">2376 技嘉</th>
+<td class="data row32 col0" id="T_47105_row32_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row32 col1" id="T_47105_row32_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">7.5%</span></td>
+<td class="data row32 col2" id="T_47105_row32_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">7.5%</span></td>
+<td class="data row32 col3" id="T_47105_row32_col3">2026-05-11</td>
+<td class="data row32 col4" id="T_47105_row32_col4">NaT</td>
+<td class="data row32 col5" id="T_47105_row32_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -1.67%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row33" id="T_47105_level0_row33">2395 研華</th>
+<td class="data row33 col0" id="T_47105_row33_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row33 col1" id="T_47105_row33_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">5.1%</span></td>
+<td class="data row33 col2" id="T_47105_row33_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">5.1%</span></td>
+<td class="data row33 col3" id="T_47105_row33_col3">2026-05-11</td>
+<td class="data row33 col4" id="T_47105_row33_col4">NaT</td>
+<td class="data row33 col5" id="T_47105_row33_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -3.83%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row34" id="T_47105_level0_row34">2408 南亞科</th>
+<td class="data row34 col0" id="T_47105_row34_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row34 col1" id="T_47105_row34_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row34 col2" id="T_47105_row34_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row34 col3" id="T_47105_row34_col3">2026-05-11</td>
+<td class="data row34 col4" id="T_47105_row34_col4">NaT</td>
+<td class="data row34 col5" id="T_47105_row34_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -0.78%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row35" id="T_47105_level0_row35">2451 創見</th>
+<td class="data row35 col0" id="T_47105_row35_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row35 col1" id="T_47105_row35_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">5.1%</span></td>
+<td class="data row35 col2" id="T_47105_row35_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">5.1%</span></td>
+<td class="data row35 col3" id="T_47105_row35_col3">2026-05-11</td>
+<td class="data row35 col4" id="T_47105_row35_col4">NaT</td>
+<td class="data row35 col5" id="T_47105_row35_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -10.21%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row36" id="T_47105_level0_row36">3006 晶豪科</th>
+<td class="data row36 col0" id="T_47105_row36_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row36 col1" id="T_47105_row36_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">1.7%</span></td>
+<td class="data row36 col2" id="T_47105_row36_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">1.7%</span></td>
+<td class="data row36 col3" id="T_47105_row36_col3">2026-05-11</td>
+<td class="data row36 col4" id="T_47105_row36_col4">NaT</td>
+<td class="data row36 col5" id="T_47105_row36_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 4.48%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row37" id="T_47105_level0_row37">3036 文曄</th>
+<td class="data row37 col0" id="T_47105_row37_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row37 col1" id="T_47105_row37_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">5.1%</span></td>
+<td class="data row37 col2" id="T_47105_row37_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">5.1%</span></td>
+<td class="data row37 col3" id="T_47105_row37_col3">2026-05-11</td>
+<td class="data row37 col4" id="T_47105_row37_col4">NaT</td>
+<td class="data row37 col5" id="T_47105_row37_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 6.88%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row38" id="T_47105_level0_row38">3055 蔚華科</th>
+<td class="data row38 col0" id="T_47105_row38_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row38 col1" id="T_47105_row38_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row38 col2" id="T_47105_row38_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row38 col3" id="T_47105_row38_col3">2026-05-11</td>
+<td class="data row38 col4" id="T_47105_row38_col4">NaT</td>
+<td class="data row38 col5" id="T_47105_row38_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 10.64%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row39" id="T_47105_level0_row39">3090 日電貿</th>
+<td class="data row39 col0" id="T_47105_row39_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row39 col1" id="T_47105_row39_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">4.0%</span></td>
+<td class="data row39 col2" id="T_47105_row39_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">4.0%</span></td>
+<td class="data row39 col3" id="T_47105_row39_col3">2026-05-11</td>
+<td class="data row39 col4" id="T_47105_row39_col4">NaT</td>
+<td class="data row39 col5" id="T_47105_row39_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 81.94%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row40" id="T_47105_level0_row40">3209 全科</th>
+<td class="data row40 col0" id="T_47105_row40_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row40 col1" id="T_47105_row40_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">2.8%</span></td>
+<td class="data row40 col2" id="T_47105_row40_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">2.8%</span></td>
+<td class="data row40 col3" id="T_47105_row40_col3">2026-05-11</td>
+<td class="data row40 col4" id="T_47105_row40_col4">NaT</td>
+<td class="data row40 col5" id="T_47105_row40_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 20.38%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row41" id="T_47105_level0_row41">3229 晟鈦</th>
+<td class="data row41 col0" id="T_47105_row41_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row41 col1" id="T_47105_row41_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">2.2%</span></td>
+<td class="data row41 col2" id="T_47105_row41_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">2.2%</span></td>
+<td class="data row41 col3" id="T_47105_row41_col3">2026-05-11</td>
+<td class="data row41 col4" id="T_47105_row41_col4">NaT</td>
+<td class="data row41 col5" id="T_47105_row41_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -12.71%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row42" id="T_47105_level0_row42">3354 律勝</th>
+<td class="data row42 col0" id="T_47105_row42_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row42 col1" id="T_47105_row42_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">3.5%</span></td>
+<td class="data row42 col2" id="T_47105_row42_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">3.5%</span></td>
+<td class="data row42 col3" id="T_47105_row42_col3">2026-05-11</td>
+<td class="data row42 col4" id="T_47105_row42_col4">NaT</td>
+<td class="data row42 col5" id="T_47105_row42_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -2.53%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row43" id="T_47105_level0_row43">3443 創意</th>
+<td class="data row43 col0" id="T_47105_row43_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row43 col1" id="T_47105_row43_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">1.1%</span></td>
+<td class="data row43 col2" id="T_47105_row43_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">1.1%</span></td>
+<td class="data row43 col3" id="T_47105_row43_col3">2026-05-11</td>
+<td class="data row43 col4" id="T_47105_row43_col4">NaT</td>
+<td class="data row43 col5" id="T_47105_row43_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -13.74%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row44" id="T_47105_level0_row44">3691 碩禾</th>
+<td class="data row44 col0" id="T_47105_row44_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row44 col1" id="T_47105_row44_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">1.2%</span></td>
+<td class="data row44 col2" id="T_47105_row44_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">1.2%</span></td>
+<td class="data row44 col3" id="T_47105_row44_col3">2026-05-11</td>
+<td class="data row44 col4" id="T_47105_row44_col4">NaT</td>
+<td class="data row44 col5" id="T_47105_row44_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -2.52%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row45" id="T_47105_level0_row45">4127 天良</th>
+<td class="data row45 col0" id="T_47105_row45_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row45 col1" id="T_47105_row45_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row45 col2" id="T_47105_row45_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row45 col3" id="T_47105_row45_col3">2026-05-11</td>
+<td class="data row45 col4" id="T_47105_row45_col4">NaT</td>
+<td class="data row45 col5" id="T_47105_row45_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 40.67%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row46" id="T_47105_level0_row46">4576 大銀微系統</th>
+<td class="data row46 col0" id="T_47105_row46_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row46 col1" id="T_47105_row46_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">4.5%</span></td>
+<td class="data row46 col2" id="T_47105_row46_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">4.5%</span></td>
+<td class="data row46 col3" id="T_47105_row46_col3">2026-05-11</td>
+<td class="data row46 col4" id="T_47105_row46_col4">NaT</td>
+<td class="data row46 col5" id="T_47105_row46_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 3.83%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row47" id="T_47105_level0_row47">5289 宜鼎</th>
+<td class="data row47 col0" id="T_47105_row47_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row47 col1" id="T_47105_row47_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row47 col2" id="T_47105_row47_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row47 col3" id="T_47105_row47_col3">2026-05-11</td>
+<td class="data row47 col4" id="T_47105_row47_col4">NaT</td>
+<td class="data row47 col5" id="T_47105_row47_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -5.35%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row48" id="T_47105_level0_row48">6005 群益證</th>
+<td class="data row48 col0" id="T_47105_row48_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row48 col1" id="T_47105_row48_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">9.3%</span></td>
+<td class="data row48 col2" id="T_47105_row48_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">9.3%</span></td>
+<td class="data row48 col3" id="T_47105_row48_col3">2026-05-11</td>
+<td class="data row48 col4" id="T_47105_row48_col4">NaT</td>
+<td class="data row48 col5" id="T_47105_row48_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -1.68%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row49" id="T_47105_level0_row49">6021 美好證</th>
+<td class="data row49 col0" id="T_47105_row49_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row49 col1" id="T_47105_row49_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">1.1%</span></td>
+<td class="data row49 col2" id="T_47105_row49_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">1.1%</span></td>
+<td class="data row49 col3" id="T_47105_row49_col3">2026-05-11</td>
+<td class="data row49 col4" id="T_47105_row49_col4">NaT</td>
+<td class="data row49 col5" id="T_47105_row49_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -10.92%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row50" id="T_47105_level0_row50">6166 凌華</th>
+<td class="data row50 col0" id="T_47105_row50_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row50 col1" id="T_47105_row50_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">10.9%</span></td>
+<td class="data row50 col2" id="T_47105_row50_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">10.9%</span></td>
+<td class="data row50 col3" id="T_47105_row50_col3">2026-05-11</td>
+<td class="data row50 col4" id="T_47105_row50_col4">NaT</td>
+<td class="data row50 col5" id="T_47105_row50_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 31.42%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row51" id="T_47105_level0_row51">6417 韋僑</th>
+<td class="data row51 col0" id="T_47105_row51_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row51 col1" id="T_47105_row51_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">4.5%</span></td>
+<td class="data row51 col2" id="T_47105_row51_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">4.5%</span></td>
+<td class="data row51 col3" id="T_47105_row51_col3">2026-05-11</td>
+<td class="data row51 col4" id="T_47105_row51_col4">NaT</td>
+<td class="data row51 col5" id="T_47105_row51_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -6.82%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row52" id="T_47105_level0_row52">6834 天二科技</th>
+<td class="data row52 col0" id="T_47105_row52_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row52 col1" id="T_47105_row52_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">6.4%</span></td>
+<td class="data row52 col2" id="T_47105_row52_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">6.4%</span></td>
+<td class="data row52 col3" id="T_47105_row52_col3">2026-05-11</td>
+<td class="data row52 col4" id="T_47105_row52_col4">NaT</td>
+<td class="data row52 col5" id="T_47105_row52_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 48.68%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row53" id="T_47105_level0_row53">8271 宇瞻</th>
+<td class="data row53 col0" id="T_47105_row53_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row53 col1" id="T_47105_row53_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row53 col2" id="T_47105_row53_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row53 col3" id="T_47105_row53_col3">2026-05-11</td>
+<td class="data row53 col4" id="T_47105_row53_col4">NaT</td>
+<td class="data row53 col5" id="T_47105_row53_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> -15.40%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row54" id="T_47105_level0_row54">8926 台汽電</th>
+<td class="data row54 col0" id="T_47105_row54_col0"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e60;color:#ff627e;font-weight:400;white-space:nowrap;">entry</span></td>
+<td class="data row54 col1" id="T_47105_row54_col1"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row54 col2" id="T_47105_row54_col2"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;">0.5%</span></td>
+<td class="data row54 col3" id="T_47105_row54_col3">2026-05-11</td>
+<td class="data row54 col4" id="T_47105_row54_col4">NaT</td>
+<td class="data row54 col5" id="T_47105_row54_col5"><span style="display:inline-flex; align-items:center; gap:4px;color:#ff627e;font-weight:400;font-size:14px;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16">
+<path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg> 15.83%</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- full 分頁容器 -->
+<div class="pagination" id="pg-full" style="display:none;"></div>
+</div>
+<!-- ═════════ 切換邏輯 ═════════ -->
+<script>
+  var PAGE_SIZE = 16;
+
+  // ── 分頁狀態：各表格目前在第幾頁 ──
+  var pageState = { entry: 1, full: 1 };
+
+  // ── 核心分頁函式 ──────────────────────────────────────────
+  // wrapperId : 'tbl-entry' | 'tbl-full'
+  // pgId      : 'pg-entry'  | 'pg-full'
+  // key       : 'entry'     | 'full'
+  function paginate(wrapperId, pgId, key) {
+    var wrapper = document.getElementById(wrapperId);
+    var pgBar   = document.getElementById(pgId);
+    if (!wrapper || !pgBar) return;
+
+    var tbody = wrapper.querySelector('tbody');
+    if (!tbody) return;
+
+    var rows      = Array.from(tbody.querySelectorAll('tr'));
+    var total     = rows.length;
+    var totalPage = Math.ceil(total / PAGE_SIZE);
+
+    // ── 若總筆數 <= PAGE_SIZE，隱藏分頁列並全部顯示 ──
+    if (total <= PAGE_SIZE) {
+      rows.forEach(function(r) { r.style.display = ''; });
+      pgBar.innerHTML = '';
+      return;
+    }
+
+    var cur = pageState[key];
+    // 邊界保護
+    if (cur < 1)         cur = 1;
+    if (cur > totalPage) cur = totalPage;
+    pageState[key] = cur;
+
+    // ── 顯示 / 隱藏列 ──
+    rows.forEach(function(r, i) {
+      r.style.display = (i >= (cur - 1) * PAGE_SIZE && i < cur * PAGE_SIZE) ? '' : 'none';
+    });
+
+    // ── 重繪分頁按鈕 ──
+    pgBar.innerHTML = '';
+
+    // 上一頁
+    var prev = document.createElement('button');
+    prev.textContent = '‹';
+    prev.disabled    = (cur === 1);
+    prev.onclick     = function() { pageState[key] = cur - 1; paginate(wrapperId, pgId, key); };
+    pgBar.appendChild(prev);
+
+    // 頁碼按鈕（最多顯示 7 個，超出以 … 省略）
+    function addBtn(n) {
+      var btn = document.createElement('button');
+      btn.textContent = n;
+      if (n === cur) btn.classList.add('active');
+      btn.onclick = function() { pageState[key] = n; paginate(wrapperId, pgId, key); };
+      pgBar.appendChild(btn);
+    }
+    function addEllipsis() {
+      var span = document.createElement('button');
+      span.textContent = '…';
+      span.disabled    = true;
+      pgBar.appendChild(span);
+    }
+
+    if (totalPage <= 7) {
+      for (var p = 1; p <= totalPage; p++) addBtn(p);
+    } else {
+      addBtn(1);
+      if (cur > 4)              addEllipsis();
+      var start = Math.max(2, cur - 2);
+      var end   = Math.min(totalPage - 1, cur + 2);
+      for (var p = start; p <= end; p++) addBtn(p);
+      if (cur < totalPage - 3)  addEllipsis();
+      addBtn(totalPage);
+    }
+
+    // 下一頁
+    var next = document.createElement('button');
+    next.textContent = '›';
+    next.disabled    = (cur === totalPage);
+    next.onclick     = function() { pageState[key] = cur + 1; paginate(wrapperId, pgId, key); };
+    pgBar.appendChild(next);
+  }
+
+  // ── 初始化兩張表的分頁 ──
+  function initPagination() {
+    paginate('tbl-entry', 'pg-entry', 'entry');
+    paginate('tbl-full',  'pg-full',  'full');
+  }
+
+  // ── 表格切換（原邏輯保留，補上分頁容器的顯示切換） ──
+  function showTable(mode) {
+    var isEntry = mode === 'entry';
+    document.getElementById('tbl-entry').style.display  = isEntry ? '' : 'none';
+    document.getElementById('pg-entry').style.display   = isEntry ? '' : 'none';   // [新增]
+    document.getElementById('tbl-full').style.display   = isEntry ? 'none' : '';
+    document.getElementById('pg-full').style.display    = isEntry ? 'none' : '';   // [新增]
+    document.getElementById('card-pnl').classList.toggle('active', isEntry);
+    document.getElementById('card-recent').classList.toggle('active', !isEntry);
+  }
+
+  // ── 頁面載入後初始化 ──
+  window.addEventListener('DOMContentLoaded', function() {
+    initPagination();
+  });
+</script>
+<script>
+(function () {
+  // 從儲存格的 innerText 解析可排序的純數值
+  function parseVal(text) {
+    var t = text.trim();
+    // 去除千分位逗號、百分號，嘗試轉數字
+    var n = parseFloat(t.replace(/,/g, '').replace('%', ''));
+    if (!isNaN(n)) return n;
+    // 嘗試日期
+    var d = Date.parse(t);
+    if (!isNaN(d)) return d;
+    // 其餘當字串
+    return t.toLowerCase();
+  }
+
+  // 為指定 table 元素掛上點擊排序事件
+  function enableSort(table) {
+    if (!table) return;
+    var headers = table.querySelectorAll('thead th');
+    // sortState：記錄每欄目前排序方向（null / 'asc' / 'desc'）
+    var sortState = Array(headers.length).fill(null);
+
+    headers.forEach(function (th, colIdx) {
+      th.addEventListener('click', function () {
+        var dir = sortState[colIdx] === 'asc' ? 'desc' : 'asc';
+        // 重置所有欄的排序箭頭
+        sortState = Array(headers.length).fill(null);
+        sortState[colIdx] = dir;
+        headers.forEach(function (h) {
+          h.dataset.sort = '';
+        });
+        th.dataset.sort = dir;   // CSS 透過 data-sort 顯示箭頭
+
+        // 收集 tbody 的所有 <tr>
+        var tbody = table.querySelector('tbody');
+        var rows  = Array.from(tbody.querySelectorAll('tr'));
+
+        rows.sort(function (a, b) {
+          // colIdx 0 對應 index 欄（th），其餘為 td
+          var cellA = a.querySelectorAll('th, td')[colIdx];
+          var cellB = b.querySelectorAll('th, td')[colIdx];
+          var va = cellA ? parseVal(cellA.innerText) : '';
+          var vb = cellB ? parseVal(cellB.innerText) : '';
+          if (va < vb) return dir === 'asc' ? -1 :  1;
+          if (va > vb) return dir === 'asc' ?  1 : -1;
+          return 0;
+        });
+
+        // 重新插入排序後的列
+        rows.forEach(function (r) { tbody.appendChild(r); });
+      });
+    });
+  }
+
+  // 頁面載入後，對兩張表格分別掛上排序功能
+  window.addEventListener('DOMContentLoaded', function () {
+    ['tbl-entry', 'tbl-full'].forEach(function (wrapperId) {
+      var wrapper = document.getElementById(wrapperId);
+      if (wrapper) {
+        enableSort(wrapper.querySelector('table'));
+      }
+    });
+  });
+})();
+</script>
+<script>
+  document.addEventListener('click', function(e) {
+    var th = e.target.closest('thead th');
+    if (!th) return;
+    // 判斷點擊的是哪張表
+    var inFull = !!document.getElementById('tbl-full').contains(th);
+    var key    = inFull ? 'full' : 'entry';
+    var wid    = inFull ? 'tbl-full'  : 'tbl-entry';
+    var pid    = inFull ? 'pg-full'   : 'pg-entry';
+    // 等 SORT_JS 排序完成後再重繪分頁
+    setTimeout(function() {
+      pageState[key] = 1;
+      paginate(wid, pid, key);
+    }, 0);
+  });
+</script>
+</div><script>
+const DATA       = [{"name": "3090 日電貿", "weight": 4.023, "return": 81.9438, "pct": 4.023, "color": "#ff627eFF"}, {"name": "6834 天二科技", "weight": 6.4368, "return": 48.6791, "pct": 6.4368, "color": "#ff627eFF"}, {"name": "4127 天良", "weight": 0.5747, "return": 40.6727, "pct": 0.5747, "color": "#ff627eFF"}, {"name": "6166 凌華", "weight": 10.9195, "return": 31.4187, "pct": 10.9195, "color": "#ff627eFF"}, {"name": "3209 全科", "weight": 2.8736, "return": 20.3846, "pct": 2.8736, "color": "#ff627eFF"}, {"name": "2302 麗正", "weight": 1.7241, "return": 18.6468, "pct": 1.7241, "color": "#ff627eF5"}, {"name": "8926 台汽電", "weight": 0.5747, "return": 15.8347, "pct": 0.5747, "color": "#ff627eE0"}, {"name": "3055 蔚華科", "weight": 0.5747, "return": 10.6402, "pct": 0.5747, "color": "#ff627eB5"}, {"name": "3036 文曄", "weight": 5.1724, "return": 6.8845, "pct": 5.1724, "color": "#ff627e90"}, {"name": "1560 中砂", "weight": 0.5747, "return": 6.3498, "pct": 0.5747, "color": "#ff627e8A"}, {"name": "3006 晶豪科", "weight": 1.7241, "return": 4.4765, "pct": 1.7241, "color": "#ff627e74"}, {"name": "4576 大銀微系統", "weight": 4.5977, "return": 3.828, "pct": 4.5977, "color": "#ff627e6B"}, {"name": "2408 南亞科", "weight": 0.5747, "return": -0.7816, "pct": 0.5747, "color": "#0fd9a636"}, {"name": "2376 技嘉", "weight": 7.5862, "return": -1.667, "pct": 7.5862, "color": "#0fd9a649"}, {"name": "6005 群益證", "weight": 9.3103, "return": -1.6835, "pct": 9.3103, "color": "#0fd9a64A"}, {"name": "3691 碩禾", "weight": 1.2644, "return": -2.5201, "pct": 1.2644, "color": "#0fd9a658"}, {"name": "3354 律勝", "weight": 3.5632, "return": -2.5267, "pct": 3.5632, "color": "#0fd9a658"}, {"name": "2395 研華", "weight": 5.1724, "return": -3.8333, "pct": 5.1724, "color": "#0fd9a66B"}, {"name": "5289 宜鼎", "weight": 0.5747, "return": -5.3548, "pct": 0.5747, "color": "#0fd9a67F"}, {"name": "2059 川湖", "weight": 5.1724, "return": -6.7386, "pct": 5.1724, "color": "#0fd9a68F"}, {"name": "6417 韋僑", "weight": 4.5977, "return": -6.8231, "pct": 4.5977, "color": "#0fd9a68F"}, {"name": "2360 致茂", "weight": 0.5747, "return": -7.3469, "pct": 0.5747, "color": "#0fd9a695"}, {"name": "2345 智邦", "weight": 8.046, "return": -7.7951, "pct": 8.046, "color": "#0fd9a69A"}, {"name": "1590 亞德客-KY", "weight": 2.8736, "return": -9.7442, "pct": 2.8736, "color": "#0fd9a6AD"}, {"name": "2451 創見", "weight": 5.1724, "return": -10.2134, "pct": 5.1724, "color": "#0fd9a6B1"}, {"name": "6021 美好證", "weight": 1.1494, "return": -10.9155, "pct": 1.1494, "color": "#0fd9a6B8"}, {"name": "3229 晟鈦", "weight": 2.2989, "return": -12.7073, "pct": 2.2989, "color": "#0fd9a6C7"}, {"name": "3443 創意", "weight": 1.1494, "return": -13.7365, "pct": 1.1494, "color": "#0fd9a6D0"}, {"name": "8271 宇瞻", "weight": 0.5747, "return": -15.4037, "pct": 0.5747, "color": "#0fd9a6DD"}, {"name": "2301 光寶科", "weight": 0.5747, "return": -15.6306, "pct": 0.5747, "color": "#0fd9a6DF"}];
+const POS_COLOR  = '#ff627e';
+const NEG_COLOR  = '#0fd9a6';
+const PNL_COLOR  = '#ff627e';
+const PNL_STR    = '+8.27%';
+
+(function () {
+  const svg     = document.getElementById('chart');
+  const legend  = document.getElementById('legend');
+  const mainLbl = document.getElementById('mainLabel');
+  const pnlVal  = document.getElementById('pnlValue');
+  const tt      = document.getElementById('tooltip');
+
+  const cx = 140, cy = 140, R = 132, r = 82;
+  const GAP   = DATA.length > 1 ? 0.0 : 0;
+  const total = DATA.reduce((s, d) => s + d.pct, 0);
+  let angle = -90;
+
+  function xy(deg, rad) {
+    const a = deg * Math.PI / 180;
+    return [cx + rad * Math.cos(a), cy + rad * Math.sin(a)];
+  }
+  function arc(s, e) {
+    const [x1,y1]=xy(s,R),[x2,y2]=xy(e,R);
+    const [x3,y3]=xy(e,r),[x4,y4]=xy(s,r);
+    const lg = e - s > 180 ? 1 : 0;
+    return `M${x1},${y1} A${R},${R} 0 ${lg},1 ${x2},${y2} L${x3},${y3} A${r},${r} 0 ${lg},0 ${x4},${y4}Z`;
+  }
+
+  DATA.forEach(d => {
+    const sweep = (d.pct / total) * 360;
+    const s = angle + GAP / 2;
+    const e = angle + sweep - GAP / 2;
+    angle += sweep;
+
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", arc(s, e));
+    path.setAttribute("fill", d.color);
+    path.setAttribute("opacity", "0.9");
+    path.style.cursor = "pointer";
+    path.style.transition = "opacity .12s, filter .12s";
+
+    const retColor = d.return >= 0 ? POS_COLOR : NEG_COLOR;
+    const retStr   = (d.return >= 0 ? "+" : "") + d.return.toFixed(2) + "%";
+
+    function onEnter(ev) {
+      path.setAttribute("opacity", "1");
+      path.style.filter = "brightness(1.3)";
+
+      // 主標題換成股票名稱，PnL 換成該標的報酬率與顏色
+      mainLbl.textContent = d.name;
+      mainLbl.style.color = "rgba(235,249,255,.75)";
+      pnlVal.textContent  = retStr;
+      pnlVal.style.color  = retColor;
+
+      tt.style.display = "block";
+      tt.innerHTML = `<div class="tt-name">${d.name}</div>
+        <div style="color:${retColor};font-weight:500">${retStr}</div>
+        <div class="tt-dim">Weight&nbsp;&nbsp;${d.weight.toFixed(2)}%</div>
+        <div class="tt-dim">Portfolio ${d.pct.toFixed(2)}%</div>`;
+      if (ev && ev.clientX) {
+        tt.style.left = (ev.clientX + 14) + "px";
+        tt.style.top  = (ev.clientY - 10) + "px";
+      }
+    }
+    function onMove(ev) {
+      tt.style.left = (ev.clientX + 14) + "px";
+      tt.style.top  = (ev.clientY - 10) + "px";
+    }
+    function onLeave() {
+      path.setAttribute("opacity", "0.9");
+      path.style.filter = "";
+      mainLbl.textContent = "當期損益";
+      mainLbl.style.color = "rgba(235,249,255,.55)";
+      pnlVal.textContent  = PNL_STR;
+      pnlVal.style.color  = PNL_COLOR;
+      tt.style.display    = "none";
+    }
+
+    path.addEventListener("mouseenter", onEnter);
+    path.addEventListener("mousemove",  onMove);
+    path.addEventListener("mouseleave", onLeave);
+    svg.appendChild(path);
+
+    // legend row
+    const row = document.createElement("div");
+    row.className = "legend-item";
+    row.innerHTML = `
+      <div class="legend-swatch" style="background:${d.color}"></div>
+      <div class="legend-name" title="${d.name}">${d.name}</div>
+      <div class="legend-wt">${d.weight.toFixed(1)}%</div>
+      <div class="legend-ret" style="color:${retColor}">${retStr}</div>`;
+    row.addEventListener("mouseenter", onEnter);
+    row.addEventListener("mouseleave", onLeave);
+    legend.appendChild(row);
+  });
+
+  // inner bg circle
+  const bg = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  bg.setAttribute("cx", cx); bg.setAttribute("cy", cy);
+  bg.setAttribute("r", r - 1);
+  bg.setAttribute("fill", "#1c1719");
+  svg.appendChild(bg);
+})();
+</script><script>
+  var PAGE_SIZE = 16;
+
+  // ── 分頁狀態：各表格目前在第幾頁 ──
+  var pageState = { entry: 1, full: 1 };
+
+  // ── 核心分頁函式 ──────────────────────────────────────────
+  // wrapperId : 'tbl-entry' | 'tbl-full'
+  // pgId      : 'pg-entry'  | 'pg-full'
+  // key       : 'entry'     | 'full'
+  function paginate(wrapperId, pgId, key) {
+    var wrapper = document.getElementById(wrapperId);
+    var pgBar   = document.getElementById(pgId);
+    if (!wrapper || !pgBar) return;
+
+    var tbody = wrapper.querySelector('tbody');
+    if (!tbody) return;
+
+    var rows      = Array.from(tbody.querySelectorAll('tr'));
+    var total     = rows.length;
+    var totalPage = Math.ceil(total / PAGE_SIZE);
+
+    // ── 若總筆數 <= PAGE_SIZE，隱藏分頁列並全部顯示 ──
+    if (total <= PAGE_SIZE) {
+      rows.forEach(function(r) { r.style.display = ''; });
+      pgBar.innerHTML = '';
+      return;
+    }
+
+    var cur = pageState[key];
+    // 邊界保護
+    if (cur < 1)         cur = 1;
+    if (cur > totalPage) cur = totalPage;
+    pageState[key] = cur;
+
+    // ── 顯示 / 隱藏列 ──
+    rows.forEach(function(r, i) {
+      r.style.display = (i >= (cur - 1) * PAGE_SIZE && i < cur * PAGE_SIZE) ? '' : 'none';
+    });
+
+    // ── 重繪分頁按鈕 ──
+    pgBar.innerHTML = '';
+
+    // 上一頁
+    var prev = document.createElement('button');
+    prev.textContent = '‹';
+    prev.disabled    = (cur === 1);
+    prev.onclick     = function() { pageState[key] = cur - 1; paginate(wrapperId, pgId, key); };
+    pgBar.appendChild(prev);
+
+    // 頁碼按鈕（最多顯示 7 個，超出以 … 省略）
+    function addBtn(n) {
+      var btn = document.createElement('button');
+      btn.textContent = n;
+      if (n === cur) btn.classList.add('active');
+      btn.onclick = function() { pageState[key] = n; paginate(wrapperId, pgId, key); };
+      pgBar.appendChild(btn);
+    }
+    function addEllipsis() {
+      var span = document.createElement('button');
+      span.textContent = '…';
+      span.disabled    = true;
+      pgBar.appendChild(span);
+    }
+
+    if (totalPage <= 7) {
+      for (var p = 1; p <= totalPage; p++) addBtn(p);
+    } else {
+      addBtn(1);
+      if (cur > 4)              addEllipsis();
+      var start = Math.max(2, cur - 2);
+      var end   = Math.min(totalPage - 1, cur + 2);
+      for (var p = start; p <= end; p++) addBtn(p);
+      if (cur < totalPage - 3)  addEllipsis();
+      addBtn(totalPage);
+    }
+
+    // 下一頁
+    var next = document.createElement('button');
+    next.textContent = '›';
+    next.disabled    = (cur === totalPage);
+    next.onclick     = function() { pageState[key] = cur + 1; paginate(wrapperId, pgId, key); };
+    pgBar.appendChild(next);
+  }
+
+  // ── 初始化兩張表的分頁 ──
+  function initPagination() {
+    paginate('tbl-entry', 'pg-entry', 'entry');
+    paginate('tbl-full',  'pg-full',  'full');
+  }
+
+  // ── 表格切換（原邏輯保留，補上分頁容器的顯示切換） ──
+  function showTable(mode) {
+    var isEntry = mode === 'entry';
+    document.getElementById('tbl-entry').style.display  = isEntry ? '' : 'none';
+    document.getElementById('pg-entry').style.display   = isEntry ? '' : 'none';   // [新增]
+    document.getElementById('tbl-full').style.display   = isEntry ? 'none' : '';
+    document.getElementById('pg-full').style.display    = isEntry ? 'none' : '';   // [新增]
+    document.getElementById('card-pnl').classList.toggle('active', isEntry);
+    document.getElementById('card-recent').classList.toggle('active', !isEntry);
+  }
+
+  // ── 頁面載入後初始化 ──
+  window.addEventListener('DOMContentLoaded', function() {
+    initPagination();
+  });
+</script><script>
+(function () {
+  // 從儲存格的 innerText 解析可排序的純數值
+  function parseVal(text) {
+    var t = text.trim();
+    // 去除千分位逗號、百分號，嘗試轉數字
+    var n = parseFloat(t.replace(/,/g, '').replace('%', ''));
+    if (!isNaN(n)) return n;
+    // 嘗試日期
+    var d = Date.parse(t);
+    if (!isNaN(d)) return d;
+    // 其餘當字串
+    return t.toLowerCase();
+  }
+
+  // 為指定 table 元素掛上點擊排序事件
+  function enableSort(table) {
+    if (!table) return;
+    var headers = table.querySelectorAll('thead th');
+    // sortState：記錄每欄目前排序方向（null / 'asc' / 'desc'）
+    var sortState = Array(headers.length).fill(null);
+
+    headers.forEach(function (th, colIdx) {
+      th.addEventListener('click', function () {
+        var dir = sortState[colIdx] === 'asc' ? 'desc' : 'asc';
+        // 重置所有欄的排序箭頭
+        sortState = Array(headers.length).fill(null);
+        sortState[colIdx] = dir;
+        headers.forEach(function (h) {
+          h.dataset.sort = '';
+        });
+        th.dataset.sort = dir;   // CSS 透過 data-sort 顯示箭頭
+
+        // 收集 tbody 的所有 <tr>
+        var tbody = table.querySelector('tbody');
+        var rows  = Array.from(tbody.querySelectorAll('tr'));
+
+        rows.sort(function (a, b) {
+          // colIdx 0 對應 index 欄（th），其餘為 td
+          var cellA = a.querySelectorAll('th, td')[colIdx];
+          var cellB = b.querySelectorAll('th, td')[colIdx];
+          var va = cellA ? parseVal(cellA.innerText) : '';
+          var vb = cellB ? parseVal(cellB.innerText) : '';
+          if (va < vb) return dir === 'asc' ? -1 :  1;
+          if (va > vb) return dir === 'asc' ?  1 : -1;
+          return 0;
+        });
+
+        // 重新插入排序後的列
+        rows.forEach(function (r) { tbody.appendChild(r); });
+      });
+    });
+  }
+
+  // 頁面載入後，對兩張表格分別掛上排序功能
+  window.addEventListener('DOMContentLoaded', function () {
+    ['tbl-entry', 'tbl-full'].forEach(function (wrapperId) {
+      var wrapper = document.getElementById(wrapperId);
+      if (wrapper) {
+        enableSort(wrapper.querySelector('table'));
+      }
+    });
+  });
+})();
+</script><script>
+  document.addEventListener('click', function(e) {
+    var th = e.target.closest('thead th');
+    if (!th) return;
+    // 判斷點擊的是哪張表
+    var inFull = !!document.getElementById('tbl-full').contains(th);
+    var key    = inFull ? 'full' : 'entry';
+    var wid    = inFull ? 'tbl-full'  : 'tbl-entry';
+    var pid    = inFull ? 'pg-full'   : 'pg-entry';
+    // 等 SORT_JS 排序完成後再重繪分頁
+    setTimeout(function() {
+      pageState[key] = 1;
+      paginate(wid, pid, key);
+    }, 0);
+  });
+</script></body>
+</html>
