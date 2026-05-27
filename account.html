@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Portfolio Report</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Noto+Sans+TC:wght@400;500&amp;display=swap" rel="stylesheet"/><style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#18171c;color:#ebf9ff;font-family:"Inter","Noto Sans TC",sans-serif;font-size:14px;font-weight:400;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 24px;}
+.tab-bar{position:absolute;top:-18px;left:50%;transform:translateX(-50%);display:flex;background:#18171c;border-radius:14px;padding:5px;gap:2px;box-shadow:0 4px 16px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.04),inset 0 -1px 0 rgba(0,0,0,.4);z-index:10;}
+.tab-btn{padding:7px 18px;border-radius:10px;border:none;background:transparent;color:rgba(235,249,255,.38);font-family:"Inter","Noto Sans TC",sans-serif;font-size:13px;font-weight:500;cursor:pointer;letter-spacing:.03em;transition:background .15s,color .15s,box-shadow .15s;white-space:nowrap;}
+.tab-btn.active{background:#2c2f3a;color:rgba(235,249,255,.92);box-shadow:0 2px 6px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08),inset 0 -1px 0 rgba(0,0,0,.3);}
+.tab-btn:hover:not(.active){color:rgba(235,249,255,.62);background:rgba(255,255,255,.04);}
+.container{display:flex;align-items:center;gap:52px;flex-wrap:wrap;justify-content:center;}
+.donut-svg-wrap{position:relative;flex-shrink:0;padding-top:24px;}
+.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;gap:7px;}
+.donut-center .main-label{font-size:16px;font-weight:500;color:rgba(235,249,255,.55);letter-spacing:.04em;line-height:1;transition:color .15s;max-width:110px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.donut-center .ret-value{font-size:22px;font-weight:600;letter-spacing:.02em;line-height:1;transition:color .15s;}
+.legend{display:flex;flex-direction:column;min-width:240px;max-height:420px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(235,249,255,.1) transparent;}
+.legend-item{display:grid;grid-template-columns:10px 1fr auto auto;align-items:center;column-gap:14px;padding:6px;border-radius:4px;cursor:default;}
+.legend-item:hover{background:rgba(235,249,255,.05);}
+.legend-swatch{width:10px;height:10px;border-radius:2px;}
+.legend-name{font-size:14px;font-weight:400;color:#ebf9ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.01em;}
+.legend-wt{font-size:12px;color:rgba(235,249,255,.35);text-align:right;padding-right:14px;white-space:nowrap;}
+.legend-ret{font-size:14px;font-weight:500;text-align:right;white-space:nowrap;min-width:64px;}
+#tooltip{position:fixed;pointer-events:none;background:rgba(28,23,25,.96);border:1px solid rgba(235,249,255,.1);border-radius:8px;padding:10px 14px;font-size:13px;line-height:1.8;z-index:999;display:none;min-width:160px;box-shadow:0 4px 20px rgba(0,0,0,.5);color:#ebf9ff;font-family:"Inter","Noto Sans TC",sans-serif;}
+#tooltip .tt-name{font-size:12px;font-weight:600;margin-bottom:3px;letter-spacing:.03em;}
+#tooltip .tt-dim{color:rgba(235,249,255,.4);}
+</style><style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:#18171c;color:#ebf9ff;font-family:"Inter","Noto Sans TC",sans-serif;font-size:14px;font-weight:400;min-height:100vh;padding:32px 24px;max-width:1200px;margin:0 auto;}
+.table-wrapper{width:100%;overflow-x:auto;}
+.table-wrapper>div{width:100%;}
+</style><style>
+thead th::after {
+    content: '';
+    display: inline-block;
+    margin-left: 5px;
+    opacity: 0.3;
+    font-size: 10px;
+    vertical-align: middle;
+    color: #ebf9ff50 !important;
+}
+thead th:hover {
+    cursor: pointer;
+    color: #ebf9ff50 !important;
+    transition: color 0.15s ease;
+}
+thead th:hover::after {
+    content: '';
+    opacity: 0.6;
+    color: #ebf9ff50 !important;
+}
+thead th:active {
+    cursor: pointer;
+    color: #ebf9ff50 !important;
+}
+thead th[data-sort="asc"]::after  { content: ' ▼'; opacity: 1; color: #ebf9ff; }
+thead th[data-sort="desc"]::after { content: ' ▲'; opacity: 1; color: #ebf9ff; }
+</style><style>
+.pagination {
+    display: flex; gap: 6px; align-items: center;
+    margin-top: 16px; flex-wrap: wrap; width: 100%;
+}
+.pagination button {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    color: #ebf9ff;
+    font-family: "Inter","Noto Sans TC",sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    padding: 5px 12px; cursor: pointer;
+    transition: background 0.15s; min-width: 34px;
+}
+.pagination button:hover   { background: rgba(255,255,255,0.12); }
+.pagination button.active  { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.40); font-weight: 600; }
+.pagination button:disabled { opacity: 0.3; cursor: default; background: transparent; }
+</style><style>
+.summary-block{display:flex;flex-direction:column;align-items:flex-start;margin-bottom:24px;}
+.summary-label{font-size:13px;color:#ebf9ff80;margin-bottom:4px;letter-spacing:0.04em;}
+.summary-cost-row{display:flex;align-items:flex-end;gap:10px;}
+.summary-cost{font-size:42px;font-weight:700;color:#ebf9ff;letter-spacing:-0.01em;line-height:1;}
+.summary-sub{display:flex;align-items:center;gap:6px;padding-bottom:4px;font-size:14px;font-weight:500;}
+</style><style type="text/css">
+#T_85387 table {
+  border-collapse: separate;
+  width: 100%;
+  font-family: "Inter","Noto Sans TC",sans-serif;
+}
+#T_85387 thead th {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: "Inter","Noto Sans TC",sans-serif;
+  color: #ebf9ff;
+  background: #18171c;
+  padding: 12px 14px;
+  border-bottom: 1px solid #ebf9ff30;
+  text-align: center;
+}
+#T_85387 tbody tr {
+  background: #18171c;
+}
+#T_85387 tbody tr:hover {
+  background: rgba(255,255,255,0.07);
+}
+#T_85387 tbody td {
+  border-bottom: 1px solid #ebf9ff10;
+  color: #ebf9ff;
+}
+#T_85387 tbody th {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: "Inter","Noto Sans TC",sans-serif;
+  color: #ebf9ff;
+  background: #18171c;
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+#T_85387_row0_col0, #T_85387_row0_col1, #T_85387_row0_col2, #T_85387_row0_col3, #T_85387_row0_col4, #T_85387_row0_col5, #T_85387_row0_col6, #T_85387_row1_col0, #T_85387_row1_col1, #T_85387_row1_col2, #T_85387_row1_col3, #T_85387_row1_col4, #T_85387_row1_col5, #T_85387_row1_col6, #T_85387_row2_col0, #T_85387_row2_col1, #T_85387_row2_col2, #T_85387_row2_col3, #T_85387_row2_col4, #T_85387_row2_col5, #T_85387_row2_col6, #T_85387_row3_col0, #T_85387_row3_col1, #T_85387_row3_col2, #T_85387_row3_col3, #T_85387_row3_col4, #T_85387_row3_col5, #T_85387_row3_col6, #T_85387_row4_col0, #T_85387_row4_col1, #T_85387_row4_col2, #T_85387_row4_col3, #T_85387_row4_col4, #T_85387_row4_col5, #T_85387_row4_col6, #T_85387_row5_col0, #T_85387_row5_col1, #T_85387_row5_col2, #T_85387_row5_col3, #T_85387_row5_col4, #T_85387_row5_col5, #T_85387_row5_col6, #T_85387_row6_col0, #T_85387_row6_col1, #T_85387_row6_col2, #T_85387_row6_col3, #T_85387_row6_col4, #T_85387_row6_col5, #T_85387_row6_col6, #T_85387_row7_col0, #T_85387_row7_col1, #T_85387_row7_col2, #T_85387_row7_col3, #T_85387_row7_col4, #T_85387_row7_col5, #T_85387_row7_col6, #T_85387_row8_col0, #T_85387_row8_col1, #T_85387_row8_col2, #T_85387_row8_col3, #T_85387_row8_col4, #T_85387_row8_col5, #T_85387_row8_col6, #T_85387_row9_col0, #T_85387_row9_col1, #T_85387_row9_col2, #T_85387_row9_col3, #T_85387_row9_col4, #T_85387_row9_col5, #T_85387_row9_col6, #T_85387_row10_col0, #T_85387_row10_col1, #T_85387_row10_col2, #T_85387_row10_col3, #T_85387_row10_col4, #T_85387_row10_col5, #T_85387_row10_col6, #T_85387_row11_col0, #T_85387_row11_col1, #T_85387_row11_col2, #T_85387_row11_col3, #T_85387_row11_col4, #T_85387_row11_col5, #T_85387_row11_col6, #T_85387_row12_col0, #T_85387_row12_col1, #T_85387_row12_col2, #T_85387_row12_col3, #T_85387_row12_col4, #T_85387_row12_col5, #T_85387_row12_col6, #T_85387_row13_col0, #T_85387_row13_col1, #T_85387_row13_col2, #T_85387_row13_col3, #T_85387_row13_col4, #T_85387_row13_col5, #T_85387_row13_col6, #T_85387_row14_col0, #T_85387_row14_col1, #T_85387_row14_col2, #T_85387_row14_col3, #T_85387_row14_col4, #T_85387_row14_col5, #T_85387_row14_col6, #T_85387_row15_col0, #T_85387_row15_col1, #T_85387_row15_col2, #T_85387_row15_col3, #T_85387_row15_col4, #T_85387_row15_col5, #T_85387_row15_col6, #T_85387_row16_col0, #T_85387_row16_col1, #T_85387_row16_col2, #T_85387_row16_col3, #T_85387_row16_col4, #T_85387_row16_col5, #T_85387_row16_col6, #T_85387_row17_col0, #T_85387_row17_col1, #T_85387_row17_col2, #T_85387_row17_col3, #T_85387_row17_col4, #T_85387_row17_col5, #T_85387_row17_col6, #T_85387_row18_col0, #T_85387_row18_col1, #T_85387_row18_col2, #T_85387_row18_col3, #T_85387_row18_col4, #T_85387_row18_col5, #T_85387_row18_col6, #T_85387_row19_col0, #T_85387_row19_col1, #T_85387_row19_col2, #T_85387_row19_col3, #T_85387_row19_col4, #T_85387_row19_col5, #T_85387_row19_col6, #T_85387_row20_col0, #T_85387_row20_col1, #T_85387_row20_col2, #T_85387_row20_col3, #T_85387_row20_col4, #T_85387_row20_col5, #T_85387_row20_col6, #T_85387_row21_col0, #T_85387_row21_col1, #T_85387_row21_col2, #T_85387_row21_col3, #T_85387_row21_col4, #T_85387_row21_col5, #T_85387_row21_col6, #T_85387_row22_col0, #T_85387_row22_col1, #T_85387_row22_col2, #T_85387_row22_col3, #T_85387_row22_col4, #T_85387_row22_col5, #T_85387_row22_col6, #T_85387_row23_col0, #T_85387_row23_col1, #T_85387_row23_col2, #T_85387_row23_col3, #T_85387_row23_col4, #T_85387_row23_col5, #T_85387_row23_col6, #T_85387_row24_col0, #T_85387_row24_col1, #T_85387_row24_col2, #T_85387_row24_col3, #T_85387_row24_col4, #T_85387_row24_col5, #T_85387_row24_col6, #T_85387_row25_col0, #T_85387_row25_col1, #T_85387_row25_col2, #T_85387_row25_col3, #T_85387_row25_col4, #T_85387_row25_col5, #T_85387_row25_col6, #T_85387_row26_col0, #T_85387_row26_col1, #T_85387_row26_col2, #T_85387_row26_col3, #T_85387_row26_col4, #T_85387_row26_col5, #T_85387_row26_col6, #T_85387_row27_col0, #T_85387_row27_col1, #T_85387_row27_col2, #T_85387_row27_col3, #T_85387_row27_col4, #T_85387_row27_col5, #T_85387_row27_col6 {
+  text-align: center;
+  vertical-align: middle;
+  padding: 5px 14px;
+  font-size: 14px;
+  font-weight: 400;
+}
+</style><style>
+body { display: block !important; align-items: unset !important; justify-content: unset !important; max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+.pie-section { display: flex; justify-content: flex-start; margin-bottom: 36px; padding-top: 24px; }
+.pie-section .container { justify-content: flex-start !important; }
+.position-section { width: 100%; }</style></head>
+<body><div class="pie-section">
+<div class="container">
+<div class="donut-svg-wrap">
+<div class="tab-bar">
+<button class="tab-btn active" id="btn-a" onclick="switchMode('a')">未實現損益</button>
+<button class="tab-btn" id="btn-b" onclick="switchMode('b')">即時行情</button>
+</div>
+<svg height="280" id="chart" viewbox="0 0 280 280" width="280"></svg>
+<div class="donut-center">
+<div class="main-label" id="mainLabel">未實現損益</div>
+<div class="ret-value" id="retValue"></div>
+</div>
+</div>
+<div class="legend" id="legend"></div>
+</div>
+<div id="tooltip"></div>
+<script>
+const MODES={
+    a:{title:'未實現損益',data:[{"name": "3090 日電貿", "weight": 4.12, "return": 95.91, "change_rate": -0.43, "pct": 4.1196, "color": "#ff627eFF"}, {"name": "6834 天二科技", "weight": 5.43, "return": 67.08, "change_rate": -5.12, "pct": 5.4295, "color": "#ff627eFF"}, {"name": "4127 天良", "weight": 0.45, "return": 47.74, "change_rate": -2.05, "pct": 0.45, "color": "#ff627eFF"}, {"name": "8926 台汽電", "weight": 0.42, "return": 33.59, "change_rate": 5.24, "pct": 0.42, "color": "#ff627eFF"}, {"name": "6166 凌華", "weight": 8.34, "return": 28.98, "change_rate": 2.25, "pct": 8.3392, "color": "#ff627eFF"}, {"name": "2302 麗正", "weight": 0.01, "return": 25.49, "change_rate": -3.68, "pct": 0.01, "color": "#ff627eFF"}, {"name": "3209 全科", "weight": 3.02, "return": 23.59, "change_rate": 1.24, "pct": 3.0197, "color": "#ff627eFF"}, {"name": "1560 中砂", "weight": 0.44, "return": 12.13, "change_rate": -2.02, "pct": 0.44, "color": "#ff627eC2"}, {"name": "00981A 主動統一台股增長", "weight": 38.43, "return": 10.91, "change_rate": 1.49, "pct": 38.4262, "color": "#ff627eB7"}, {"name": "3036 文曄", "weight": 3.03, "return": 10.68, "change_rate": 0.85, "pct": 3.0297, "color": "#ff627eB5"}, {"name": "3006 晶豪科", "weight": 0.97, "return": 9.39, "change_rate": 4.1, "pct": 0.9699, "color": "#ff627eA9"}, {"name": "6005 群益證", "weight": 5.26, "return": 9.18, "change_rate": 5.9, "pct": 5.2595, "color": "#ff627eA7"}, {"name": "4576 大銀微系統", "weight": 2.57, "return": 7.05, "change_rate": -4.04, "pct": 2.5697, "color": "#ff627e92"}, {"name": "2395 研華", "weight": 2.86, "return": 6.42, "change_rate": -0.19, "pct": 2.8597, "color": "#ff627e8B"}, {"name": "2301 光寶科", "weight": 0.49, "return": 5.01, "change_rate": 2.71, "pct": 0.49, "color": "#ff627e7B"}, {"name": "2376 技嘉", "weight": 4.0, "return": 4.77, "change_rate": -1.04, "pct": 3.9996, "color": "#ff627e78"}, {"name": "3691 碩禾", "weight": 0.72, "return": 4.49, "change_rate": -0.95, "pct": 0.7199, "color": "#ff627e74"}, {"name": "6417 韋僑", "weight": 2.49, "return": 3.4, "change_rate": -1.36, "pct": 2.4898, "color": "#ff627e65"}, {"name": "3229 晟鈦", "weight": 1.22, "return": 1.49, "change_rate": -4.17, "pct": 1.2199, "color": "#ff627e46"}, {"name": "3055 蔚華科", "weight": 0.59, "return": 1.18, "change_rate": -5.46, "pct": 0.5899, "color": "#ff627e3F"}, {"name": "2345 智邦", "weight": 6.3, "return": 0.97, "change_rate": 0.0, "pct": 6.2994, "color": "#ff627e3B"}, {"name": "6021 美好證", "weight": 1.02, "return": 0.62, "change_rate": 8.21, "pct": 1.0199, "color": "#ff627e32"}, {"name": "2408 南亞科", "weight": 0.25, "return": 0.0, "change_rate": 2.8, "pct": 0.25, "color": "#ff627e14"}, {"name": "1590 亞德客-KY", "weight": 1.15, "return": -1.58, "change_rate": -2.04, "pct": 1.1499, "color": "#0fd9a648"}, {"name": "2451 創見", "weight": 2.51, "return": -3.69, "change_rate": 1.42, "pct": 2.5097, "color": "#0fd9a669"}, {"name": "3354 律勝", "weight": 1.72, "return": -4.47, "change_rate": -4.97, "pct": 1.7198, "color": "#0fd9a674"}, {"name": "8271 宇瞻", "weight": 0.23, "return": -6.92, "change_rate": 1.08, "pct": 0.23, "color": "#0fd9a691"}, {"name": "2059 川湖", "weight": 1.97, "return": -9.4, "change_rate": -2.28, "pct": 1.9698, "color": "#0fd9a6AA"}],valueKey:'return',retColor:'#ff627e',retStr:'+13.48%'},
+    b:{title:'即時行情',  data:[{"name": "6021 美好證", "weight": 1.02, "return": 0.62, "change_rate": 8.21, "pct": 1.0199, "color": "#ff627eE5"}, {"name": "6005 群益證", "weight": 5.26, "return": 9.18, "change_rate": 5.9, "pct": 5.2595, "color": "#ff627eBF"}, {"name": "8926 台汽電", "weight": 0.42, "return": 33.59, "change_rate": 5.24, "pct": 0.42, "color": "#ff627eB4"}, {"name": "3006 晶豪科", "weight": 0.97, "return": 9.39, "change_rate": 4.1, "pct": 0.9699, "color": "#ff627e9E"}, {"name": "2408 南亞科", "weight": 0.25, "return": 0.0, "change_rate": 2.8, "pct": 0.25, "color": "#ff627e82"}, {"name": "2301 光寶科", "weight": 0.49, "return": 5.01, "change_rate": 2.71, "pct": 0.49, "color": "#ff627e80"}, {"name": "6166 凌華", "weight": 8.34, "return": 28.98, "change_rate": 2.25, "pct": 8.3392, "color": "#ff627e74"}, {"name": "00981A 主動統一台股增長", "weight": 38.43, "return": 10.91, "change_rate": 1.49, "pct": 38.4262, "color": "#ff627e5F"}, {"name": "2451 創見", "weight": 2.51, "return": -3.69, "change_rate": 1.42, "pct": 2.5097, "color": "#ff627e5D"}, {"name": "3209 全科", "weight": 3.02, "return": 23.59, "change_rate": 1.24, "pct": 3.0197, "color": "#ff627e57"}, {"name": "8271 宇瞻", "weight": 0.23, "return": -6.92, "change_rate": 1.08, "pct": 0.23, "color": "#ff627e52"}, {"name": "3036 文曄", "weight": 3.03, "return": 10.68, "change_rate": 0.85, "pct": 3.0297, "color": "#ff627e4A"}, {"name": "2345 智邦", "weight": 6.3, "return": 0.97, "change_rate": 0.0, "pct": 6.2994, "color": "#ff627e14"}, {"name": "2395 研華", "weight": 2.86, "return": 6.42, "change_rate": -0.19, "pct": 2.8597, "color": "#0fd9a62A"}, {"name": "3090 日電貿", "weight": 4.12, "return": 95.91, "change_rate": -0.43, "pct": 4.1196, "color": "#0fd9a638"}, {"name": "3691 碩禾", "weight": 0.72, "return": 4.49, "change_rate": -0.95, "pct": 0.7199, "color": "#0fd9a64E"}, {"name": "2376 技嘉", "weight": 4.0, "return": 4.77, "change_rate": -1.04, "pct": 3.9996, "color": "#0fd9a651"}, {"name": "6417 韋僑", "weight": 2.49, "return": 3.4, "change_rate": -1.36, "pct": 2.4898, "color": "#0fd9a65B"}, {"name": "1560 中砂", "weight": 0.44, "return": 12.13, "change_rate": -2.02, "pct": 0.44, "color": "#0fd9a66E"}, {"name": "1590 亞德客-KY", "weight": 1.15, "return": -1.58, "change_rate": -2.04, "pct": 1.1499, "color": "#0fd9a66F"}, {"name": "4127 天良", "weight": 0.45, "return": 47.74, "change_rate": -2.05, "pct": 0.45, "color": "#0fd9a66F"}, {"name": "2059 川湖", "weight": 1.97, "return": -9.4, "change_rate": -2.28, "pct": 1.9698, "color": "#0fd9a675"}, {"name": "2302 麗正", "weight": 0.01, "return": 25.49, "change_rate": -3.68, "pct": 0.01, "color": "#0fd9a695"}, {"name": "4576 大銀微系統", "weight": 2.57, "return": 7.05, "change_rate": -4.04, "pct": 2.5697, "color": "#0fd9a69D"}, {"name": "3229 晟鈦", "weight": 1.22, "return": 1.49, "change_rate": -4.17, "pct": 1.2199, "color": "#0fd9a69F"}, {"name": "3354 律勝", "weight": 1.72, "return": -4.47, "change_rate": -4.97, "pct": 1.7198, "color": "#0fd9a6AF"}, {"name": "6834 天二科技", "weight": 5.43, "return": 67.08, "change_rate": -5.12, "pct": 5.4295, "color": "#0fd9a6B1"}, {"name": "3055 蔚華科", "weight": 0.59, "return": 1.18, "change_rate": -5.46, "pct": 0.5899, "color": "#0fd9a6B8"}],valueKey:'change_rate',retColor:'#ff627e',retStr:'+0.59%'},
+};
+const POS_COLOR='#ff627e',NEG_COLOR='#0fd9a6',BG_COLOR='#18171c';
+let currentMode='a';
+const cx=140,cy=140,R=132,r=82;
+function xy(deg,rad){const a=deg*Math.PI/180;return[cx+rad*Math.cos(a),cy+rad*Math.sin(a)];}
+function arc(s,e){
+    const[x1,y1]=xy(s,R),[x2,y2]=xy(e,R),[x3,y3]=xy(e,r),[x4,y4]=xy(s,r);
+    const lg=e-s>180?1:0;
+    return `M${x1},${y1} A${R},${R} 0 ${lg},1 ${x2},${y2} L${x3},${y3} A${r},${r} 0 ${lg},0 ${x4},${y4}Z`;
+}
+function renderChart(modeKey){
+    const mode=MODES[modeKey];
+    const svg=document.getElementById('chart'),legend=document.getElementById('legend');
+    const mainLbl=document.getElementById('mainLabel'),retVal=document.getElementById('retValue');
+    const tt=document.getElementById('tooltip');
+    svg.innerHTML='';legend.innerHTML='';tt.style.display='none';
+    mainLbl.textContent=mode.title;mainLbl.style.color='rgba(235,249,255,.55)';
+    retVal.textContent=mode.retStr;retVal.style.color=mode.retColor;
+    const DATA=mode.data,vk=mode.valueKey;
+    const total=DATA.reduce((s,d)=>s+d.pct,0);
+    let angle=-90;
+    DATA.forEach(d=>{
+        const val=d[vk],sweep=(d.pct/total)*360,s=angle,e=angle+sweep;
+        angle+=sweep;
+        const vc=val>=0?POS_COLOR:NEG_COLOR,vs=(val>=0?'+':'')+val.toFixed(2)+'%';
+        const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+        path.setAttribute('d',arc(s,e));path.setAttribute('fill',d.color);
+        path.setAttribute('opacity','0.9');
+        path.style.cssText='cursor:pointer;transition:opacity .12s,filter .12s';
+        function onEnter(ev){
+            path.setAttribute('opacity','1');path.style.filter='brightness(1.3)';
+            mainLbl.textContent=d.name;mainLbl.style.color='rgba(235,249,255,.75)';
+            retVal.textContent=vs;retVal.style.color=vc;
+            tt.style.display='block';
+            tt.innerHTML=`<div class="tt-name">${d.name}</div>
+                <div style="color:${vc};font-weight:500">${vs}</div>
+                <div class="tt-dim">Weight&nbsp;&nbsp;${d.weight.toFixed(2)}%</div>
+                <div class="tt-dim">Portfolio ${d.pct.toFixed(2)}%</div>`;
+            if(ev&&ev.clientX){tt.style.left=(ev.clientX+14)+'px';tt.style.top=(ev.clientY-10)+'px';}
+        }
+        function onMove(ev){tt.style.left=(ev.clientX+14)+'px';tt.style.top=(ev.clientY-10)+'px';}
+        function onLeave(){
+            path.setAttribute('opacity','0.9');path.style.filter='';
+            mainLbl.textContent=mode.title;mainLbl.style.color='rgba(235,249,255,.55)';
+            retVal.textContent=mode.retStr;retVal.style.color=mode.retColor;tt.style.display='none';
+        }
+        path.addEventListener('mouseenter',onEnter);
+        path.addEventListener('mousemove',onMove);
+        path.addEventListener('mouseleave',onLeave);
+        svg.appendChild(path);
+        const row=document.createElement('div');
+        row.className='legend-item';
+        row.innerHTML=`<div class="legend-swatch" style="background:${d.color}"></div>
+            <div class="legend-name" title="${d.name}">${d.name}</div>
+            <div class="legend-wt">${d.weight.toFixed(1)}%</div>
+            <div class="legend-ret" style="color:${vc}">${vs}</div>`;
+        row.addEventListener('mouseenter',onEnter);
+        row.addEventListener('mouseleave',onLeave);
+        legend.appendChild(row);
+    });
+    const bg=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    bg.setAttribute('cx',cx);bg.setAttribute('cy',cy);
+    bg.setAttribute('r',r-1);bg.setAttribute('fill',BG_COLOR);
+    svg.appendChild(bg);
+}
+function switchMode(k){
+    if(k===currentMode)return;
+    currentMode=k;
+    document.getElementById('btn-a').classList.toggle('active',k==='a');
+    document.getElementById('btn-b').classList.toggle('active',k==='b');
+    renderChart(k);
+}
+renderChart('a');
+</script>
+</div><div class="position-section">
+<div class="summary-block">
+<div class="summary-label">Total Cost</div>
+<div class="summary-cost-row">
+<span class="summary-cost">$ 438,206</span>
+<div class="summary-sub">
+<span style="color:#ff627e;">+59,078</span>
+<span style="color:#ff627e;">(+13.48%)</span>
+</div>
+</div>
+</div>
+<div class="table-wrapper">
+<div id="tbl-position"><style type="text/css">
+#T_85387 table {
+  border-collapse: separate;
+  width: 100%;
+  font-family: "Inter","Noto Sans TC",sans-serif;
+}
+#T_85387 thead th {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: "Inter","Noto Sans TC",sans-serif;
+  color: #ebf9ff;
+  background: #18171c;
+  padding: 12px 14px;
+  border-bottom: 1px solid #ebf9ff30;
+  text-align: center;
+}
+#T_85387 tbody tr {
+  background: #18171c;
+}
+#T_85387 tbody tr:hover {
+  background: rgba(255,255,255,0.07);
+}
+#T_85387 tbody td {
+  border-bottom: 1px solid #ebf9ff10;
+  color: #ebf9ff;
+}
+#T_85387 tbody th {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: "Inter","Noto Sans TC",sans-serif;
+  color: #ebf9ff;
+  background: #18171c;
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+#T_85387_row0_col0, #T_85387_row0_col1, #T_85387_row0_col2, #T_85387_row0_col3, #T_85387_row0_col4, #T_85387_row0_col5, #T_85387_row0_col6, #T_85387_row1_col0, #T_85387_row1_col1, #T_85387_row1_col2, #T_85387_row1_col3, #T_85387_row1_col4, #T_85387_row1_col5, #T_85387_row1_col6, #T_85387_row2_col0, #T_85387_row2_col1, #T_85387_row2_col2, #T_85387_row2_col3, #T_85387_row2_col4, #T_85387_row2_col5, #T_85387_row2_col6, #T_85387_row3_col0, #T_85387_row3_col1, #T_85387_row3_col2, #T_85387_row3_col3, #T_85387_row3_col4, #T_85387_row3_col5, #T_85387_row3_col6, #T_85387_row4_col0, #T_85387_row4_col1, #T_85387_row4_col2, #T_85387_row4_col3, #T_85387_row4_col4, #T_85387_row4_col5, #T_85387_row4_col6, #T_85387_row5_col0, #T_85387_row5_col1, #T_85387_row5_col2, #T_85387_row5_col3, #T_85387_row5_col4, #T_85387_row5_col5, #T_85387_row5_col6, #T_85387_row6_col0, #T_85387_row6_col1, #T_85387_row6_col2, #T_85387_row6_col3, #T_85387_row6_col4, #T_85387_row6_col5, #T_85387_row6_col6, #T_85387_row7_col0, #T_85387_row7_col1, #T_85387_row7_col2, #T_85387_row7_col3, #T_85387_row7_col4, #T_85387_row7_col5, #T_85387_row7_col6, #T_85387_row8_col0, #T_85387_row8_col1, #T_85387_row8_col2, #T_85387_row8_col3, #T_85387_row8_col4, #T_85387_row8_col5, #T_85387_row8_col6, #T_85387_row9_col0, #T_85387_row9_col1, #T_85387_row9_col2, #T_85387_row9_col3, #T_85387_row9_col4, #T_85387_row9_col5, #T_85387_row9_col6, #T_85387_row10_col0, #T_85387_row10_col1, #T_85387_row10_col2, #T_85387_row10_col3, #T_85387_row10_col4, #T_85387_row10_col5, #T_85387_row10_col6, #T_85387_row11_col0, #T_85387_row11_col1, #T_85387_row11_col2, #T_85387_row11_col3, #T_85387_row11_col4, #T_85387_row11_col5, #T_85387_row11_col6, #T_85387_row12_col0, #T_85387_row12_col1, #T_85387_row12_col2, #T_85387_row12_col3, #T_85387_row12_col4, #T_85387_row12_col5, #T_85387_row12_col6, #T_85387_row13_col0, #T_85387_row13_col1, #T_85387_row13_col2, #T_85387_row13_col3, #T_85387_row13_col4, #T_85387_row13_col5, #T_85387_row13_col6, #T_85387_row14_col0, #T_85387_row14_col1, #T_85387_row14_col2, #T_85387_row14_col3, #T_85387_row14_col4, #T_85387_row14_col5, #T_85387_row14_col6, #T_85387_row15_col0, #T_85387_row15_col1, #T_85387_row15_col2, #T_85387_row15_col3, #T_85387_row15_col4, #T_85387_row15_col5, #T_85387_row15_col6, #T_85387_row16_col0, #T_85387_row16_col1, #T_85387_row16_col2, #T_85387_row16_col3, #T_85387_row16_col4, #T_85387_row16_col5, #T_85387_row16_col6, #T_85387_row17_col0, #T_85387_row17_col1, #T_85387_row17_col2, #T_85387_row17_col3, #T_85387_row17_col4, #T_85387_row17_col5, #T_85387_row17_col6, #T_85387_row18_col0, #T_85387_row18_col1, #T_85387_row18_col2, #T_85387_row18_col3, #T_85387_row18_col4, #T_85387_row18_col5, #T_85387_row18_col6, #T_85387_row19_col0, #T_85387_row19_col1, #T_85387_row19_col2, #T_85387_row19_col3, #T_85387_row19_col4, #T_85387_row19_col5, #T_85387_row19_col6, #T_85387_row20_col0, #T_85387_row20_col1, #T_85387_row20_col2, #T_85387_row20_col3, #T_85387_row20_col4, #T_85387_row20_col5, #T_85387_row20_col6, #T_85387_row21_col0, #T_85387_row21_col1, #T_85387_row21_col2, #T_85387_row21_col3, #T_85387_row21_col4, #T_85387_row21_col5, #T_85387_row21_col6, #T_85387_row22_col0, #T_85387_row22_col1, #T_85387_row22_col2, #T_85387_row22_col3, #T_85387_row22_col4, #T_85387_row22_col5, #T_85387_row22_col6, #T_85387_row23_col0, #T_85387_row23_col1, #T_85387_row23_col2, #T_85387_row23_col3, #T_85387_row23_col4, #T_85387_row23_col5, #T_85387_row23_col6, #T_85387_row24_col0, #T_85387_row24_col1, #T_85387_row24_col2, #T_85387_row24_col3, #T_85387_row24_col4, #T_85387_row24_col5, #T_85387_row24_col6, #T_85387_row25_col0, #T_85387_row25_col1, #T_85387_row25_col2, #T_85387_row25_col3, #T_85387_row25_col4, #T_85387_row25_col5, #T_85387_row25_col6, #T_85387_row26_col0, #T_85387_row26_col1, #T_85387_row26_col2, #T_85387_row26_col3, #T_85387_row26_col4, #T_85387_row26_col5, #T_85387_row26_col6, #T_85387_row27_col0, #T_85387_row27_col1, #T_85387_row27_col2, #T_85387_row27_col3, #T_85387_row27_col4, #T_85387_row27_col5, #T_85387_row27_col6 {
+  text-align: center;
+  vertical-align: middle;
+  padding: 5px 14px;
+  font-size: 14px;
+  font-weight: 400;
+}
+</style>
+<table id="T_85387">
+<thead>
+<tr>
+<th class="blank level0"> </th>
+<th class="col_heading level0 col0" id="T_85387_level0_col0">weight</th>
+<th class="col_heading level0 col1" id="T_85387_level0_col1">quantity</th>
+<th class="col_heading level0 col2" id="T_85387_level0_col2">price</th>
+<th class="col_heading level0 col3" id="T_85387_level0_col3">last_price</th>
+<th class="col_heading level0 col4" id="T_85387_level0_col4">pnl</th>
+<th class="col_heading level0 col5" id="T_85387_level0_col5">change_rate</th>
+<th class="col_heading level0 col6" id="T_85387_level0_col6">return</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th class="row_heading level0 row0" id="T_85387_level0_row0">00981A 主動統一台股增長</th>
+<td class="data row0 col0" id="T_85387_row0_col0"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 38.43%</span></td>
+<td class="data row0 col1" id="T_85387_row0_col1">6,000</td>
+<td class="data row0 col2" id="T_85387_row0_col2">$ 28.75</td>
+<td class="data row0 col3" id="T_85387_row0_col3">$ 31.96</td>
+<td class="data row0 col4" id="T_85387_row0_col4"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 18,822</span></td>
+<td class="data row0 col5" id="T_85387_row0_col5"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;">⬆ 1.49%</span></td>
+<td class="data row0 col6" id="T_85387_row0_col6"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e00;white-space:nowrap;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg> 10.91%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row1" id="T_85387_level0_row1">1560 中砂</th>
+<td class="data row1 col0" id="T_85387_row1_col0"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 0.44%</span></td>
+<td class="data row1 col1" id="T_85387_row1_col1">3</td>
+<td class="data row1 col2" id="T_85387_row1_col2">$ 645.67</td>
+<td class="data row1 col3" id="T_85387_row1_col3">$ 727.0</td>
+<td class="data row1 col4" id="T_85387_row1_col4"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 235</span></td>
+<td class="data row1 col5" id="T_85387_row1_col5"><span style="display:inline-flex;align-items:center;gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a600;border:1px solid #0fd9a600;white-space:nowrap;">⬇ -2.02%</span></td>
+<td class="data row1 col6" id="T_85387_row1_col6"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e00;white-space:nowrap;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg> 12.13%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row2" id="T_85387_level0_row2">1590 亞德客-KY</th>
+<td class="data row2 col0" id="T_85387_row2_col0"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 1.15%</span></td>
+<td class="data row2 col1" id="T_85387_row2_col1">4</td>
+<td class="data row2 col2" id="T_85387_row2_col2">$ 1,452.0</td>
+<td class="data row2 col3" id="T_85387_row2_col3">$ 1,435.0</td>
+<td class="data row2 col4" id="T_85387_row2_col4"><span style="display:inline-flex;align-items:center;gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a600;border:1px solid #0fd9a600;white-space:nowrap;"> -92</span></td>
+<td class="data row2 col5" id="T_85387_row2_col5"><span style="display:inline-flex;align-items:center;gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a600;border:1px solid #0fd9a600;white-space:nowrap;">⬇ -2.04%</span></td>
+<td class="data row2 col6" id="T_85387_row2_col6"><span style="display:inline-flex;align-items:center;gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a600;white-space:nowrap;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16"><path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg> -1.58%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row3" id="T_85387_level0_row3">2059 川湖</th>
+<td class="data row3 col0" id="T_85387_row3_col0"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 1.97%</span></td>
+<td class="data row3 col1" id="T_85387_row3_col1">2</td>
+<td class="data row3 col2" id="T_85387_row3_col2">$ 5,407.0</td>
+<td class="data row3 col3" id="T_85387_row3_col3">$ 4,920.0</td>
+<td class="data row3 col4" id="T_85387_row3_col4"><span style="display:inline-flex;align-items:center;gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a600;border:1px solid #0fd9a600;white-space:nowrap;"> -1,016</span></td>
+<td class="data row3 col5" id="T_85387_row3_col5"><span style="display:inline-flex;align-items:center;gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a600;border:1px solid #0fd9a600;white-space:nowrap;">⬇ -2.28%</span></td>
+<td class="data row3 col6" id="T_85387_row3_col6"><span style="display:inline-flex;align-items:center;gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a600;white-space:nowrap;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16"><path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg> -9.40%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row4" id="T_85387_level0_row4">2301 光寶科</th>
+<td class="data row4 col0" id="T_85387_row4_col0"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 0.49%</span></td>
+<td class="data row4 col1" id="T_85387_row4_col1">10</td>
+<td class="data row4 col2" id="T_85387_row4_col2">$ 233.4</td>
+<td class="data row4 col3" id="T_85387_row4_col3">$ 246.0</td>
+<td class="data row4 col4" id="T_85387_row4_col4"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 117</span></td>
+<td class="data row4 col5" id="T_85387_row4_col5"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;">⬆ 2.71%</span></td>
+<td class="data row4 col6" id="T_85387_row4_col6"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e00;white-space:nowrap;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg> 5.01%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row5" id="T_85387_level0_row5">2302 麗正</th>
+<td class="data row5 col0" id="T_85387_row5_col0"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 0.01%</span></td>
+<td class="data row5 col1" id="T_85387_row5_col1">2</td>
+<td class="data row5 col2" id="T_85387_row5_col2">$ 25.5</td>
+<td class="data row5 col3" id="T_85387_row5_col3">$ 32.7</td>
+<td class="data row5 col4" id="T_85387_row5_col4"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 13</span></td>
+<td class="data row5 col5" id="T_85387_row5_col5"><span style="display:inline-flex;align-items:center;gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a600;border:1px solid #0fd9a600;white-space:nowrap;">⬇ -3.68%</span></td>
+<td class="data row5 col6" id="T_85387_row5_col6"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e00;white-space:nowrap;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg> 25.49%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row6" id="T_85387_level0_row6">2345 智邦</th>
+<td class="data row6 col0" id="T_85387_row6_col0"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 6.30%</span></td>
+<td class="data row6 col1" id="T_85387_row6_col1">12</td>
+<td class="data row6 col2" id="T_85387_row6_col2">$ 2,583.58</td>
+<td class="data row6 col3" id="T_85387_row6_col3">$ 2,620.0</td>
+<td class="data row6 col4" id="T_85387_row6_col4"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 301</span></td>
+<td class="data row6 col5" id="T_85387_row6_col5"><span style="display:inline-flex;align-items:center;gap:4px;color:#a0aab8;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#a0aab800;border:1px solid #a0aab800;white-space:nowrap;">⬇ 0.00%</span></td>
+<td class="data row6 col6" id="T_85387_row6_col6"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e00;white-space:nowrap;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg> 0.97%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row7" id="T_85387_level0_row7">2376 技嘉</th>
+<td class="data row7 col0" id="T_85387_row7_col0"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 4.00%</span></td>
+<td class="data row7 col1" id="T_85387_row7_col1">60</td>
+<td class="data row7 col2" id="T_85387_row7_col2">$ 316.02</td>
+<td class="data row7 col3" id="T_85387_row7_col3">$ 332.5</td>
+<td class="data row7 col4" id="T_85387_row7_col4"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 904</span></td>
+<td class="data row7 col5" id="T_85387_row7_col5"><span style="display:inline-flex;align-items:center;gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a600;border:1px solid #0fd9a600;white-space:nowrap;">⬇ -1.04%</span></td>
+<td class="data row7 col6" id="T_85387_row7_col6"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e00;white-space:nowrap;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg> 4.77%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row8" id="T_85387_level0_row8">2395 研華</th>
+<td class="data row8 col0" id="T_85387_row8_col0"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 2.86%</span></td>
+<td class="data row8 col1" id="T_85387_row8_col1">28</td>
+<td class="data row8 col2" id="T_85387_row8_col2">$ 476.25</td>
+<td class="data row8 col3" id="T_85387_row8_col3">$ 509.0</td>
+<td class="data row8 col4" id="T_85387_row8_col4"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 856</span></td>
+<td class="data row8 col5" id="T_85387_row8_col5"><span style="display:inline-flex;align-items:center;gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a600;border:1px solid #0fd9a600;white-space:nowrap;">⬇ -0.19%</span></td>
+<td class="data row8 col6" id="T_85387_row8_col6"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e00;white-space:nowrap;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg> 6.42%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row9" id="T_85387_level0_row9">2408 南亞科</th>
+<td class="data row9 col0" id="T_85387_row9_col0"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 0.25%</span></td>
+<td class="data row9 col1" id="T_85387_row9_col1">4</td>
+<td class="data row9 col2" id="T_85387_row9_col2">$ 311.0</td>
+<td class="data row9 col3" id="T_85387_row9_col3">$ 312.0</td>
+<td class="data row9 col4" id="T_85387_row9_col4"><span style="display:inline-flex;align-items:center;gap:4px;color:#a0aab8;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#a0aab800;border:1px solid #a0aab800;white-space:nowrap;"> 0</span></td>
+<td class="data row9 col5" id="T_85387_row9_col5"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;">⬆ 2.80%</span></td>
+<td class="data row9 col6" id="T_85387_row9_col6"><span style="display:inline-flex;align-items:center;gap:4px;color:#a0aab8;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#a0aab820;border:1px solid #a0aab800;white-space:nowrap;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16"><path d="M7 7L17 17M17 17H7M17 17V7" stroke="#a0aab8" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg> 0.00%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row10" id="T_85387_level0_row10">2451 創見</th>
+<td class="data row10 col0" id="T_85387_row10_col0"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 2.51%</span></td>
+<td class="data row10 col1" id="T_85387_row10_col1">39</td>
+<td class="data row10 col2" id="T_85387_row10_col2">$ 331.9</td>
+<td class="data row10 col3" id="T_85387_row10_col3">$ 321.0</td>
+<td class="data row10 col4" id="T_85387_row10_col4"><span style="display:inline-flex;align-items:center;gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a600;border:1px solid #0fd9a600;white-space:nowrap;"> -477</span></td>
+<td class="data row10 col5" id="T_85387_row10_col5"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;">⬆ 1.42%</span></td>
+<td class="data row10 col6" id="T_85387_row10_col6"><span style="display:inline-flex;align-items:center;gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a600;white-space:nowrap;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16"><path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg> -3.69%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row11" id="T_85387_level0_row11">3006 晶豪科</th>
+<td class="data row11 col0" id="T_85387_row11_col0"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 0.97%</span></td>
+<td class="data row11 col1" id="T_85387_row11_col1">20</td>
+<td class="data row11 col2" id="T_85387_row11_col2">$ 219.45</td>
+<td class="data row11 col3" id="T_85387_row11_col3">$ 241.0</td>
+<td class="data row11 col4" id="T_85387_row11_col4"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 412</span></td>
+<td class="data row11 col5" id="T_85387_row11_col5"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;">⬆ 4.10%</span></td>
+<td class="data row11 col6" id="T_85387_row11_col6"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e00;white-space:nowrap;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg> 9.39%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row12" id="T_85387_level0_row12">3036 文曄</th>
+<td class="data row12 col0" id="T_85387_row12_col0"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 3.03%</span></td>
+<td class="data row12 col1" id="T_85387_row12_col1">51</td>
+<td class="data row12 col2" id="T_85387_row12_col2">$ 266.33</td>
+<td class="data row12 col3" id="T_85387_row12_col3">$ 296.0</td>
+<td class="data row12 col4" id="T_85387_row12_col4"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 1,450</span></td>
+<td class="data row12 col5" id="T_85387_row12_col5"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;">⬆ 0.85%</span></td>
+<td class="data row12 col6" id="T_85387_row12_col6"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e00;white-space:nowrap;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg> 10.68%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row13" id="T_85387_level0_row13">3055 蔚華科</th>
+<td class="data row13 col0" id="T_85387_row13_col0"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 0.59%</span></td>
+<td class="data row13 col1" id="T_85387_row13_col1">26</td>
+<td class="data row13 col2" id="T_85387_row13_col2">$ 110.73</td>
+<td class="data row13 col3" id="T_85387_row13_col3">$ 112.5</td>
+<td class="data row13 col4" id="T_85387_row13_col4"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 34</span></td>
+<td class="data row13 col5" id="T_85387_row13_col5"><span style="display:inline-flex;align-items:center;gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a600;border:1px solid #0fd9a600;white-space:nowrap;">⬇ -5.46%</span></td>
+<td class="data row13 col6" id="T_85387_row13_col6"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e00;white-space:nowrap;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg> 1.18%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row14" id="T_85387_level0_row14">3090 日電貿</th>
+<td class="data row14 col0" id="T_85387_row14_col0"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 4.12%</span></td>
+<td class="data row14 col1" id="T_85387_row14_col1">89</td>
+<td class="data row14 col2" id="T_85387_row14_col2">$ 117.4</td>
+<td class="data row14 col3" id="T_85387_row14_col3">$ 231.0</td>
+<td class="data row14 col4" id="T_85387_row14_col4"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 10,021</span></td>
+<td class="data row14 col5" id="T_85387_row14_col5"><span style="display:inline-flex;align-items:center;gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a600;border:1px solid #0fd9a600;white-space:nowrap;">⬇ -0.43%</span></td>
+<td class="data row14 col6" id="T_85387_row14_col6"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e00;white-space:nowrap;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg> 95.91%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row15" id="T_85387_level0_row15">3209 全科</th>
+<td class="data row15 col0" id="T_85387_row15_col0"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 3.02%</span></td>
+<td class="data row15 col1" id="T_85387_row15_col1">185</td>
+<td class="data row15 col2" id="T_85387_row15_col2">$ 65.57</td>
+<td class="data row15 col3" id="T_85387_row15_col3">$ 81.4</td>
+<td class="data row15 col4" id="T_85387_row15_col4"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 2,861</span></td>
+<td class="data row15 col5" id="T_85387_row15_col5"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;">⬆ 1.24%</span></td>
+<td class="data row15 col6" id="T_85387_row15_col6"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e00;white-space:nowrap;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg> 23.59%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row16" id="T_85387_level0_row16">3229 晟鈦</th>
+<td class="data row16 col0" id="T_85387_row16_col0"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 1.22%</span></td>
+<td class="data row16 col1" id="T_85387_row16_col1">133</td>
+<td class="data row16 col2" id="T_85387_row16_col2">$ 45.03</td>
+<td class="data row16 col3" id="T_85387_row16_col3">$ 45.9</td>
+<td class="data row16 col4" id="T_85387_row16_col4"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 89</span></td>
+<td class="data row16 col5" id="T_85387_row16_col5"><span style="display:inline-flex;align-items:center;gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a600;border:1px solid #0fd9a600;white-space:nowrap;">⬇ -4.17%</span></td>
+<td class="data row16 col6" id="T_85387_row16_col6"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e00;white-space:nowrap;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg> 1.49%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row17" id="T_85387_level0_row17">3354 律勝</th>
+<td class="data row17 col0" id="T_85387_row17_col0"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 1.72%</span></td>
+<td class="data row17 col1" id="T_85387_row17_col1">264</td>
+<td class="data row17 col2" id="T_85387_row17_col2">$ 33.88</td>
+<td class="data row17 col3" id="T_85387_row17_col3">$ 32.5</td>
+<td class="data row17 col4" id="T_85387_row17_col4"><span style="display:inline-flex;align-items:center;gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a600;border:1px solid #0fd9a600;white-space:nowrap;"> -400</span></td>
+<td class="data row17 col5" id="T_85387_row17_col5"><span style="display:inline-flex;align-items:center;gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a600;border:1px solid #0fd9a600;white-space:nowrap;">⬇ -4.97%</span></td>
+<td class="data row17 col6" id="T_85387_row17_col6"><span style="display:inline-flex;align-items:center;gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a600;white-space:nowrap;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16"><path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg> -4.47%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row18" id="T_85387_level0_row18">3691 碩禾</th>
+<td class="data row18 col0" id="T_85387_row18_col0"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 0.72%</span></td>
+<td class="data row18 col1" id="T_85387_row18_col1">23</td>
+<td class="data row18 col2" id="T_85387_row18_col2">$ 148.17</td>
+<td class="data row18 col3" id="T_85387_row18_col3">$ 155.5</td>
+<td class="data row18 col4" id="T_85387_row18_col4"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 153</span></td>
+<td class="data row18 col5" id="T_85387_row18_col5"><span style="display:inline-flex;align-items:center;gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a600;border:1px solid #0fd9a600;white-space:nowrap;">⬇ -0.95%</span></td>
+<td class="data row18 col6" id="T_85387_row18_col6"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e00;white-space:nowrap;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg> 4.49%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row19" id="T_85387_level0_row19">4127 天良</th>
+<td class="data row19 col0" id="T_85387_row19_col0"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 0.45%</span></td>
+<td class="data row19 col1" id="T_85387_row19_col1">34</td>
+<td class="data row19 col2" id="T_85387_row19_col2">$ 44.97</td>
+<td class="data row19 col3" id="T_85387_row19_col3">$ 66.7</td>
+<td class="data row19 col4" id="T_85387_row19_col4"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 730</span></td>
+<td class="data row19 col5" id="T_85387_row19_col5"><span style="display:inline-flex;align-items:center;gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a600;border:1px solid #0fd9a600;white-space:nowrap;">⬇ -2.05%</span></td>
+<td class="data row19 col6" id="T_85387_row19_col6"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e00;white-space:nowrap;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg> 47.74%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row20" id="T_85387_level0_row20">4576 大銀微系統</th>
+<td class="data row20 col0" id="T_85387_row20_col0"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 2.57%</span></td>
+<td class="data row20 col1" id="T_85387_row20_col1">47</td>
+<td class="data row20 col2" id="T_85387_row20_col2">$ 253.96</td>
+<td class="data row20 col3" id="T_85387_row20_col3">$ 273.0</td>
+<td class="data row20 col4" id="T_85387_row20_col4"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 841</span></td>
+<td class="data row20 col5" id="T_85387_row20_col5"><span style="display:inline-flex;align-items:center;gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a600;border:1px solid #0fd9a600;white-space:nowrap;">⬇ -4.04%</span></td>
+<td class="data row20 col6" id="T_85387_row20_col6"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e00;white-space:nowrap;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg> 7.05%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row21" id="T_85387_level0_row21">6005 群益證</th>
+<td class="data row21 col0" id="T_85387_row21_col0"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 5.26%</span></td>
+<td class="data row21 col1" id="T_85387_row21_col1">750</td>
+<td class="data row21 col2" id="T_85387_row21_col2">$ 31.92</td>
+<td class="data row21 col3" id="T_85387_row21_col3">$ 35.0</td>
+<td class="data row21 col4" id="T_85387_row21_col4"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 2,198</span></td>
+<td class="data row21 col5" id="T_85387_row21_col5"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;">⬆ 5.90%</span></td>
+<td class="data row21 col6" id="T_85387_row21_col6"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e00;white-space:nowrap;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg> 9.18%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row22" id="T_85387_level0_row22">6021 美好證</th>
+<td class="data row22 col0" id="T_85387_row22_col0"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 1.02%</span></td>
+<td class="data row22 col1" id="T_85387_row22_col1">146</td>
+<td class="data row22 col2" id="T_85387_row22_col2">$ 34.52</td>
+<td class="data row22 col3" id="T_85387_row22_col3">$ 34.9</td>
+<td class="data row22 col4" id="T_85387_row22_col4"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 31</span></td>
+<td class="data row22 col5" id="T_85387_row22_col5"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;">⬆ 8.21%</span></td>
+<td class="data row22 col6" id="T_85387_row22_col6"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e00;white-space:nowrap;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg> 0.62%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row23" id="T_85387_level0_row23">6166 凌華</th>
+<td class="data row23 col0" id="T_85387_row23_col0"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 8.34%</span></td>
+<td class="data row23 col1" id="T_85387_row23_col1">306</td>
+<td class="data row23 col2" id="T_85387_row23_col2">$ 104.99</td>
+<td class="data row23 col3" id="T_85387_row23_col3">$ 136.0</td>
+<td class="data row23 col4" id="T_85387_row23_col4"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 9,309</span></td>
+<td class="data row23 col5" id="T_85387_row23_col5"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;">⬆ 2.25%</span></td>
+<td class="data row23 col6" id="T_85387_row23_col6"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e00;white-space:nowrap;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg> 28.98%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row24" id="T_85387_level0_row24">6417 韋僑</th>
+<td class="data row24 col0" id="T_85387_row24_col0"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 2.49%</span></td>
+<td class="data row24 col1" id="T_85387_row24_col1">86</td>
+<td class="data row24 col2" id="T_85387_row24_col2">$ 139.15</td>
+<td class="data row24 col3" id="T_85387_row24_col3">$ 144.5</td>
+<td class="data row24 col4" id="T_85387_row24_col4"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 407</span></td>
+<td class="data row24 col5" id="T_85387_row24_col5"><span style="display:inline-flex;align-items:center;gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a600;border:1px solid #0fd9a600;white-space:nowrap;">⬇ -1.36%</span></td>
+<td class="data row24 col6" id="T_85387_row24_col6"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e00;white-space:nowrap;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg> 3.40%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row25" id="T_85387_level0_row25">6834 天二科技</th>
+<td class="data row25 col0" id="T_85387_row25_col0"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 5.43%</span></td>
+<td class="data row25 col1" id="T_85387_row25_col1">349</td>
+<td class="data row25 col2" id="T_85387_row25_col2">$ 46.3</td>
+<td class="data row25 col3" id="T_85387_row25_col3">$ 77.7</td>
+<td class="data row25 col4" id="T_85387_row25_col4"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 10,840</span></td>
+<td class="data row25 col5" id="T_85387_row25_col5"><span style="display:inline-flex;align-items:center;gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a600;border:1px solid #0fd9a600;white-space:nowrap;">⬇ -5.12%</span></td>
+<td class="data row25 col6" id="T_85387_row25_col6"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e00;white-space:nowrap;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg> 67.08%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row26" id="T_85387_level0_row26">8271 宇瞻</th>
+<td class="data row26 col0" id="T_85387_row26_col0"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 0.23%</span></td>
+<td class="data row26 col1" id="T_85387_row26_col1">5</td>
+<td class="data row26 col2" id="T_85387_row26_col2">$ 248.6</td>
+<td class="data row26 col3" id="T_85387_row26_col3">$ 232.5</td>
+<td class="data row26 col4" id="T_85387_row26_col4"><span style="display:inline-flex;align-items:center;gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a600;border:1px solid #0fd9a600;white-space:nowrap;"> -86</span></td>
+<td class="data row26 col5" id="T_85387_row26_col5"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;">⬆ 1.08%</span></td>
+<td class="data row26 col6" id="T_85387_row26_col6"><span style="display:inline-flex;align-items:center;gap:4px;color:#0fd9a6;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#0fd9a620;border:1px solid #0fd9a600;white-space:nowrap;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16"><path d="M7 7L17 17M17 17H7M17 17V7" stroke="#0fd9a6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg> -6.92%</span></td>
+</tr>
+<tr>
+<th class="row_heading level0 row27" id="T_85387_level0_row27">8926 台汽電</th>
+<td class="data row27 col0" id="T_85387_row27_col0"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 0.42%</span></td>
+<td class="data row27 col1" id="T_85387_row27_col1">29</td>
+<td class="data row27 col2" id="T_85387_row27_col2">$ 53.9</td>
+<td class="data row27 col3" id="T_85387_row27_col3">$ 72.3</td>
+<td class="data row27 col4" id="T_85387_row27_col4"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;"> 525</span></td>
+<td class="data row27 col5" id="T_85387_row27_col5"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e00;border:1px solid #ff627e00;white-space:nowrap;">⬆ 5.24%</span></td>
+<td class="data row27 col6" id="T_85387_row27_col6"><span style="display:inline-flex;align-items:center;gap:4px;color:#ff627e;font-weight:400;font-size:14px;justify-content:center;padding:3px 14px;border-radius:100px;background:#ff627e20;border:1px solid #ff627e00;white-space:nowrap;"><svg fill="none" height="16" viewbox="0 0 24 24" width="16"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="#ff627e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg> 33.59%</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="pagination" id="pg-position"></div>
+</div>
+<script>
+var PAGE_SIZE = 16;
+var pageState = {'position': 1};
+
+function paginate(wrapperId, pgId, key) {
+    var wrapper = document.getElementById(wrapperId);
+    var pgBar   = document.getElementById(pgId);
+    if (!wrapper || !pgBar) return;
+    var tbody = wrapper.querySelector('tbody');
+    if (!tbody) return;
+    var rows      = Array.from(tbody.querySelectorAll('tr'));
+    var total     = rows.length;
+    var totalPage = Math.ceil(total / PAGE_SIZE);
+    if (total <= PAGE_SIZE) {
+        rows.forEach(function(r) { r.style.display = ''; });
+        pgBar.innerHTML = '';
+        return;
+    }
+    var cur = pageState[key];
+    if (cur < 1)         cur = 1;
+    if (cur > totalPage) cur = totalPage;
+    pageState[key] = cur;
+    rows.forEach(function(r, i) {
+        r.style.display = (i >= (cur-1)*PAGE_SIZE && i < cur*PAGE_SIZE) ? '' : 'none';
+    });
+    pgBar.innerHTML = '';
+    var prev = document.createElement('button');
+    prev.textContent = '‹';
+    prev.disabled    = (cur === 1);
+    prev.onclick     = function() { pageState[key] = cur-1; paginate(wrapperId, pgId, key); };
+    pgBar.appendChild(prev);
+    function addBtn(n) {
+        var btn = document.createElement('button');
+        btn.textContent = n;
+        if (n === cur) btn.classList.add('active');
+        btn.onclick = function() { pageState[key] = n; paginate(wrapperId, pgId, key); };
+        pgBar.appendChild(btn);
+    }
+    function addEllipsis() {
+        var span = document.createElement('button');
+        span.textContent = '…'; span.disabled = true;
+        pgBar.appendChild(span);
+    }
+    if (totalPage <= 7) {
+        for (var p = 1; p <= totalPage; p++) addBtn(p);
+    } else {
+        addBtn(1);
+        if (cur > 4) addEllipsis();
+        var start = Math.max(2, cur-2);
+        var end   = Math.min(totalPage-1, cur+2);
+        for (var p = start; p <= end; p++) addBtn(p);
+        if (cur < totalPage-3) addEllipsis();
+        addBtn(totalPage);
+    }
+    var next = document.createElement('button');
+    next.textContent = '›';
+    next.disabled    = (cur === totalPage);
+    next.onclick     = function() { pageState[key] = cur+1; paginate(wrapperId, pgId, key); };
+    pgBar.appendChild(next);
+}
+
+window.addEventListener('DOMContentLoaded', function() {
+        paginate('tbl-position', 'pg-position', 'position');
+});
+
+document.addEventListener('click', function(e) {
+    var th = e.target.closest('thead th');
+    if (!th) return;
+        var inSection_position = document.getElementById('tbl-position').contains(th);
+        if (inSection_position) { setTimeout(function(){ pageState['position']=1; paginate('tbl-position','pg-position','position'); },0); }
+});
+</script>
+<script>
+(function () {
+function parseVal(text) {
+    var t = text.trim().replace(/^[^\d\-\.]+/, '');
+    var n = parseFloat(t.replace(/,/g, '').replace('%', ''));
+    if (!isNaN(n)) return n;
+    var d = Date.parse(t);
+    if (!isNaN(d)) return d;
+    return t.toLowerCase();
+}
+function enableSort(table) {
+    if (!table) return;
+    var headers   = table.querySelectorAll('thead th');
+    var sortState = Array(headers.length).fill(null);
+    headers.forEach(function (th, colIdx) {
+        th.addEventListener('click', function () {
+            var dir = sortState[colIdx] === 'asc' ? 'desc' : 'asc';
+            sortState = Array(headers.length).fill(null);
+            sortState[colIdx] = dir;
+            headers.forEach(function (h) { h.dataset.sort = ''; });
+            th.dataset.sort = dir;
+            var tbody = table.querySelector('tbody');
+            var rows  = Array.from(tbody.querySelectorAll('tr'));
+            rows.sort(function (a, b) {
+                var cellA = a.querySelectorAll('th, td')[colIdx];
+                var cellB = b.querySelectorAll('th, td')[colIdx];
+                var va = cellA ? parseVal(cellA.innerText) : '';
+                var vb = cellB ? parseVal(cellB.innerText) : '';
+                if (va < vb) return dir === 'asc' ? -1 :  1;
+                if (va > vb) return dir === 'asc' ?  1 : -1;
+                return 0;
+            });
+            rows.forEach(function (r) { tbody.appendChild(r); });
+        });
+    });
+}
+window.addEventListener('DOMContentLoaded', function () {
+    ["tbl-position"].forEach(function (id) {
+        var w = document.getElementById(id);
+        if (w) enableSort(w.querySelector('table'));
+    });
+});
+})();
+</script>
+</div><script>
+const MODES={
+    a:{title:'未實現損益',data:[{"name": "3090 日電貿", "weight": 4.12, "return": 95.91, "change_rate": -0.43, "pct": 4.1196, "color": "#ff627eFF"}, {"name": "6834 天二科技", "weight": 5.43, "return": 67.08, "change_rate": -5.12, "pct": 5.4295, "color": "#ff627eFF"}, {"name": "4127 天良", "weight": 0.45, "return": 47.74, "change_rate": -2.05, "pct": 0.45, "color": "#ff627eFF"}, {"name": "8926 台汽電", "weight": 0.42, "return": 33.59, "change_rate": 5.24, "pct": 0.42, "color": "#ff627eFF"}, {"name": "6166 凌華", "weight": 8.34, "return": 28.98, "change_rate": 2.25, "pct": 8.3392, "color": "#ff627eFF"}, {"name": "2302 麗正", "weight": 0.01, "return": 25.49, "change_rate": -3.68, "pct": 0.01, "color": "#ff627eFF"}, {"name": "3209 全科", "weight": 3.02, "return": 23.59, "change_rate": 1.24, "pct": 3.0197, "color": "#ff627eFF"}, {"name": "1560 中砂", "weight": 0.44, "return": 12.13, "change_rate": -2.02, "pct": 0.44, "color": "#ff627eC2"}, {"name": "00981A 主動統一台股增長", "weight": 38.43, "return": 10.91, "change_rate": 1.49, "pct": 38.4262, "color": "#ff627eB7"}, {"name": "3036 文曄", "weight": 3.03, "return": 10.68, "change_rate": 0.85, "pct": 3.0297, "color": "#ff627eB5"}, {"name": "3006 晶豪科", "weight": 0.97, "return": 9.39, "change_rate": 4.1, "pct": 0.9699, "color": "#ff627eA9"}, {"name": "6005 群益證", "weight": 5.26, "return": 9.18, "change_rate": 5.9, "pct": 5.2595, "color": "#ff627eA7"}, {"name": "4576 大銀微系統", "weight": 2.57, "return": 7.05, "change_rate": -4.04, "pct": 2.5697, "color": "#ff627e92"}, {"name": "2395 研華", "weight": 2.86, "return": 6.42, "change_rate": -0.19, "pct": 2.8597, "color": "#ff627e8B"}, {"name": "2301 光寶科", "weight": 0.49, "return": 5.01, "change_rate": 2.71, "pct": 0.49, "color": "#ff627e7B"}, {"name": "2376 技嘉", "weight": 4.0, "return": 4.77, "change_rate": -1.04, "pct": 3.9996, "color": "#ff627e78"}, {"name": "3691 碩禾", "weight": 0.72, "return": 4.49, "change_rate": -0.95, "pct": 0.7199, "color": "#ff627e74"}, {"name": "6417 韋僑", "weight": 2.49, "return": 3.4, "change_rate": -1.36, "pct": 2.4898, "color": "#ff627e65"}, {"name": "3229 晟鈦", "weight": 1.22, "return": 1.49, "change_rate": -4.17, "pct": 1.2199, "color": "#ff627e46"}, {"name": "3055 蔚華科", "weight": 0.59, "return": 1.18, "change_rate": -5.46, "pct": 0.5899, "color": "#ff627e3F"}, {"name": "2345 智邦", "weight": 6.3, "return": 0.97, "change_rate": 0.0, "pct": 6.2994, "color": "#ff627e3B"}, {"name": "6021 美好證", "weight": 1.02, "return": 0.62, "change_rate": 8.21, "pct": 1.0199, "color": "#ff627e32"}, {"name": "2408 南亞科", "weight": 0.25, "return": 0.0, "change_rate": 2.8, "pct": 0.25, "color": "#ff627e14"}, {"name": "1590 亞德客-KY", "weight": 1.15, "return": -1.58, "change_rate": -2.04, "pct": 1.1499, "color": "#0fd9a648"}, {"name": "2451 創見", "weight": 2.51, "return": -3.69, "change_rate": 1.42, "pct": 2.5097, "color": "#0fd9a669"}, {"name": "3354 律勝", "weight": 1.72, "return": -4.47, "change_rate": -4.97, "pct": 1.7198, "color": "#0fd9a674"}, {"name": "8271 宇瞻", "weight": 0.23, "return": -6.92, "change_rate": 1.08, "pct": 0.23, "color": "#0fd9a691"}, {"name": "2059 川湖", "weight": 1.97, "return": -9.4, "change_rate": -2.28, "pct": 1.9698, "color": "#0fd9a6AA"}],valueKey:'return',retColor:'#ff627e',retStr:'+13.48%'},
+    b:{title:'即時行情',  data:[{"name": "6021 美好證", "weight": 1.02, "return": 0.62, "change_rate": 8.21, "pct": 1.0199, "color": "#ff627eE5"}, {"name": "6005 群益證", "weight": 5.26, "return": 9.18, "change_rate": 5.9, "pct": 5.2595, "color": "#ff627eBF"}, {"name": "8926 台汽電", "weight": 0.42, "return": 33.59, "change_rate": 5.24, "pct": 0.42, "color": "#ff627eB4"}, {"name": "3006 晶豪科", "weight": 0.97, "return": 9.39, "change_rate": 4.1, "pct": 0.9699, "color": "#ff627e9E"}, {"name": "2408 南亞科", "weight": 0.25, "return": 0.0, "change_rate": 2.8, "pct": 0.25, "color": "#ff627e82"}, {"name": "2301 光寶科", "weight": 0.49, "return": 5.01, "change_rate": 2.71, "pct": 0.49, "color": "#ff627e80"}, {"name": "6166 凌華", "weight": 8.34, "return": 28.98, "change_rate": 2.25, "pct": 8.3392, "color": "#ff627e74"}, {"name": "00981A 主動統一台股增長", "weight": 38.43, "return": 10.91, "change_rate": 1.49, "pct": 38.4262, "color": "#ff627e5F"}, {"name": "2451 創見", "weight": 2.51, "return": -3.69, "change_rate": 1.42, "pct": 2.5097, "color": "#ff627e5D"}, {"name": "3209 全科", "weight": 3.02, "return": 23.59, "change_rate": 1.24, "pct": 3.0197, "color": "#ff627e57"}, {"name": "8271 宇瞻", "weight": 0.23, "return": -6.92, "change_rate": 1.08, "pct": 0.23, "color": "#ff627e52"}, {"name": "3036 文曄", "weight": 3.03, "return": 10.68, "change_rate": 0.85, "pct": 3.0297, "color": "#ff627e4A"}, {"name": "2345 智邦", "weight": 6.3, "return": 0.97, "change_rate": 0.0, "pct": 6.2994, "color": "#ff627e14"}, {"name": "2395 研華", "weight": 2.86, "return": 6.42, "change_rate": -0.19, "pct": 2.8597, "color": "#0fd9a62A"}, {"name": "3090 日電貿", "weight": 4.12, "return": 95.91, "change_rate": -0.43, "pct": 4.1196, "color": "#0fd9a638"}, {"name": "3691 碩禾", "weight": 0.72, "return": 4.49, "change_rate": -0.95, "pct": 0.7199, "color": "#0fd9a64E"}, {"name": "2376 技嘉", "weight": 4.0, "return": 4.77, "change_rate": -1.04, "pct": 3.9996, "color": "#0fd9a651"}, {"name": "6417 韋僑", "weight": 2.49, "return": 3.4, "change_rate": -1.36, "pct": 2.4898, "color": "#0fd9a65B"}, {"name": "1560 中砂", "weight": 0.44, "return": 12.13, "change_rate": -2.02, "pct": 0.44, "color": "#0fd9a66E"}, {"name": "1590 亞德客-KY", "weight": 1.15, "return": -1.58, "change_rate": -2.04, "pct": 1.1499, "color": "#0fd9a66F"}, {"name": "4127 天良", "weight": 0.45, "return": 47.74, "change_rate": -2.05, "pct": 0.45, "color": "#0fd9a66F"}, {"name": "2059 川湖", "weight": 1.97, "return": -9.4, "change_rate": -2.28, "pct": 1.9698, "color": "#0fd9a675"}, {"name": "2302 麗正", "weight": 0.01, "return": 25.49, "change_rate": -3.68, "pct": 0.01, "color": "#0fd9a695"}, {"name": "4576 大銀微系統", "weight": 2.57, "return": 7.05, "change_rate": -4.04, "pct": 2.5697, "color": "#0fd9a69D"}, {"name": "3229 晟鈦", "weight": 1.22, "return": 1.49, "change_rate": -4.17, "pct": 1.2199, "color": "#0fd9a69F"}, {"name": "3354 律勝", "weight": 1.72, "return": -4.47, "change_rate": -4.97, "pct": 1.7198, "color": "#0fd9a6AF"}, {"name": "6834 天二科技", "weight": 5.43, "return": 67.08, "change_rate": -5.12, "pct": 5.4295, "color": "#0fd9a6B1"}, {"name": "3055 蔚華科", "weight": 0.59, "return": 1.18, "change_rate": -5.46, "pct": 0.5899, "color": "#0fd9a6B8"}],valueKey:'change_rate',retColor:'#ff627e',retStr:'+0.59%'},
+};
+const POS_COLOR='#ff627e',NEG_COLOR='#0fd9a6',BG_COLOR='#18171c';
+let currentMode='a';
+const cx=140,cy=140,R=132,r=82;
+function xy(deg,rad){const a=deg*Math.PI/180;return[cx+rad*Math.cos(a),cy+rad*Math.sin(a)];}
+function arc(s,e){
+    const[x1,y1]=xy(s,R),[x2,y2]=xy(e,R),[x3,y3]=xy(e,r),[x4,y4]=xy(s,r);
+    const lg=e-s>180?1:0;
+    return `M${x1},${y1} A${R},${R} 0 ${lg},1 ${x2},${y2} L${x3},${y3} A${r},${r} 0 ${lg},0 ${x4},${y4}Z`;
+}
+function renderChart(modeKey){
+    const mode=MODES[modeKey];
+    const svg=document.getElementById('chart'),legend=document.getElementById('legend');
+    const mainLbl=document.getElementById('mainLabel'),retVal=document.getElementById('retValue');
+    const tt=document.getElementById('tooltip');
+    svg.innerHTML='';legend.innerHTML='';tt.style.display='none';
+    mainLbl.textContent=mode.title;mainLbl.style.color='rgba(235,249,255,.55)';
+    retVal.textContent=mode.retStr;retVal.style.color=mode.retColor;
+    const DATA=mode.data,vk=mode.valueKey;
+    const total=DATA.reduce((s,d)=>s+d.pct,0);
+    let angle=-90;
+    DATA.forEach(d=>{
+        const val=d[vk],sweep=(d.pct/total)*360,s=angle,e=angle+sweep;
+        angle+=sweep;
+        const vc=val>=0?POS_COLOR:NEG_COLOR,vs=(val>=0?'+':'')+val.toFixed(2)+'%';
+        const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+        path.setAttribute('d',arc(s,e));path.setAttribute('fill',d.color);
+        path.setAttribute('opacity','0.9');
+        path.style.cssText='cursor:pointer;transition:opacity .12s,filter .12s';
+        function onEnter(ev){
+            path.setAttribute('opacity','1');path.style.filter='brightness(1.3)';
+            mainLbl.textContent=d.name;mainLbl.style.color='rgba(235,249,255,.75)';
+            retVal.textContent=vs;retVal.style.color=vc;
+            tt.style.display='block';
+            tt.innerHTML=`<div class="tt-name">${d.name}</div>
+                <div style="color:${vc};font-weight:500">${vs}</div>
+                <div class="tt-dim">Weight&nbsp;&nbsp;${d.weight.toFixed(2)}%</div>
+                <div class="tt-dim">Portfolio ${d.pct.toFixed(2)}%</div>`;
+            if(ev&&ev.clientX){tt.style.left=(ev.clientX+14)+'px';tt.style.top=(ev.clientY-10)+'px';}
+        }
+        function onMove(ev){tt.style.left=(ev.clientX+14)+'px';tt.style.top=(ev.clientY-10)+'px';}
+        function onLeave(){
+            path.setAttribute('opacity','0.9');path.style.filter='';
+            mainLbl.textContent=mode.title;mainLbl.style.color='rgba(235,249,255,.55)';
+            retVal.textContent=mode.retStr;retVal.style.color=mode.retColor;tt.style.display='none';
+        }
+        path.addEventListener('mouseenter',onEnter);
+        path.addEventListener('mousemove',onMove);
+        path.addEventListener('mouseleave',onLeave);
+        svg.appendChild(path);
+        const row=document.createElement('div');
+        row.className='legend-item';
+        row.innerHTML=`<div class="legend-swatch" style="background:${d.color}"></div>
+            <div class="legend-name" title="${d.name}">${d.name}</div>
+            <div class="legend-wt">${d.weight.toFixed(1)}%</div>
+            <div class="legend-ret" style="color:${vc}">${vs}</div>`;
+        row.addEventListener('mouseenter',onEnter);
+        row.addEventListener('mouseleave',onLeave);
+        legend.appendChild(row);
+    });
+    const bg=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    bg.setAttribute('cx',cx);bg.setAttribute('cy',cy);
+    bg.setAttribute('r',r-1);bg.setAttribute('fill',BG_COLOR);
+    svg.appendChild(bg);
+}
+function switchMode(k){
+    if(k===currentMode)return;
+    currentMode=k;
+    document.getElementById('btn-a').classList.toggle('active',k==='a');
+    document.getElementById('btn-b').classList.toggle('active',k==='b');
+    renderChart(k);
+}
+renderChart('a');
+</script><script>
+var PAGE_SIZE = 16;
+var pageState = {'position': 1};
+
+function paginate(wrapperId, pgId, key) {
+    var wrapper = document.getElementById(wrapperId);
+    var pgBar   = document.getElementById(pgId);
+    if (!wrapper || !pgBar) return;
+    var tbody = wrapper.querySelector('tbody');
+    if (!tbody) return;
+    var rows      = Array.from(tbody.querySelectorAll('tr'));
+    var total     = rows.length;
+    var totalPage = Math.ceil(total / PAGE_SIZE);
+    if (total <= PAGE_SIZE) {
+        rows.forEach(function(r) { r.style.display = ''; });
+        pgBar.innerHTML = '';
+        return;
+    }
+    var cur = pageState[key];
+    if (cur < 1)         cur = 1;
+    if (cur > totalPage) cur = totalPage;
+    pageState[key] = cur;
+    rows.forEach(function(r, i) {
+        r.style.display = (i >= (cur-1)*PAGE_SIZE && i < cur*PAGE_SIZE) ? '' : 'none';
+    });
+    pgBar.innerHTML = '';
+    var prev = document.createElement('button');
+    prev.textContent = '‹';
+    prev.disabled    = (cur === 1);
+    prev.onclick     = function() { pageState[key] = cur-1; paginate(wrapperId, pgId, key); };
+    pgBar.appendChild(prev);
+    function addBtn(n) {
+        var btn = document.createElement('button');
+        btn.textContent = n;
+        if (n === cur) btn.classList.add('active');
+        btn.onclick = function() { pageState[key] = n; paginate(wrapperId, pgId, key); };
+        pgBar.appendChild(btn);
+    }
+    function addEllipsis() {
+        var span = document.createElement('button');
+        span.textContent = '…'; span.disabled = true;
+        pgBar.appendChild(span);
+    }
+    if (totalPage <= 7) {
+        for (var p = 1; p <= totalPage; p++) addBtn(p);
+    } else {
+        addBtn(1);
+        if (cur > 4) addEllipsis();
+        var start = Math.max(2, cur-2);
+        var end   = Math.min(totalPage-1, cur+2);
+        for (var p = start; p <= end; p++) addBtn(p);
+        if (cur < totalPage-3) addEllipsis();
+        addBtn(totalPage);
+    }
+    var next = document.createElement('button');
+    next.textContent = '›';
+    next.disabled    = (cur === totalPage);
+    next.onclick     = function() { pageState[key] = cur+1; paginate(wrapperId, pgId, key); };
+    pgBar.appendChild(next);
+}
+
+window.addEventListener('DOMContentLoaded', function() {
+        paginate('tbl-position', 'pg-position', 'position');
+});
+
+document.addEventListener('click', function(e) {
+    var th = e.target.closest('thead th');
+    if (!th) return;
+        var inSection_position = document.getElementById('tbl-position').contains(th);
+        if (inSection_position) { setTimeout(function(){ pageState['position']=1; paginate('tbl-position','pg-position','position'); },0); }
+});
+</script><script>
+(function () {
+function parseVal(text) {
+    var t = text.trim().replace(/^[^\d\-\.]+/, '');
+    var n = parseFloat(t.replace(/,/g, '').replace('%', ''));
+    if (!isNaN(n)) return n;
+    var d = Date.parse(t);
+    if (!isNaN(d)) return d;
+    return t.toLowerCase();
+}
+function enableSort(table) {
+    if (!table) return;
+    var headers   = table.querySelectorAll('thead th');
+    var sortState = Array(headers.length).fill(null);
+    headers.forEach(function (th, colIdx) {
+        th.addEventListener('click', function () {
+            var dir = sortState[colIdx] === 'asc' ? 'desc' : 'asc';
+            sortState = Array(headers.length).fill(null);
+            sortState[colIdx] = dir;
+            headers.forEach(function (h) { h.dataset.sort = ''; });
+            th.dataset.sort = dir;
+            var tbody = table.querySelector('tbody');
+            var rows  = Array.from(tbody.querySelectorAll('tr'));
+            rows.sort(function (a, b) {
+                var cellA = a.querySelectorAll('th, td')[colIdx];
+                var cellB = b.querySelectorAll('th, td')[colIdx];
+                var va = cellA ? parseVal(cellA.innerText) : '';
+                var vb = cellB ? parseVal(cellB.innerText) : '';
+                if (va < vb) return dir === 'asc' ? -1 :  1;
+                if (va > vb) return dir === 'asc' ?  1 : -1;
+                return 0;
+            });
+            rows.forEach(function (r) { tbody.appendChild(r); });
+        });
+    });
+}
+window.addEventListener('DOMContentLoaded', function () {
+    ["tbl-position"].forEach(function (id) {
+        var w = document.getElementById(id);
+        if (w) enableSort(w.querySelector('table'));
+    });
+});
+})();
+</script></body>
+</html>
