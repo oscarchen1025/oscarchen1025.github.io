@@ -12,10 +12,10 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .wrap{position:relative;z-index:1;width:900px;max-width:100%;}
 
 /* ── Account Summary ── */
-.acct-block{border-radius:14px;background:linear-gradient(160deg,rgba(255,255,255,0.04),#13121a);border:1px solid #252334;box-shadow:0 0 0 0.5px rgba(100,80,255,0.12),0 8px 32px rgba(0,0,0,0.55);padding:16px 22px;margin-bottom:14px;display:inline-flex;align-items:flex-end;gap:12px;}
+.acct-block{border-radius:14px;background:linear-gradient(160deg,rgba(255,255,255,0.04),#13121a);border:1px solid #252334;box-shadow:0 0 0 0.5px rgba(100,80,255,0.12),0 8px 32px rgba(0,0,0,0.55);padding:16px 22px;margin-bottom:14px;display:inline-flex;align-items:flex-end;gap:12px;flex-wrap:wrap;}
 .acct-cost-lbl{font-size:12px;letter-spacing:0.12em;color:rgba(235,249,255,0.35);text-transform:uppercase;margin-bottom:5px;}
 .acct-cost-val{font-size:36px;font-weight:700;letter-spacing:-0.02em;color:#ebf9ff;line-height:1;}
-.acct-pnl-inline{display:flex;align-items:center;gap:6px;padding-bottom:3px;}
+.acct-pnl-inline{display:flex;align-items:center;gap:6px;padding-bottom:3px;flex-wrap:wrap;}
 .acct-metric-lbl{font-size:12px;color:rgba(235,249,255,0.35);}
 .acct-metric-val{font-size:13px;font-weight:600;}
 .tri-up{display:inline-block;width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-bottom:6px solid #ff627e;}
@@ -56,8 +56,19 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .tsB .t-btn.active::after{opacity:1;transform:scaleX(1);}
 .tsB .t-btn:hover:not(.active){color:rgba(235,249,255,0.62);}
 
-/* ── Viz wrap ── */
-.viz-wrap{display:flex;gap:20px;border-radius:16px;background:linear-gradient(160deg,rgba(255,255,255,0.04),#13121a);border:1px solid #252334;box-shadow:0 0 0 0.5px rgba(100,80,255,0.12),0 8px 32px rgba(0,0,0,0.55);padding:20px;margin-bottom:14px;align-items:flex-start;}
+/* ── Viz wrap（桌機：橫排）── */
+.viz-wrap{
+  display:flex;
+  flex-direction:row;
+  gap:20px;
+  border-radius:16px;
+  background:linear-gradient(160deg,rgba(255,255,255,0.04),#13121a);
+  border:1px solid #252334;
+  box-shadow:0 0 0 0.5px rgba(100,80,255,0.12),0 8px 32px rgba(0,0,0,0.55);
+  padding:20px;
+  margin-bottom:14px;
+  align-items:flex-start;
+}
 .donut-col{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;margin-top:-14px;}
 .donut-svg-wrap{position:relative;width:260px;height:260px;}
 .donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;pointer-events:none;padding:0 22px;text-align:center;}
@@ -78,6 +89,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
 /* ── Table ── */
 .table-wrap{border-radius:16px;background:linear-gradient(160deg,rgba(255,255,255,0.04),#13121a);border:1px solid #252334;box-shadow:0 0 0 0.5px rgba(100,80,255,0.12),0 8px 32px rgba(0,0,0,0.55);overflow:hidden;}
+/* 手機橫向捲動容器 */
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .tbl{width:100%;border-collapse:separate;border-spacing:0 3px;padding:12px 16px;}
 .tbl thead th{padding:6px 14px 10px;font-size:11px;font-weight:500;color:rgba(235,249,255,0.40);letter-spacing:0.06em;border-bottom:1px solid rgba(255,255,255,0.06);text-align:left;cursor:pointer;user-select:none;white-space:nowrap;transition:color 0.15s;}
 .tbl thead th:hover{color:#ebf9ff;}
@@ -93,13 +106,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   transition:background 0.15s;
   cursor:pointer;
 }
-/* hover：背景不變色，只改游標 */
 .tbl tbody tr:hover{background:linear-gradient(180deg,#1e1d26,#13121a);}
-
-/* active：背景不變，底部顯示紫色線條 */
-.tbl tbody tr.row-active{
-  background:linear-gradient(180deg,#1e1d26,#13121a) !important;
-}
+.tbl tbody tr.row-active{background:linear-gradient(180deg,#1e1d26,#13121a) !important;}
 .tbl tbody td{
   padding:10px 14px;
   font-size:13px;
@@ -107,10 +115,10 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   border-top:1px solid rgba(255,255,255,0.07);
   border-bottom:1px solid rgba(0,0,0,0.4);
   transition:border-bottom-color 0.2s;
+  white-space:nowrap;
 }
 .tbl tbody td:first-child{border-radius:10px 0 0 10px;border-left:1px solid rgba(255,255,255,0.08);font-weight:600;}
 .tbl tbody td:last-child{border-radius:0 10px 10px 0;border-right:1px solid rgba(255,255,255,0.08);}
-/* active 列底部紫色線 */
 .tbl tbody tr.row-active td{border-bottom-color:#6566fc;}
 
 /* ── Inline K 線展開列 ── */
@@ -119,6 +127,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   border:none !important;
   border-radius:0 !important;
   background:transparent !important;
+  white-space:normal !important;
 }
 .kline-inline-wrap{
   background:linear-gradient(160deg,#181728,#0f0e1a);
@@ -127,16 +136,12 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   margin:2px 4px 8px;
   overflow:hidden;
 }
-
 .kline-chart-area{height:280px;position:relative;}
 .kline-vol-area{height:70px;position:relative;border-top:1px solid rgba(255,255,255,0.04);}
-.kline-no-data{
-  display:flex;align-items:center;justify-content:center;
-  height:100%;color:rgba(235,249,255,0.3);font-size:13px;
-}
+.kline-no-data{display:flex;align-items:center;justify-content:center;height:100%;color:rgba(235,249,255,0.3);font-size:13px;}
 
 /* ── Pagination ── */
-.pagination{display:flex;align-items:center;justify-content:center;gap:6px;padding:14px 16px 10px;border-top:1px solid rgba(255,255,255,0.06);}
+.pagination{display:flex;align-items:center;justify-content:center;gap:6px;padding:14px 16px 10px;border-top:1px solid rgba(255,255,255,0.06);flex-wrap:wrap;}
 .pg-btn{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.10);color:rgba(235,249,255,0.65);border-radius:7px;padding:5px 12px;font-size:12px;cursor:pointer;transition:background 0.15s,color 0.15s,border-color 0.15s;font-family:"Inter","Noto Sans TC",sans-serif;}
 .pg-btn:hover:not(:disabled){background:rgba(255,255,255,0.10);color:#ebf9ff;border-color:rgba(255,255,255,0.22);}
 .pg-btn:disabled{opacity:0.3;cursor:not-allowed;}
@@ -145,6 +150,59 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
 /* ── Tooltip ── */
 #tt{position:fixed;z-index:999;pointer-events:none;display:none;background:rgba(22,21,30,0.96);border:1px solid #2e2b45;border-radius:10px;padding:10px 14px;min-width:170px;box-shadow:0 8px 32px rgba(0,0,0,0.6);font-size:12px;line-height:1.9;}
+
+/* ══════════════════════════════════════════════════════════════════
+   RWD — 平板（＜900px）
+══════════════════════════════════════════════════════════════════ */
+@media (max-width:899px){
+  body{padding:14px;}
+  .wrap{width:100%;}
+  /* acct */
+  .acct-block{width:100%;}
+  .acct-cost-val{font-size:28px;}
+  /* viz：donut 上方、bar 下方 */
+  .viz-wrap{flex-direction:column;align-items:center;gap:14px;padding:16px;}
+  .donut-col{margin-top:0;width:100%;align-items:center;}
+  .donut-svg-wrap{width:220px;height:220px;}
+  .bar-col{width:100%;}
+  .bar-viewport{height:200px;}
+  /* table padding 縮小 */
+  .tbl{padding:8px 10px;}
+  .tbl thead th{padding:6px 10px 8px;}
+  .tbl tbody td{padding:8px 10px;font-size:12px;}
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   RWD — 手機（＜600px）
+══════════════════════════════════════════════════════════════════ */
+@media (max-width:599px){
+  body{padding:10px;}
+  /* acct */
+  .acct-block{padding:12px 14px;gap:8px;}
+  .acct-cost-val{font-size:22px;}
+  .acct-metric-val{font-size:12px;}
+  /* viz */
+  .viz-wrap{padding:12px;gap:10px;}
+  .donut-svg-wrap{width:180px;height:180px;}
+  .donut-center-val{font-size:18px;}
+  .bar-viewport{height:160px;}
+  .h-bar-row{grid-template-columns:80px 1fr 58px;column-gap:6px;}
+  .h-bar-name{font-size:11px;}
+  .h-bar-ret{font-size:11px;}
+  /* toggle 按鈕 */
+  .tsB .t-btn{padding:7px 12px 9px;font-size:11px;}
+  /* table：橫向捲動，最小欄寬保住可讀性 */
+  .tbl{min-width:580px;padding:6px 8px;}
+  .tbl thead th{padding:5px 8px 7px;font-size:10px;}
+  .tbl tbody td{padding:7px 8px;font-size:11px;}
+  /* kline 縮小高度 */
+  .kline-chart-area{height:200px;}
+  .kline-vol-area{height:50px;}
+  /* pagination */
+  .pg-btn{padding:4px 10px;font-size:11px;}
+  /* 隱藏 tooltip（手機無 hover）*/
+  #tt{display:none !important;}
+}
 </style>
 </head>
 <body>
@@ -166,8 +224,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
   <div class="viz-wrap">
     <div class="donut-col">
-      <div class="donut-svg-wrap">
-        <svg id="donutSvg" width="260" height="260" viewBox="0 0 260 260">
+      <div class="donut-svg-wrap" id="donutSvgWrap">
+        <svg id="donutSvg" viewBox="0 0 260 260" style="width:100%;height:100%;">
           <defs>
             <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
               <feGaussianBlur stdDeviation="4" result="blur"/>
@@ -205,7 +263,9 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   </div>
 
   <div class="table-wrap">
-    <table class="tbl" id="posTable"></table>
+    <div class="table-scroll">
+      <table class="tbl" id="posTable"></table>
+    </div>
     <div class="pagination" id="pagination"></div>
   </div>
 </div>
@@ -227,6 +287,7 @@ const KLINE_FONT_COLOR_JS      = "rgba(235,249,255,0.5)";
 const KLINE_GRID_COLOR_JS      = "rgba(255,255,255,0.04)";
 const KLINE_CROSSHAIR_COLOR_JS = "rgba(255,255,255,0.2)";
 const KLINE_AXIS_LABEL_BG_JS   = "#1e1d26";
+const KLINE_CHART_BG_COLOR_JS  = "#0b0b0e";
 
 /* ── 圓餅圖 / 長條圖 / 表格固定配色（不受 UP/DOWN_COLOR 影響）── */
 const CHART_UP_HEX   = '#ff627e';
@@ -258,7 +319,6 @@ function arcPath(cx,cy,R,ri,s,e){
   return`M${x1},${y1} A${R},${R} 0 ${lg},1 ${x2},${y2} L${x3},${y3} A${ri},${ri} 0 ${lg},0 ${x4},${y4}Z`;
 }
 
-/* 圓餅圖 / 長條圖使用固定配色 */
 function retColor(val){
   const maxAbs=mode==='ret'?Math.max(...H.records.map(r=>Math.abs(r.ret)),0.01):10;
   const norm=Math.min(Math.abs(val)/maxAbs,1);
@@ -266,10 +326,12 @@ function retColor(val){
   const ah=Math.round(a*255).toString(16).padStart(2,'0');
   return '#'+(val>=0?CHART_UP_HEX.slice(1):CHART_DOWN_HEX.slice(1))+ah;
 }
-/* 文字 / tooltip 使用固定配色 */
 function retHex(v){return v>=0?CHART_UP_HEX:CHART_DOWN_HEX;}
 function fmtSign(v,dec=2){return(v>=0?'+':'')+v.toFixed(dec)+'%';}
 function getVal(rec){return mode==='ret'?rec.ret:rec.change_rate;}
+
+/* ── 是否為觸控裝置（手機不顯示 tooltip）── */
+const isTouchDevice = () => window.matchMedia('(max-width:599px)').matches;
 
 /* ── Account summary ── */
 (function initAcct(){
@@ -334,9 +396,17 @@ function buildDonut(){
     main.setAttribute('d',arcPath(CX,CY,R,INNER,s,e));
     main.setAttribute('fill',color);main.setAttribute('opacity','0.92');
     main.style.cssText='cursor:pointer;transition:opacity 0.15s,filter 0.15s;';
-    main.addEventListener('mouseenter',ev=>{setCenter(rec);main.style.filter='brightness(1.35)';if(barRows[rec.label])barRows[rec.label].style.background='rgba(235,249,255,0.06)';showTt(rec,ev);});
-    main.addEventListener('mousemove',ev=>moveTt(ev));
-    main.addEventListener('mouseleave',()=>{resetCenter();main.style.filter='';if(barRows[rec.label])barRows[rec.label].style.background='';hideTt();});
+    main.addEventListener('mouseenter',ev=>{
+      setCenter(rec);main.style.filter='brightness(1.35)';
+      if(barRows[rec.label])barRows[rec.label].style.background='rgba(235,249,255,0.06)';
+      if(!isTouchDevice())showTt(rec,ev);
+    });
+    main.addEventListener('mousemove',ev=>{if(!isTouchDevice())moveTt(ev);});
+    main.addEventListener('mouseleave',()=>{
+      resetCenter();main.style.filter='';
+      if(barRows[rec.label])barRows[rec.label].style.background='';
+      hideTt();
+    });
     mainG.appendChild(main);
     svgPaths[rec.label]=main;
     const[hx1,hy1]=polar(CX,CY,R,s),[hx2,hy2]=polar(CX,CY,R,e);
@@ -364,9 +434,17 @@ function buildBars(){
       <div class="h-bar-name" title="${rec.ticker} ${rec.name}">${rec.ticker} ${rec.name}</div>
       <div class="h-bar-track"><div class="h-bar-fill" style="width:${fp}%;background:${retColor(v)};"></div></div>
       <div class="h-bar-ret" style="color:${rc};">${rs}</div>`;
-    row.addEventListener('mouseenter',ev=>{setCenter(rec);if(svgPaths[rec.label])svgPaths[rec.label].style.filter='brightness(1.35)';showTt(rec,ev);});
-    row.addEventListener('mousemove',ev=>moveTt(ev));
-    row.addEventListener('mouseleave',()=>{resetCenter();if(svgPaths[rec.label])svgPaths[rec.label].style.filter='';hideTt();});
+    row.addEventListener('mouseenter',ev=>{
+      setCenter(rec);
+      if(svgPaths[rec.label])svgPaths[rec.label].style.filter='brightness(1.35)';
+      if(!isTouchDevice())showTt(rec,ev);
+    });
+    row.addEventListener('mousemove',ev=>{if(!isTouchDevice())moveTt(ev);});
+    row.addEventListener('mouseleave',()=>{
+      resetCenter();
+      if(svgPaths[rec.label])svgPaths[rec.label].style.filter='';
+      hideTt();
+    });
     barListEl.appendChild(row);
     barRows[rec.label]=row;
   });
@@ -384,13 +462,13 @@ document.getElementById('btnRC').addEventListener('click',()=>updateMode('change
 
 /* ── Table ── */
 const cols=[
-  {key:'ticker_name',label:'Symbol',          sortable:false},
-  {key:'weight',     label:'Weight',          sortable:true},
-  {key:'quantity',   label:'Quantity',        sortable:true},
-  {key:'price',      label:'Avg cost',        sortable:true},
-  {key:'last_price', label:'Price',           sortable:true},
-  {key:'change_rate',label:'Change %',        sortable:true},
-  {key:'pnl',        label:'PnL',             sortable:true},
+  {key:'ticker_name',label:'Symbol',           sortable:false},
+  {key:'weight',     label:'Weight',           sortable:true},
+  {key:'quantity',   label:'Quantity',         sortable:true},
+  {key:'price',      label:'Avg cost',         sortable:true},
+  {key:'last_price', label:'Price',            sortable:true},
+  {key:'change_rate',label:'Change %',         sortable:true},
+  {key:'pnl',        label:'PnL',              sortable:true},
   {key:'ret',        label:'Unrealized return',sortable:true},
 ];
 
@@ -421,7 +499,7 @@ function renderThead(){
 }
 
 /* ─── K 線嵌入列 HTML 生成 ─────────────────────────────────────── */
-function makeInlineKlineHTML(colSpan, ticker, name){
+function makeInlineKlineHTML(colSpan,ticker){
   return `
     <tr class="kline-inline-row" data-kline-row="${ticker}">
       <td colspan="${colSpan}">
@@ -447,33 +525,38 @@ function destroyKlineCharts(){
   if(klineVolChartInst){klineVolChartInst.remove();klineVolChartInst=null;}
 }
 
-function drawKlineInto(ticker, days){
-  const chartWrap = document.getElementById('kc-'+ticker);
-  const volWrap   = document.getElementById('kv-'+ticker);
-  if(!chartWrap||!volWrap) return;
+/* K 線圖高度隨斷點調整 */
+function klineChartHeight(){
+  return window.innerWidth<600?200:280;
+}
+function klineVolHeight(){
+  return window.innerWidth<600?50:70;
+}
+
+function drawKlineInto(ticker,days){
+  const chartWrap=document.getElementById('kc-'+ticker);
+  const volWrap  =document.getElementById('kv-'+ticker);
+  if(!chartWrap||!volWrap)return;
 
   destroyKlineCharts();
   chartWrap.innerHTML='';
   volWrap.innerHTML='';
 
-  const rawData = KLINE_MAP[ticker]||[];
-  const data    = filterByDays(rawData, days);
+  /* 同步 DOM 高度 */
+  chartWrap.style.height=klineChartHeight()+'px';
+  volWrap.style.height  =klineVolHeight()+'px';
+
+  const rawData=KLINE_MAP[ticker]||[];
+  const data   =filterByDays(rawData,days);
 
   if(!data.length){
     chartWrap.innerHTML='<div class="kline-no-data">⚠️ 無法取得 K 線資料</div>';
     return;
   }
 
-  /* 使用 Python 常數對應的 JS 變數設定 K 線圖樣式 */
   const baseOpts={
-    layout:{
-      background:{color:'#0b0b0e'},
-      textColor:KLINE_FONT_COLOR_JS,
-    },
-    grid:{
-      vertLines:{color:KLINE_GRID_COLOR_JS},
-      horzLines:{color:KLINE_GRID_COLOR_JS},
-    },
+    layout:{background:{color:KLINE_CHART_BG_COLOR_JS},textColor:KLINE_FONT_COLOR_JS},
+    grid:{vertLines:{color:KLINE_GRID_COLOR_JS},horzLines:{color:KLINE_GRID_COLOR_JS}},
     crosshair:{
       mode:LightweightCharts.CrosshairMode.Normal,
       vertLine:{color:KLINE_CROSSHAIR_COLOR_JS,labelBackgroundColor:KLINE_AXIS_LABEL_BG_JS},
@@ -485,42 +568,32 @@ function drawKlineInto(ticker, days){
     handleScaleEvents:true,
   };
 
-  klineChartInst = LightweightCharts.createChart(chartWrap,{...baseOpts,height:280});
+  klineChartInst=LightweightCharts.createChart(chartWrap,{...baseOpts,height:klineChartHeight()});
 
-  /* K 棒使用 KLINE_UP_COLOR / KLINE_DOWN_COLOR */
-  const candleSeries = klineChartInst.addCandlestickSeries({
-    upColor:         KLINE_UP_COLOR,
-    downColor:       KLINE_DOWN_COLOR,
-    borderUpColor:   KLINE_UP_COLOR,
-    borderDownColor: KLINE_DOWN_COLOR,
-    wickUpColor:     KLINE_UP_COLOR,
-    wickDownColor:   KLINE_DOWN_COLOR,
+  const candleSeries=klineChartInst.addCandlestickSeries({
+    upColor:KLINE_UP_COLOR,downColor:KLINE_DOWN_COLOR,
+    borderUpColor:KLINE_UP_COLOR,borderDownColor:KLINE_DOWN_COLOR,
+    wickUpColor:KLINE_UP_COLOR,wickDownColor:KLINE_DOWN_COLOR,
   });
   candleSeries.setData(data.map(d=>({time:d.time,open:d.open,high:d.high,low:d.low,close:d.close})));
 
   const rec=H.records.find(r=>r.ticker===ticker);
   if(rec){
     candleSeries.createPriceLine({
-      price:rec.price,
-      color:'#735bf5',
-      lineWidth:1,
+      price:rec.price,color:'#735bf5',lineWidth:1,
       lineStyle:LightweightCharts.LineStyle.Dashed,
-      axisLabelVisible:true,
-      axisLabelColor:'#735bf5',
-      axisLabelTextColor:'#ffffff',
-      title:'',
+      axisLabelVisible:true,axisLabelColor:'#735bf5',axisLabelTextColor:'#ffffff',title:'',
     });
   }
   klineChartInst.timeScale().fitContent();
 
-  /* 成交量子圖：同樣使用 KLINE_UP_COLOR / KLINE_DOWN_COLOR */
-  klineVolChartInst = LightweightCharts.createChart(volWrap,{
+  klineVolChartInst=LightweightCharts.createChart(volWrap,{
     ...baseOpts,
-    height:70,
+    height:klineVolHeight(),
     timeScale:{...baseOpts.timeScale,visible:false},
     rightPriceScale:{...baseOpts.rightPriceScale,scaleMargins:{top:0.1,bottom:0}},
   });
-  const volSeries = klineVolChartInst.addHistogramSeries({priceFormat:{type:'volume'},priceScaleId:''});
+  const volSeries=klineVolChartInst.addHistogramSeries({priceFormat:{type:'volume'},priceScaleId:''});
   volSeries.setData(data.map(d=>{
     const isUp=d.close>=d.open;
     const hex=isUp?KLINE_UP_COLOR:KLINE_DOWN_COLOR;
@@ -539,34 +612,53 @@ function drawKlineInto(ticker, days){
   });
 }
 
-/* ─── 展開 / 收合 行內 K 線 ─────────────────────────────────────── */
-function toggleInlineKline(dataRow, ticker, name){
-  const tbody  = dataRow.parentNode;
-  const colSpan = cols.length;
+/* ── resize：重繪已展開的 K 線圖 ── */
+let _resizeTimer=null;
+window.addEventListener('resize',()=>{
+  clearTimeout(_resizeTimer);
+  _resizeTimer=setTimeout(()=>{
+    if(expandedTicker){
+      const cw=document.getElementById('kc-'+expandedTicker);
+      const vw=document.getElementById('kv-'+expandedTicker);
+      if(cw&&klineChartInst){
+        cw.style.height=klineChartHeight()+'px';
+        klineChartInst.resize(cw.clientWidth,klineChartHeight());
+      }
+      if(vw&&klineVolChartInst){
+        vw.style.height=klineVolHeight()+'px';
+        klineVolChartInst.resize(vw.clientWidth,klineVolHeight());
+      }
+    }
+  },120);
+});
 
-  if(expandedTicker === ticker){
+/* ─── 展開 / 收合 行內 K 線 ─────────────────────────────────────── */
+function toggleInlineKline(dataRow,ticker){
+  const tbody  =dataRow.parentNode;
+  const colSpan=cols.length;
+
+  if(expandedTicker===ticker){
     destroyKlineCharts();
-    const existRow = tbody.querySelector(`tr[data-kline-row="${ticker}"]`);
-    if(existRow) existRow.remove();
+    const existRow=tbody.querySelector(`tr[data-kline-row="${ticker}"]`);
+    if(existRow)existRow.remove();
     dataRow.classList.remove('row-active');
-    expandedTicker = null;
+    expandedTicker=null;
     return;
   }
 
   if(expandedTicker){
     destroyKlineCharts();
-    const prevKlineRow = tbody.querySelector(`tr[data-kline-row="${expandedTicker}"]`);
-    if(prevKlineRow) prevKlineRow.remove();
-    const prevDataRow = tbody.querySelector(`tr[data-ticker="${expandedTicker}"]`);
-    if(prevDataRow) prevDataRow.classList.remove('row-active');
+    const prevKlineRow=tbody.querySelector(`tr[data-kline-row="${expandedTicker}"]`);
+    if(prevKlineRow)prevKlineRow.remove();
+    const prevDataRow=tbody.querySelector(`tr[data-ticker="${expandedTicker}"]`);
+    if(prevDataRow)prevDataRow.classList.remove('row-active');
   }
 
-  expandedTicker = ticker;
-  expandedDays   = 180;
+  expandedTicker=ticker;
+  expandedDays  =180;
   dataRow.classList.add('row-active');
-  dataRow.insertAdjacentHTML('afterend', makeInlineKlineHTML(colSpan, ticker, name));
-
-  requestAnimationFrame(()=>drawKlineInto(ticker, 180));
+  dataRow.insertAdjacentHTML('afterend',makeInlineKlineHTML(colSpan,ticker));
+  requestAnimationFrame(()=>drawKlineInto(ticker,180));
 }
 
 /* ─── 渲染表格 tbody ────────────────────────────────────────────── */
@@ -574,10 +666,9 @@ function renderTbody(){
   const start=(currentPage-1)*PAGE_SIZE;
   const pageRecs=tableRecords.slice(start,start+PAGE_SIZE);
   const tbody=document.createElement('tbody');
-
   pageRecs.forEach(r=>{
     const tr=document.createElement('tr');
-    tr.dataset.ticker = r.ticker;
+    tr.dataset.ticker=r.ticker;
     tr.innerHTML=`
       <td>
         <span style="font-weight:700;">${r.ticker}</span><br>
@@ -590,18 +681,15 @@ function renderTbody(){
       <td style="color:${retHex(r.change_rate)}">${fmtSign(r.change_rate)}</td>
       <td style="color:${retHex(r.pnl)}">${(r.pnl>=0?'+':'')+r.pnl.toLocaleString()}</td>
       <td style="color:${retHex(r.ret)};font-weight:600;">${fmtSign(r.ret)}</td>`;
-
-    tr.addEventListener('click', ()=>toggleInlineKline(tr, r.ticker, r.name));
+    tr.addEventListener('click',()=>toggleInlineKline(tr,r.ticker));
     tbody.appendChild(tr);
   });
-
   return tbody;
 }
 
 function renderTable(){
   destroyKlineCharts();
-  expandedTicker = null;
-
+  expandedTicker=null;
   const tbl=document.getElementById('posTable');
   tbl.innerHTML='';
   tbl.appendChild(renderThead());
@@ -656,6 +744,7 @@ renderTable();renderPagination();
 /* ── Tooltip ── */
 const tt=document.getElementById('tt');
 function showTt(r,e){
+  if(isTouchDevice())return;
   const rc=retHex(r.ret),pc=retHex(r.pnl),cc=retHex(r.change_rate);
   tt.innerHTML=`
     <div style="font-weight:700;font-size:13px;">${r.ticker}</div>
