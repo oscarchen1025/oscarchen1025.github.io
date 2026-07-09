@@ -6,17 +6,16 @@
 <title>Account</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;}
 body{
   font-family:"PingFang SC", "SF Pro Display", -apple-system, "Helvetica Neue", sans-serif;
   background:#0a0e13;
   color:#ebf9ff;
   font-size:14px;
   font-weight:400;
-  padding:30px;
   min-height:100vh;
   display:flex;
-  flex-direction:column;
-  align-items:center;
+  overflow-x:hidden;
 }
 body::before{
   content:'';
@@ -28,35 +27,82 @@ body::before{
   pointer-events:none;
   z-index:0;
 }
-.wrap{position:relative;z-index:1;width:900px;max-width:100%;}
 
-/* ── Fund Usage Bar (above donut + bar chart) ── */
-.fund-usage-card{
-  border-radius:16px;
+/* ── App shell: sidebar + main ── */
+.app-shell{display:flex;width:100%;min-height:100vh;position:relative;z-index:1;}
+
+.sidebar{
+  width:208px;
+  flex-shrink:0;
   background:#0a0e13;
-  border:1px solid rgba(255,255,255,0.06);
-  padding:18px 20px;
-  margin-bottom:14px;
+  border-right:1px solid rgba(255,255,255,0.06);
+  padding:22px 12px;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
 }
-.fu-value{font-size:26px;font-weight:700;letter-spacing:-0.01em;margin-top:10px;color:#ebf9ff;}
-.fu-value .fu-sep{color:#848a94;font-weight:400;}
-.fu-value .fu-total{color:#848a94;font-weight:700;}
-.fu-track{position:relative;height:10px;border-radius:5px;background:rgba(255,255,255,0.07);margin-top:16px;cursor:pointer;}
-.fu-fill{position:absolute;top:0;left:0;height:100%;border-radius:5px 0 0 5px;transition:width 0.4s ease,background 0.4s ease;}
-.fu-hatch{position:absolute;top:0;height:100%;border-radius:0 5px 5px 0;transition:left 0.4s ease,width 0.4s ease,background 0.4s ease;}
-.fu-handle{position:absolute;top:50%;width:16px;height:16px;border-radius:50%;background:#0a0e13;border:3px solid #00d4a9;transform:translate(-50%,-50%);transition:left 0.4s ease,border-color 0.4s ease;z-index:1;}
-.fu-note{
-  margin-top:14px;
-  padding:10px 14px;
-  border-radius:10px;
-  background:rgba(255,255,255,0.03);
-  border:1px solid rgba(255,255,255,0.06);
-  font-size:12px;
+.sidebar-brand{
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:0.04em;
+  color:#ebf9ff;
+  padding:2px 10px 20px;
+}
+.nav-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:9px;
+  font-size:13px;
   font-weight:400;
   color:#848a94;
-  line-height:1.6;
+  cursor:pointer;
+  border-left:2px solid transparent;
+  transition:background 0.15s,color 0.15s;
+  user-select:none;
 }
-.fu-note b{color:#00d4a9;font-weight:700;}
+.nav-item:hover{background:rgba(255,255,255,0.04);color:#ebf9ff;}
+.nav-item.active{
+  color:#ebf9ff;
+  font-weight:700;
+  background:linear-gradient(90deg,rgba(90,92,248,0.16),rgba(90,92,248,0.02));
+  border-left:2px solid #5a5cf8;
+}
+.nav-dot{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:0.55;flex-shrink:0;}
+.nav-item.active .nav-dot{opacity:1;background:#8f91fb;}
+.nav-badge{
+  margin-left:auto;
+  font-size:10px;
+  font-weight:700;
+  color:#fb4d69;
+  background:rgba(251,77,105,0.16);
+  padding:1px 7px;
+  border-radius:8px;
+}
+
+.main{flex:1;min-width:0;padding:26px 28px 40px;overflow-y:auto;}
+.wrap{width:900px;max-width:100%;margin:0 auto;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+.section-title{font-size:12px;font-weight:700;letter-spacing:0.04em;color:#ebf9ff;margin-bottom:12px;}
+
+/* ── Usage Bar Header ── */
+.usage-bar-block{margin-bottom:22px;padding:0 2px;}
+.usage-top-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
+.usage-balance-group{display:flex;align-items:baseline;flex-wrap:wrap;gap:0;}
+.usage-balance-num{font-size:32px;font-weight:700;color:#ebf9ff;letter-spacing:-0.02em;line-height:1.1;}
+.usage-balance-denom{font-size:16px;font-weight:700;color:#848a94;margin-left:4px;letter-spacing:-0.01em;}
+.usage-pnl-inline{display:flex;align-items:center;gap:8px;margin-left:14px;}
+.usage-pnl-abs{font-size:13px;font-weight:700;display:flex;align-items:center;gap:4px;}
+.usage-pnl-pct{font-size:13px;font-weight:700;}
+.usage-bar-track{position:relative;height:14px;background:rgba(255,255,255,0.07);border-radius:8px;overflow:hidden;margin-bottom:6px;}
+.usage-bar-fill{position:absolute;top:0;left:0;height:100%;border-radius:8px;background:linear-gradient(90deg,#5a5cf8,#7c5ce8);transition:width 0.6s ease;}
+.usage-bottom-row{display:flex;justify-content:space-between;align-items:center;}
+.usage-used-label{font-size:13px;font-weight:700;color:#7c7ef7;}
+.tri-up{display:inline-block;width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-bottom:6px solid #fb4d69;}
+.tri-down{display:inline-block;width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:6px solid #00d4a9;}
 
 /* ── Toggle (shared style for donut mode toggle + table mode toggle) ── */
 .toggle-row{display:flex;justify-content:center;margin-top:10px;}
@@ -97,11 +143,6 @@ body::before{
   color:rgba(235,249,255,0.75);
   background:rgba(255,255,255,0.04);
 }
-.density-btn{
-  display:inline-flex;
-  align-items:center;
-  padding:6px 14px;
-}
 
 /* ── Viz wrap ── */
 .viz-wrap{
@@ -114,7 +155,7 @@ body::before{
   margin-bottom:14px;
   align-items:flex-start;
 }
-.donut-col{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;margin-top:0;}
+.donut-col{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;margin-top:-14px;}
 .donut-svg-wrap{position:relative;width:260px;height:260px;}
 .donut-center{
   position:absolute;inset:0;display:flex;flex-direction:column;
@@ -136,46 +177,39 @@ body::before{
 .h-bar-fill{position:absolute;top:0;left:0;height:100%;border-radius:4px;transition:width 0.35s ease,background 0.35s ease;}
 .h-bar-ret{font-size:12px;font-weight:700;text-align:right;white-space:nowrap;transition:color 0.2s;}
 
-/* ── Table search box ── */
-.table-search-wrap{position:relative;display:flex;align-items:center;flex:0 0 auto;}
-.table-search-icon{position:absolute;left:9px;color:#848a94;pointer-events:none;display:flex;}
-.table-search-input{
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.10);
-  border-radius:8px;
-  padding:6px 10px 6px 28px;
-  font-size:12px;
-  font-weight:400;
-  font-family:"PingFang SC", "SF Pro Display", -apple-system, "Helvetica Neue", sans-serif;
-  color:#ebf9ff;
-  width:170px;
-  outline:none;
-  transition:border-color 0.15s,background 0.15s;
-}
-.table-search-input::placeholder{color:#848a94;}
-.table-search-input:focus{border-color:rgba(255,255,255,0.24);background:rgba(255,255,255,0.08);}
-
-/* ── Standalone stats panel (between search toolbar and holdings table) ── */
-.stats-panel{
+/* ── Account Detail ── */
+.acct-detail-col{
+  flex:0 0 168px;
   display:flex;
-  align-items:center;
+  flex-direction:column;
   justify-content:flex-start;
-  flex-wrap:wrap;
-  gap:20px;
-  min-width:0;
-  padding:12px 14px;
-  margin-top:12px;
-  border-top:1px solid rgba(255,255,255,0.07);
-  border-bottom:1px solid rgba(255,255,255,0.07);
-  background:rgba(255,255,255,0.015);
+  align-self:stretch;
+  margin-top:-4px;
   position:relative;
-  z-index:1;
+  border-radius:14px;
+  padding:14px 14px 10px;
+  background:linear-gradient(160deg,rgba(255,255,255,0.05) 0%,rgba(255,255,255,0.015) 100%),rgba(8,10,14,0.7);
+  border:1px solid rgba(255,255,255,0.10);
+  box-shadow:0 1px 0 rgba(255,255,255,0.07) inset,0 8px 28px rgba(0,0,0,0.35);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  overflow:hidden;
 }
-.stat-item{display:flex;align-items:baseline;gap:5px;white-space:nowrap;}
-.stat-lbl{font-size:11px;font-weight:400;color:#848a94;letter-spacing:0.02em;}
-.stat-val{font-size:13px;font-weight:700;color:#ebf9ff;}
+.acct-detail-col::before{
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.20) 40%,rgba(255,255,255,0.28) 60%,transparent 100%);
+  pointer-events:none;
+}
+.acct-detail-title{font-size:10px;font-weight:400;letter-spacing:0.12em;color:#848a94;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.07);}
+.acct-detail-row{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
+.acct-detail-row:last-child{border-bottom:none;}
+.acct-detail-lbl{font-size:12px;font-weight:400;color:#848a94;white-space:nowrap;flex-shrink:0;}
+.acct-detail-val{font-size:13px;font-weight:400;text-align:right;white-space:nowrap;margin-left:8px;}
 
-/* ── Table (styleC column layout: Symbol / Weight / Quantity / Cost→Price / Change / Return-PnL) ── */
+/* ── Table ── */
 .table-wrap{
   position:relative;
   border-radius:16px;
@@ -196,76 +230,61 @@ body::before{
   z-index:0;
 }
 
-/* ── Table toggle row (search + mode toggle) ── */
+/* ── Table mode toggle (top-right of table) ── */
 .table-toggle-row{
   display:flex;
-  justify-content:space-between;
+  justify-content:flex-end;
   align-items:center;
-  gap:10px;
   padding:14px 14px 0;
   position:relative;
   z-index:1;
 }
 
-.pos-tbl{position:relative;z-index:1;}
-.table-headrow,.table-row{
-  display:grid;
-  grid-template-columns:1.5fr 0.6fr 0.85fr 1.35fr 0.75fr 1.05fr;
-  align-items:center;
-  gap:10px;
-  padding:8px 14px;
-  font-variant-numeric:tabular-nums;
-}
-.table-headrow > div:not(:first-child),.table-row > div:not(:first-child){text-align:right;}
-.table-headrow{
+.tbl{width:100%;border-collapse:collapse;position:relative;z-index:1;}
+.tbl thead th{
+  padding:12px 14px 10px;
   font-size:12px;
   font-weight:400;
   color:#848a94;
   letter-spacing:0.06em;
   border-bottom:1px solid rgba(255,255,255,0.07);
+  text-align:left;
+  cursor:pointer;
+  user-select:none;
+  white-space:nowrap;
+  transition:color 0.15s;
   background:transparent;
 }
-.table-headrow > div.sortable{cursor:pointer;user-select:none;white-space:nowrap;transition:color 0.15s;}
-.table-headrow > div.sortable:hover{color:#ebf9ff;}
-.table-headrow > div.sort-asc,.table-headrow > div.sort-desc{color:#ebf9ff;}
-.table-headrow > div .sort-icon::after{content:' ⇅';font-size:9px;opacity:0.35;}
-.table-headrow > div.sort-asc .sort-icon::after{content:' ▲';font-size:9px;opacity:1;}
-.table-headrow > div.sort-desc .sort-icon::after{content:' ▼';font-size:9px;opacity:1;}
-
-.table-body .table-row{
+.tbl thead th:hover{color:#ebf9ff;}
+.tbl thead th.sort-asc .sort-icon::after{content:' ▲';font-size:9px;}
+.tbl thead th.sort-desc .sort-icon::after{content:' ▼';font-size:9px;}
+.tbl thead th .sort-icon::after{content:' ⇅';font-size:9px;opacity:0.35;}
+.tbl thead th.sort-asc,.tbl thead th.sort-desc{color:#ebf9ff;}
+.tbl tbody tr{background:transparent;transition:background 0.12s;}
+.tbl tbody tr:hover{background:rgba(255,255,255,0.03);}
+.tbl tbody td{
+  padding:11px 14px;
   font-size:14px;
   font-weight:400;
   color:#ebf9ff;
   border-bottom:1px solid rgba(255,255,255,0.05);
-  transition:background 0.12s;
+  background:transparent;
 }
-.table-body .table-row:nth-child(even){background:rgba(255,255,255,0.015);}
-.table-body .table-row:hover{background:rgba(255,255,255,0.03);}
-.table-body .table-row:last-child{border-bottom:none;}
-.table-body .table-empty{padding:24px 14px;text-align:center;font-size:13px;color:#848a94;}
+.tbl tbody tr:last-child td{border-bottom:none;}
 
-.tbl-sym{font-size:14px;font-weight:400;}
-.tbl-name{font-size:14px;color:#ebf9ff;font-weight:400;margin-left:7px;}
+/* ── Compact table mode ── */
+.tbl.compact thead th{
+  font-size:13px;
+}
+.tbl.compact tbody td{
+  padding:4px 14px;
+  font-size:13px;
+  line-height:1.15;
+}
 
-/* ── Compact (小) table mode ── */
-.pos-tbl.compact .table-headrow{font-size:12px;}
-.pos-tbl.compact .table-row{padding-top:4px;padding-bottom:4px;font-size:14px;line-height:1.15;}
-.pos-tbl.compact .tbl-sym,.pos-tbl.compact .tbl-name{font-size:14px;}
-
-/* ── styleC tint chips (Cost→Price / Change / Return-PnL cells) ── */
-.tint-cell{display:flex;justify-content:flex-end;}
-.tint-chip{display:inline-flex;align-items:center;justify-content:flex-end;width:100%;padding:6px 10px;border-radius:6px;font-variant-numeric:tabular-nums;font-weight:400;}
-
-.cost-cell .tint-chip{gap:6px;background:transparent !important;padding:6px 0;}
-.cost-cell .cost-val{color:#848a94;}
-.cost-cell .arrow{font-size:11px;}
-.cost-cell .price-val{font-weight:400;color:#ebf9ff;}
-
-.chg-cell .tint-chip{gap:4px;font-weight:400;justify-content:center;background:transparent !important;padding:6px 0;}
-.chg-cell .tri{font-size:9px;}
-
-.pl-cell .tint-chip{gap:6px;font-weight:400;background:transparent !important;padding:6px 0;}
-.pl-cell .pnl-val{font-weight:400;font-size:12px;opacity:0.8;}
+.chg-cell{display:inline-flex;align-items:center;gap:4px;}
+.chg-tri-up{display:inline-block;width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-bottom:6px solid #fb4d69;flex-shrink:0;}
+.chg-tri-down{display:inline-block;width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:6px solid #00d4a9;flex-shrink:0;}
 
 /* ── Table Footer ── */
 .table-footer{display:flex;justify-content:space-between;align-items:center;padding:10px 16px 10px;border-top:1px solid rgba(255,255,255,0.05);position:relative;z-index:1;}
@@ -284,6 +303,49 @@ body::before{
 }
 .pg-info{font-size:11px;font-weight:400;color:#848a94;letter-spacing:0.05em;margin:0 6px;}
 
+/* ── Market overview (TAIEX / OTC) ── */
+.market-summary-row{display:flex;gap:12px;margin-bottom:16px;}
+.market-summary-card{
+  flex:1;
+  border-radius:14px;
+  padding:14px 16px;
+  background:linear-gradient(160deg,rgba(255,255,255,0.05) 0%,rgba(255,255,255,0.015) 100%),rgba(8,10,14,0.7);
+  border:1px solid rgba(255,255,255,0.10);
+}
+.market-summary-name{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:#848a94;margin-bottom:8px;}
+.market-summary-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.market-summary-val{font-size:22px;font-weight:700;color:#ebf9ff;letter-spacing:-0.01em;}
+.market-summary-chg{font-size:12px;font-weight:700;margin-left:8px;}
+.market-chart-card{
+  border-radius:16px;
+  background:#0a0e13;
+  border:1px solid rgba(255,255,255,0.06);
+  padding:18px 18px 8px;
+}
+.market-legend{display:flex;gap:16px;margin-bottom:10px;font-size:12px;color:#848a94;}
+.market-legend span{display:inline-flex;align-items:center;gap:6px;}
+.market-legend-dot{width:8px;height:8px;border-radius:50%;}
+.market-empty{font-size:12px;color:#848a94;padding:40px 0;text-align:center;}
+
+/* ── Simple record tables (orders / realized / settlement) ── */
+.simple-card{
+  border-radius:16px;
+  overflow:hidden;
+  background:linear-gradient(160deg,rgba(255,255,255,0.028) 0%,rgba(255,255,255,0.012) 100%),rgba(10,12,16,0.92);
+  border:1px solid rgba(255,255,255,0.08);
+}
+.summary-cards-row{display:flex;gap:12px;margin-bottom:16px;}
+.summary-card{
+  flex:1;
+  border-radius:14px;
+  padding:14px 16px;
+  background:linear-gradient(160deg,rgba(255,255,255,0.05) 0%,rgba(255,255,255,0.015) 100%),rgba(8,10,14,0.7);
+  border:1px solid rgba(255,255,255,0.10);
+}
+.summary-card-lbl{font-size:11px;font-weight:400;color:#848a94;margin-bottom:6px;letter-spacing:0.04em;}
+.summary-card-val{font-size:20px;font-weight:700;}
+.status-pill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:8px;display:inline-block;white-space:nowrap;}
+
 /* ── Tooltip ── */
 #tt{position:fixed;z-index:999;pointer-events:none;display:none;background:rgba(10,14,19,0.97);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px;min-width:170px;box-shadow:0 8px 32px rgba(0,0,0,0.6);font-size:12px;line-height:1.9;font-weight:400;}
 
@@ -291,11 +353,26 @@ body::before{
    RWD — Mobile / Tablet
 ══════════════════════════════════ */
 @media (max-width:700px){
-  body{padding:16px 12px;}
+  .app-shell{flex-direction:column;}
+  .sidebar{
+    width:100%;
+    flex-direction:row;
+    align-items:center;
+    gap:4px;
+    padding:10px 12px;
+    overflow-x:auto;
+    border-right:none;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+  }
+  .sidebar-brand{display:none;}
+  .nav-item{padding:8px 12px;border-left:none;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;}
+  .nav-item.active{border-left:none;border-bottom:2px solid #5a5cf8;}
+  .main{padding:16px 12px 30px;}
 
-  /* Fund usage bar */
-  .fund-usage-card{padding:14px 16px;}
-  .fu-value{font-size:20px;}
+  /* Usage bar */
+  .usage-balance-num{font-size:22px;}
+  .usage-balance-denom{font-size:13px;}
+  .usage-pnl-inline{margin-left:8px;gap:5px;}
 
   /* Viz block: stack vertically */
   .viz-wrap{
@@ -312,8 +389,6 @@ body::before{
   }
   .donut-svg-wrap{width:160px;height:160px;flex-shrink:0;}
   #donutSvg{width:160px;height:160px;}
-
-  /* Scale SVG viewBox via transform */
   .donut-center-val{font-size:16px;}
   .donut-center-ticker{font-size:13px;}
   .donut-center-name{font-size:12px;}
@@ -326,25 +401,36 @@ body::before{
   .h-bar-name{font-size:11px;}
   .h-bar-ret{font-size:11px;}
 
+  /* Account Detail: horizontal scroll row */
+  .acct-detail-col{
+    flex:none;
+    width:100%;
+    border-radius:12px;
+    padding:12px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:0;
+  }
+  .acct-detail-title{grid-column:1/-1;margin-bottom:8px;padding-bottom:6px;}
+  .acct-detail-row{padding:5px 0;}
+
   /* Table toggle row */
-  .table-toggle-row{padding:12px 10px 0;flex-wrap:wrap;gap:8px;}
-  .table-search-input{width:130px;}
-  .stats-panel{gap:12px;padding:10px 10px;overflow-x:auto;flex-wrap:nowrap;}
-  .stat-lbl{font-size:10px;}
-  .stat-val{font-size:12px;}
+  .table-toggle-row{padding:12px 10px 0;}
 
   /* Table: horizontal scroll */
-  .table-wrap{border-radius:12px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
-  .table-headrow,.table-row{min-width:560px;padding:10px 10px 8px;}
-  .table-headrow{font-size:11px;}
-  .table-body .table-row{padding:9px 10px;font-size:13px;}
-  .pos-tbl.compact .table-headrow{font-size:12px;}
-  .pos-tbl.compact .table-row{padding:4px 10px;font-size:14px;line-height:1.15;}
+  .table-wrap,.simple-card{border-radius:12px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .tbl{min-width:560px;}
+  .tbl thead th{padding:10px 10px 8px;font-size:11px;}
+  .tbl tbody td{padding:9px 10px;font-size:13px;}
+  .tbl.compact thead th{font-size:13px;}
+  .tbl.compact tbody td{padding:4px 10px;font-size:13px;line-height:1.15;}
 
   /* Table footer */
   .table-footer{flex-direction:column;gap:8px;align-items:flex-start;}
   .pagination{flex-wrap:wrap;}
   .pg-btn{padding:4px 10px;font-size:11px;}
+
+  .market-summary-row,.summary-cards-row{flex-direction:column;}
 
   /* Hide tooltip on touch */
   #tt{display:none !important;}
@@ -354,105 +440,211 @@ body::before{
   .donut-col{flex-direction:column;align-items:center;}
   .donut-svg-wrap{width:180px;height:180px;}
   #donutSvg{width:180px;height:180px;}
+  .acct-detail-col{grid-template-columns:1fr;}
+  .acct-detail-title{grid-column:1;}
 }
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="app-shell">
 
-  <!-- Fund usage bar -->
-  <div class="fund-usage-card">
-    <div class="fu-value" id="fu-value"></div>
-    <div class="fu-track" id="fu-track">
-      <div class="fu-fill" id="fu-fill"></div>
-      <div class="fu-hatch" id="fu-hatch"></div>
-      <div class="fu-handle" id="fu-handle"></div>
-    </div>
-    <div class="fu-note" id="fu-note"></div>
+  <div class="sidebar">
+    <div class="sidebar-brand">Sinopac 交易台</div>
+    <div class="nav-item active" data-tab="overview"><span class="nav-dot"></span>總覽</div>
+    <div class="nav-item" data-tab="market"><span class="nav-dot"></span>市場總覽</div>
+    <div class="nav-item" data-tab="holdings"><span class="nav-dot"></span>持倉</div>
+    <div class="nav-item" data-tab="orders"><span class="nav-dot"></span>委託單<span class="nav-badge">1</span></div>
+    <div class="nav-item" data-tab="realized"><span class="nav-dot"></span>已實現損益</div>
+    <div class="nav-item" data-tab="settlement"><span class="nav-dot"></span>交割款項</div>
   </div>
 
-  <!-- Viz -->
-  <div class="viz-wrap">
-    <div class="donut-col">
-      <div class="donut-svg-wrap">
-        <svg id="donutSvg" width="260" height="260" viewBox="0 0 260 260">
-          <defs>
-            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="4" result="blur"/>
-              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
-          <circle cx="130" cy="130" r="100" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="20"/>
-          <circle cx="130" cy="130" r="110.5" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="0.5"/>
-          <circle cx="130" cy="130" r="89.5"  fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="0.5"/>
-          <g id="donutGlowG"></g>
-          <g id="donutMainG"></g>
-          <g id="donutHlG"></g>
-          <circle cx="130" cy="130" r="82" fill="#0a0e13"/>
-          <circle cx="130" cy="130" r="82" fill="none" stroke="rgba(101,102,252,0.14)" stroke-width="1.5"/>
-          <circle cx="130" cy="130" r="78" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="0.5"/>
-        </svg>
-        <div class="donut-center">
-          <div class="donut-center-ticker" id="cTicker"></div>
-          <div class="donut-center-name"   id="cName"></div>
-          <div class="donut-center-val"    id="cVal"></div>
-        </div>
-      </div>
-      <div class="toggle-row">
-        <div class="tsB">
-          <button class="t-btn active" id="btnUR">PnL</button>
-          <button class="t-btn"        id="btnRC">Today</button>
-        </div>
-      </div>
-    </div>
-    <div class="bar-col">
-      <div class="bar-viewport" id="barViewport">
-        <div id="barList"></div>
-      </div>
-    </div>
-  </div>
+  <div class="main">
+  <div class="wrap">
 
-  <div class="table-wrap">
-    <div class="table-toggle-row">
-      <div class="table-search-wrap">
-        <svg class="table-search-icon" width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="5.5" cy="5.5" r="4.3" stroke="currentColor" stroke-width="1.3"/>
-          <line x1="8.6" y1="8.6" x2="12" y2="12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-        </svg>
-        <input type="text" id="tableSearch" class="table-search-input" placeholder="Search" autocomplete="off">
+    <!-- ══════════════ 總覽 ══════════════ -->
+    <div class="tab-panel active" id="panel-overview">
+      <div class="usage-bar-block">
+        <div class="usage-top-row">
+          <div class="usage-balance-group">
+            <span class="usage-balance-num" id="ub-market-value"></span>
+            <span class="usage-balance-denom" id="ub-total-balance"></span>
+            <div class="usage-pnl-inline">
+              <span class="usage-pnl-abs" id="ub-pnl-abs-wrap">
+                <span id="ub-pnl-tri"></span>
+                <span id="ub-pnl-abs"></span>
+              </span>
+              <span class="usage-pnl-pct" id="ub-pnl-pct"></span>
+            </div>
+          </div>
+        </div>
+        <div class="usage-bar-track">
+          <div class="usage-bar-fill" id="ub-fill"></div>
+        </div>
+        <div class="usage-bottom-row">
+          <div class="usage-used-label" id="ub-used-label"></div>
+        </div>
       </div>
-      <div class="tsB densityB">
-        <button class="t-btn density-btn active" id="btnCompact" title="-">
-          <span>-</span>
-        </button>
-        <button class="t-btn density-btn" id="btnFull" title="+">
-          <span>+</span>
-        </button>
+
+      <div class="viz-wrap">
+        <div class="donut-col">
+          <div class="donut-svg-wrap">
+            <svg id="donutSvg" width="260" height="260" viewBox="0 0 260 260">
+              <defs>
+                <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="4" result="blur"/>
+                  <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+              </defs>
+              <circle cx="130" cy="130" r="100" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="20"/>
+              <circle cx="130" cy="130" r="110.5" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="0.5"/>
+              <circle cx="130" cy="130" r="89.5"  fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="0.5"/>
+              <g id="donutGlowG"></g>
+              <g id="donutMainG"></g>
+              <g id="donutHlG"></g>
+              <circle cx="130" cy="130" r="82" fill="#0a0e13"/>
+              <circle cx="130" cy="130" r="82" fill="none" stroke="rgba(101,102,252,0.14)" stroke-width="1.5"/>
+              <circle cx="130" cy="130" r="78" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="0.5"/>
+            </svg>
+            <div class="donut-center">
+              <div class="donut-center-ticker" id="cTicker"></div>
+              <div class="donut-center-name"   id="cName"></div>
+              <div class="donut-center-val"    id="cVal"></div>
+            </div>
+          </div>
+          <div class="toggle-row">
+            <div class="tsB">
+              <button class="t-btn active" id="btnUR">PnL</button>
+              <button class="t-btn"        id="btnRC">Today</button>
+            </div>
+          </div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-viewport" id="barViewport">
+            <div id="barList"></div>
+          </div>
+        </div>
+        <div class="acct-detail-col">
+          <div class="acct-detail-title">Account Detail</div>
+          <div class="acct-detail-row">
+            <span class="acct-detail-lbl">Cash</span>
+            <span class="acct-detail-val" id="ad-cash"></span>
+          </div>
+          <div class="acct-detail-row">
+            <span class="acct-detail-lbl">Net Pos Chg</span>
+            <span class="acct-detail-val" id="ad-net-change"></span>
+          </div>
+          <div class="acct-detail-row">
+            <span class="acct-detail-lbl">Win Rate</span>
+            <span class="acct-detail-val" id="ad-win-rate"></span>
+          </div>
+          <div class="acct-detail-row">
+            <span class="acct-detail-lbl">Realized PnL</span>
+            <span class="acct-detail-val" id="ad-today"></span>
+          </div>
+          <div class="acct-detail-row">
+            <span class="acct-detail-lbl">YTD</span>
+            <span class="acct-detail-val" id="ad-year"></span>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="stats-panel" id="tableStats">
-      <div class="stat-item"><span class="stat-lbl">Unrealized PnL</span><span class="stat-val" id="st-ret"></span></div>
-      <div class="stat-item"><span class="stat-lbl">Win Rate</span><span class="stat-val" id="st-winrate"></span></div>
-      <div class="stat-item"><span class="stat-lbl">Market Value</span><span class="stat-val" id="st-mv"></span></div>
-      <div class="stat-item"><span class="stat-lbl">Cost</span><span class="stat-val" id="st-cost"></span></div>
+
+    <!-- ══════════════ 市場總覽 ══════════════ -->
+    <div class="tab-panel" id="panel-market">
+      <div class="market-summary-row">
+        <div class="market-summary-card">
+          <div class="market-summary-name"><span class="market-summary-dot" style="background:#7c5ce8;"></span>加權指數 TSE001</div>
+          <span class="market-summary-val" id="mk-taiex-val"></span><span class="market-summary-chg" id="mk-taiex-chg"></span>
+        </div>
+        <div class="market-summary-card">
+          <div class="market-summary-name"><span class="market-summary-dot" style="background:#3bb2f6;"></span>櫃買指數 OTC101</div>
+          <span class="market-summary-val" id="mk-otc-val"></span><span class="market-summary-chg" id="mk-otc-chg"></span>
+        </div>
+      </div>
+      <div class="market-chart-card">
+        <div class="market-legend">
+          <span><span class="market-legend-dot" style="background:#7c5ce8;"></span>加權指數（當日 % 變化）</span>
+          <span><span class="market-legend-dot" style="background:#3bb2f6;"></span>櫃買指數（當日 % 變化）</span>
+        </div>
+        <div id="marketChartHost"></div>
+      </div>
     </div>
-    <div class="pos-tbl compact" id="posTable"></div>
-    <div class="table-footer">
-      <div class="pagination" id="pagination"></div>
-      <div class="table-update-time" id="tbl-update-time" style="margin-left:auto;"></div>
+
+    <!-- ══════════════ 持倉 ══════════════ -->
+    <div class="tab-panel" id="panel-holdings">
+      <div class="table-wrap">
+        <div class="table-toggle-row">
+          <div class="tsB">
+            <button class="t-btn active" id="btnFull">Full</button>
+            <button class="t-btn"        id="btnCompact">Summary</button>
+          </div>
+        </div>
+        <table class="tbl" id="posTable"></table>
+        <div class="table-footer">
+          <div class="pagination" id="pagination"></div>
+          <div class="table-update-time" id="tbl-update-time" style="margin-left:auto;"></div>
+        </div>
+      </div>
     </div>
+
+    <!-- ══════════════ 委託單 ══════════════ -->
+    <div class="tab-panel" id="panel-orders">
+      <div class="simple-card">
+        <table class="tbl" id="ordersTable"></table>
+      </div>
+    </div>
+
+    <!-- ══════════════ 已實現損益 ══════════════ -->
+    <div class="tab-panel" id="panel-realized">
+      <div class="summary-cards-row">
+        <div class="summary-card">
+          <div class="summary-card-lbl">今日已實現</div>
+          <div class="summary-card-val" id="rz-today"></div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-lbl">本年度已實現</div>
+          <div class="summary-card-val" id="rz-year"></div>
+        </div>
+      </div>
+      <div class="simple-card">
+        <table class="tbl" id="realizedTable"></table>
+      </div>
+    </div>
+
+    <!-- ══════════════ 交割款項 ══════════════ -->
+    <div class="tab-panel" id="panel-settlement">
+      <div class="summary-cards-row">
+        <div class="summary-card">
+          <div class="summary-card-lbl">交割總額 (T0–T2)</div>
+          <div class="summary-card-val" id="st-total"></div>
+        </div>
+      </div>
+      <div class="simple-card">
+        <table class="tbl" id="settlementTable"></table>
+      </div>
+    </div>
+
+  </div>
   </div>
 </div>
 
 <div id="tt"></div>
 
 <script>
-var HOLDINGS_DATA     = {"records": [{"label": "3357 臺慶科", "ticker": "3357", "name": "臺慶科", "weight": 13.08, "ret": 0.46, "pnl": 580.0, "change_rate": 1.1, "quantity": 467, "price": 272.55, "last_price": 275.0}, {"label": "2414 精技", "ticker": "2414", "name": "精技", "weight": 12.17, "ret": 1.63, "pnl": 1913.0, "change_rate": 0.81, "quantity": 1941, "price": 60.34, "last_price": 61.6}, {"label": "00981A 主動統一台股增長", "ticker": "00981A", "name": "主動統一台股增長", "weight": 9.15, "ret": -2.46, "pnl": -2262.0, "change_rate": 0.67, "quantity": 3000, "price": 30.63, "last_price": 29.95}, {"label": "3624 光頡", "ticker": "3624", "name": "光頡", "weight": 8.53, "ret": -2.34, "pnl": -1998.0, "change_rate": 2.85, "quantity": 582, "price": 146.8, "last_price": 144.0}, {"label": "6446 藥華藥", "ticker": "6446", "name": "藥華藥", "weight": 6.8, "ret": 2.65, "pnl": 1716.0, "change_rate": -6.88, "quantity": 52, "price": 1246.37, "last_price": 1285.0}, {"label": "8926 台汽電", "ticker": "8926", "name": "台汽電", "weight": 6.12, "ret": 2.75, "pnl": 1604.0, "change_rate": -2.18, "quantity": 791, "price": 73.64, "last_price": 76.0}, {"label": "00991A 主動復華未來50", "ticker": "00991A", "name": "主動復華未來50", "weight": 5.96, "ret": 1.25, "pnl": 721.0, "change_rate": 2.14, "quantity": 3000, "price": 19.22, "last_price": 19.51}, {"label": "2327 國巨*", "ticker": "2327", "name": "國巨*", "weight": 5.5, "ret": -11.88, "pnl": -7246.0, "change_rate": 1.01, "quantity": 60, "price": 1016.83, "last_price": 900.0}, {"label": "2025 千興", "ticker": "2025", "name": "千興", "weight": 5.34, "ret": -9.52, "pnl": -5491.0, "change_rate": 0.41, "quantity": 4333, "price": 13.31, "last_price": 12.1}, {"label": "4739 康普", "ticker": "4739", "name": "康普", "weight": 5.26, "ret": -10.37, "pnl": -5952.0, "change_rate": -10.0, "quantity": 522, "price": 109.97, "last_price": 99.0}, {"label": "2059 川湖", "ticker": "2059", "name": "川湖", "weight": 4.2, "ret": 0.43, "pnl": 176.0, "change_rate": 1.91, "quantity": 5, "price": 8179.4, "last_price": 8250.0}, {"label": "00988A 主動統一全球創新", "ticker": "00988A", "name": "主動統一全球創新", "weight": 3.9, "ret": -13.47, "pnl": -5954.0, "change_rate": 0.1, "quantity": 2000, "price": 22.1, "last_price": 19.17}, {"label": "5288 豐祥-KY", "ticker": "5288", "name": "豐祥-KY", "weight": 3.87, "ret": 3.91, "pnl": 1425.0, "change_rate": 2.15, "quantity": 200, "price": 182.05, "last_price": 190.0}, {"label": "1714 和桐", "ticker": "1714", "name": "和桐", "weight": 3.2, "ret": -8.27, "pnl": -2823.0, "change_rate": -2.81, "quantity": 1824, "price": 18.72, "last_price": 17.25}, {"label": "2883 凱基金", "ticker": "2883", "name": "凱基金", "weight": 2.5, "ret": -0.18, "pnl": -43.0, "change_rate": -2.11, "quantity": 816, "price": 29.97, "last_price": 30.05}, {"label": "6197 佳必琪", "ticker": "6197", "name": "佳必琪", "weight": 1.28, "ret": -2.09, "pnl": -267.0, "change_rate": -2.84, "quantity": 35, "price": 364.63, "last_price": 358.5}, {"label": "2428 興勤", "ticker": "2428", "name": "興勤", "weight": 1.19, "ret": 11.09, "pnl": 1163.0, "change_rate": 7.97, "quantity": 36, "price": 291.33, "last_price": 325.0}, {"label": "5228 鈺鎧", "ticker": "5228", "name": "鈺鎧", "weight": 0.5, "ret": -13.2, "pnl": -738.0, "change_rate": 0.72, "quantity": 88, "price": 63.55, "last_price": 55.4}, {"label": "6870 騰雲", "ticker": "6870", "name": "騰雲", "weight": 0.41, "ret": 3.41, "pnl": 133.0, "change_rate": -1.36, "quantity": 14, "price": 278.43, "last_price": 289.0}, {"label": "2891 中信金", "ticker": "2891", "name": "中信金", "weight": 0.37, "ret": -1.82, "pnl": -67.0, "change_rate": -1.96, "quantity": 52, "price": 70.92, "last_price": 69.9}, {"label": "2368 金像電", "ticker": "2368", "name": "金像電", "weight": 0.33, "ret": -8.28, "pnl": -290.0, "change_rate": -6.52, "quantity": 3, "price": 1167.67, "last_price": 1075.0}, {"label": "2305 全友", "ticker": "2305", "name": "全友", "weight": 0.24, "ret": 0.13, "pnl": 3.0, "change_rate": 2.41, "quantity": 65, "price": 35.8, "last_price": 36.0}, {"label": "8021 尖點", "ticker": "8021", "name": "尖點", "weight": 0.11, "ret": -0.1, "pnl": -1.0, "change_rate": 0.57, "quantity": 2, "price": 519.5, "last_price": 521.0}], "total_weight": 100.01, "total_pnl": -23698.0, "win_rate": 43.5, "holding_count": 23, "winning": 10, "unrealized_ret": -2.3652, "realtime_change": -0.3166, "market_value": 982207, "total_balance": 1493545, "total_cost": 1001940, "last_update": "2026/07/09 16:11", "cash": 511338, "net_position_change": -19803};
-var SORTED_RECORDS    = [{"label": "2428 興勤", "ticker": "2428", "name": "興勤", "weight": 1.19, "ret": 11.09, "pnl": 1163.0, "change_rate": 7.97, "quantity": 36, "price": 291.33, "last_price": 325.0}, {"label": "5288 豐祥-KY", "ticker": "5288", "name": "豐祥-KY", "weight": 3.87, "ret": 3.91, "pnl": 1425.0, "change_rate": 2.15, "quantity": 200, "price": 182.05, "last_price": 190.0}, {"label": "6870 騰雲", "ticker": "6870", "name": "騰雲", "weight": 0.41, "ret": 3.41, "pnl": 133.0, "change_rate": -1.36, "quantity": 14, "price": 278.43, "last_price": 289.0}, {"label": "8926 台汽電", "ticker": "8926", "name": "台汽電", "weight": 6.12, "ret": 2.75, "pnl": 1604.0, "change_rate": -2.18, "quantity": 791, "price": 73.64, "last_price": 76.0}, {"label": "6446 藥華藥", "ticker": "6446", "name": "藥華藥", "weight": 6.8, "ret": 2.65, "pnl": 1716.0, "change_rate": -6.88, "quantity": 52, "price": 1246.37, "last_price": 1285.0}, {"label": "2414 精技", "ticker": "2414", "name": "精技", "weight": 12.17, "ret": 1.63, "pnl": 1913.0, "change_rate": 0.81, "quantity": 1941, "price": 60.34, "last_price": 61.6}, {"label": "00991A 主動復華未來50", "ticker": "00991A", "name": "主動復華未來50", "weight": 5.96, "ret": 1.25, "pnl": 721.0, "change_rate": 2.14, "quantity": 3000, "price": 19.22, "last_price": 19.51}, {"label": "3357 臺慶科", "ticker": "3357", "name": "臺慶科", "weight": 13.08, "ret": 0.46, "pnl": 580.0, "change_rate": 1.1, "quantity": 467, "price": 272.55, "last_price": 275.0}, {"label": "2059 川湖", "ticker": "2059", "name": "川湖", "weight": 4.2, "ret": 0.43, "pnl": 176.0, "change_rate": 1.91, "quantity": 5, "price": 8179.4, "last_price": 8250.0}, {"label": "2305 全友", "ticker": "2305", "name": "全友", "weight": 0.24, "ret": 0.13, "pnl": 3.0, "change_rate": 2.41, "quantity": 65, "price": 35.8, "last_price": 36.0}, {"label": "8021 尖點", "ticker": "8021", "name": "尖點", "weight": 0.11, "ret": -0.1, "pnl": -1.0, "change_rate": 0.57, "quantity": 2, "price": 519.5, "last_price": 521.0}, {"label": "2883 凱基金", "ticker": "2883", "name": "凱基金", "weight": 2.5, "ret": -0.18, "pnl": -43.0, "change_rate": -2.11, "quantity": 816, "price": 29.97, "last_price": 30.05}, {"label": "2891 中信金", "ticker": "2891", "name": "中信金", "weight": 0.37, "ret": -1.82, "pnl": -67.0, "change_rate": -1.96, "quantity": 52, "price": 70.92, "last_price": 69.9}, {"label": "6197 佳必琪", "ticker": "6197", "name": "佳必琪", "weight": 1.28, "ret": -2.09, "pnl": -267.0, "change_rate": -2.84, "quantity": 35, "price": 364.63, "last_price": 358.5}, {"label": "3624 光頡", "ticker": "3624", "name": "光頡", "weight": 8.53, "ret": -2.34, "pnl": -1998.0, "change_rate": 2.85, "quantity": 582, "price": 146.8, "last_price": 144.0}, {"label": "00981A 主動統一台股增長", "ticker": "00981A", "name": "主動統一台股增長", "weight": 9.15, "ret": -2.46, "pnl": -2262.0, "change_rate": 0.67, "quantity": 3000, "price": 30.63, "last_price": 29.95}, {"label": "1714 和桐", "ticker": "1714", "name": "和桐", "weight": 3.2, "ret": -8.27, "pnl": -2823.0, "change_rate": -2.81, "quantity": 1824, "price": 18.72, "last_price": 17.25}, {"label": "2368 金像電", "ticker": "2368", "name": "金像電", "weight": 0.33, "ret": -8.28, "pnl": -290.0, "change_rate": -6.52, "quantity": 3, "price": 1167.67, "last_price": 1075.0}, {"label": "2025 千興", "ticker": "2025", "name": "千興", "weight": 5.34, "ret": -9.52, "pnl": -5491.0, "change_rate": 0.41, "quantity": 4333, "price": 13.31, "last_price": 12.1}, {"label": "4739 康普", "ticker": "4739", "name": "康普", "weight": 5.26, "ret": -10.37, "pnl": -5952.0, "change_rate": -10.0, "quantity": 522, "price": 109.97, "last_price": 99.0}, {"label": "2327 國巨*", "ticker": "2327", "name": "國巨*", "weight": 5.5, "ret": -11.88, "pnl": -7246.0, "change_rate": 1.01, "quantity": 60, "price": 1016.83, "last_price": 900.0}, {"label": "5228 鈺鎧", "ticker": "5228", "name": "鈺鎧", "weight": 0.5, "ret": -13.2, "pnl": -738.0, "change_rate": 0.72, "quantity": 88, "price": 63.55, "last_price": 55.4}, {"label": "00988A 主動統一全球創新", "ticker": "00988A", "name": "主動統一全球創新", "weight": 3.9, "ret": -13.47, "pnl": -5954.0, "change_rate": 0.1, "quantity": 2000, "price": 22.1, "last_price": 19.17}];
-var SORTED_RECORDS_CR = [{"label": "2428 興勤", "ticker": "2428", "name": "興勤", "weight": 1.19, "ret": 11.09, "pnl": 1163.0, "change_rate": 7.97, "quantity": 36, "price": 291.33, "last_price": 325.0}, {"label": "3624 光頡", "ticker": "3624", "name": "光頡", "weight": 8.53, "ret": -2.34, "pnl": -1998.0, "change_rate": 2.85, "quantity": 582, "price": 146.8, "last_price": 144.0}, {"label": "2305 全友", "ticker": "2305", "name": "全友", "weight": 0.24, "ret": 0.13, "pnl": 3.0, "change_rate": 2.41, "quantity": 65, "price": 35.8, "last_price": 36.0}, {"label": "5288 豐祥-KY", "ticker": "5288", "name": "豐祥-KY", "weight": 3.87, "ret": 3.91, "pnl": 1425.0, "change_rate": 2.15, "quantity": 200, "price": 182.05, "last_price": 190.0}, {"label": "00991A 主動復華未來50", "ticker": "00991A", "name": "主動復華未來50", "weight": 5.96, "ret": 1.25, "pnl": 721.0, "change_rate": 2.14, "quantity": 3000, "price": 19.22, "last_price": 19.51}, {"label": "2059 川湖", "ticker": "2059", "name": "川湖", "weight": 4.2, "ret": 0.43, "pnl": 176.0, "change_rate": 1.91, "quantity": 5, "price": 8179.4, "last_price": 8250.0}, {"label": "3357 臺慶科", "ticker": "3357", "name": "臺慶科", "weight": 13.08, "ret": 0.46, "pnl": 580.0, "change_rate": 1.1, "quantity": 467, "price": 272.55, "last_price": 275.0}, {"label": "2327 國巨*", "ticker": "2327", "name": "國巨*", "weight": 5.5, "ret": -11.88, "pnl": -7246.0, "change_rate": 1.01, "quantity": 60, "price": 1016.83, "last_price": 900.0}, {"label": "2414 精技", "ticker": "2414", "name": "精技", "weight": 12.17, "ret": 1.63, "pnl": 1913.0, "change_rate": 0.81, "quantity": 1941, "price": 60.34, "last_price": 61.6}, {"label": "5228 鈺鎧", "ticker": "5228", "name": "鈺鎧", "weight": 0.5, "ret": -13.2, "pnl": -738.0, "change_rate": 0.72, "quantity": 88, "price": 63.55, "last_price": 55.4}, {"label": "00981A 主動統一台股增長", "ticker": "00981A", "name": "主動統一台股增長", "weight": 9.15, "ret": -2.46, "pnl": -2262.0, "change_rate": 0.67, "quantity": 3000, "price": 30.63, "last_price": 29.95}, {"label": "8021 尖點", "ticker": "8021", "name": "尖點", "weight": 0.11, "ret": -0.1, "pnl": -1.0, "change_rate": 0.57, "quantity": 2, "price": 519.5, "last_price": 521.0}, {"label": "2025 千興", "ticker": "2025", "name": "千興", "weight": 5.34, "ret": -9.52, "pnl": -5491.0, "change_rate": 0.41, "quantity": 4333, "price": 13.31, "last_price": 12.1}, {"label": "00988A 主動統一全球創新", "ticker": "00988A", "name": "主動統一全球創新", "weight": 3.9, "ret": -13.47, "pnl": -5954.0, "change_rate": 0.1, "quantity": 2000, "price": 22.1, "last_price": 19.17}, {"label": "6870 騰雲", "ticker": "6870", "name": "騰雲", "weight": 0.41, "ret": 3.41, "pnl": 133.0, "change_rate": -1.36, "quantity": 14, "price": 278.43, "last_price": 289.0}, {"label": "2891 中信金", "ticker": "2891", "name": "中信金", "weight": 0.37, "ret": -1.82, "pnl": -67.0, "change_rate": -1.96, "quantity": 52, "price": 70.92, "last_price": 69.9}, {"label": "2883 凱基金", "ticker": "2883", "name": "凱基金", "weight": 2.5, "ret": -0.18, "pnl": -43.0, "change_rate": -2.11, "quantity": 816, "price": 29.97, "last_price": 30.05}, {"label": "8926 台汽電", "ticker": "8926", "name": "台汽電", "weight": 6.12, "ret": 2.75, "pnl": 1604.0, "change_rate": -2.18, "quantity": 791, "price": 73.64, "last_price": 76.0}, {"label": "1714 和桐", "ticker": "1714", "name": "和桐", "weight": 3.2, "ret": -8.27, "pnl": -2823.0, "change_rate": -2.81, "quantity": 1824, "price": 18.72, "last_price": 17.25}, {"label": "6197 佳必琪", "ticker": "6197", "name": "佳必琪", "weight": 1.28, "ret": -2.09, "pnl": -267.0, "change_rate": -2.84, "quantity": 35, "price": 364.63, "last_price": 358.5}, {"label": "2368 金像電", "ticker": "2368", "name": "金像電", "weight": 0.33, "ret": -8.28, "pnl": -290.0, "change_rate": -6.52, "quantity": 3, "price": 1167.67, "last_price": 1075.0}, {"label": "6446 藥華藥", "ticker": "6446", "name": "藥華藥", "weight": 6.8, "ret": 2.65, "pnl": 1716.0, "change_rate": -6.88, "quantity": 52, "price": 1246.37, "last_price": 1285.0}, {"label": "4739 康普", "ticker": "4739", "name": "康普", "weight": 5.26, "ret": -10.37, "pnl": -5952.0, "change_rate": -10.0, "quantity": 522, "price": 109.97, "last_price": 99.0}];
+var HOLDINGS_DATA       = {"records": [{"label": "3357 臺慶科", "ticker": "3357", "name": "臺慶科", "weight": 13.08, "ret": 0.46, "pnl": 580.0, "change_rate": 1.1, "quantity": 467, "price": 272.55, "last_price": 275.0}, {"label": "2414 精技", "ticker": "2414", "name": "精技", "weight": 12.17, "ret": 1.63, "pnl": 1913.0, "change_rate": 0.81, "quantity": 1941, "price": 60.34, "last_price": 61.6}, {"label": "00981A 主動統一台股增長", "ticker": "00981A", "name": "主動統一台股增長", "weight": 9.15, "ret": -2.46, "pnl": -2262.0, "change_rate": 0.67, "quantity": 3000, "price": 30.63, "last_price": 29.95}, {"label": "3624 光頡", "ticker": "3624", "name": "光頡", "weight": 8.53, "ret": -2.34, "pnl": -1998.0, "change_rate": 2.85, "quantity": 582, "price": 146.8, "last_price": 144.0}, {"label": "6446 藥華藥", "ticker": "6446", "name": "藥華藥", "weight": 6.8, "ret": 2.65, "pnl": 1716.0, "change_rate": -6.88, "quantity": 52, "price": 1246.37, "last_price": 1285.0}, {"label": "8926 台汽電", "ticker": "8926", "name": "台汽電", "weight": 6.12, "ret": 2.75, "pnl": 1604.0, "change_rate": -2.18, "quantity": 791, "price": 73.64, "last_price": 76.0}, {"label": "00991A 主動復華未來50", "ticker": "00991A", "name": "主動復華未來50", "weight": 5.96, "ret": 1.25, "pnl": 721.0, "change_rate": 2.14, "quantity": 3000, "price": 19.22, "last_price": 19.51}, {"label": "2327 國巨*", "ticker": "2327", "name": "國巨*", "weight": 5.5, "ret": -11.88, "pnl": -7246.0, "change_rate": 1.01, "quantity": 60, "price": 1016.83, "last_price": 900.0}, {"label": "2025 千興", "ticker": "2025", "name": "千興", "weight": 5.34, "ret": -9.52, "pnl": -5491.0, "change_rate": 0.41, "quantity": 4333, "price": 13.31, "last_price": 12.1}, {"label": "4739 康普", "ticker": "4739", "name": "康普", "weight": 5.26, "ret": -10.37, "pnl": -5952.0, "change_rate": -10.0, "quantity": 522, "price": 109.97, "last_price": 99.0}, {"label": "2059 川湖", "ticker": "2059", "name": "川湖", "weight": 4.2, "ret": 0.43, "pnl": 176.0, "change_rate": 1.91, "quantity": 5, "price": 8179.4, "last_price": 8250.0}, {"label": "00988A 主動統一全球創新", "ticker": "00988A", "name": "主動統一全球創新", "weight": 3.9, "ret": -13.47, "pnl": -5954.0, "change_rate": 0.1, "quantity": 2000, "price": 22.1, "last_price": 19.17}, {"label": "5288 豐祥-KY", "ticker": "5288", "name": "豐祥-KY", "weight": 3.87, "ret": 3.91, "pnl": 1425.0, "change_rate": 2.15, "quantity": 200, "price": 182.05, "last_price": 190.0}, {"label": "1714 和桐", "ticker": "1714", "name": "和桐", "weight": 3.2, "ret": -8.27, "pnl": -2823.0, "change_rate": -2.81, "quantity": 1824, "price": 18.72, "last_price": 17.25}, {"label": "2883 凱基金", "ticker": "2883", "name": "凱基金", "weight": 2.5, "ret": -0.18, "pnl": -43.0, "change_rate": -2.11, "quantity": 816, "price": 29.97, "last_price": 30.05}, {"label": "6197 佳必琪", "ticker": "6197", "name": "佳必琪", "weight": 1.28, "ret": -2.09, "pnl": -267.0, "change_rate": -2.84, "quantity": 35, "price": 364.63, "last_price": 358.5}, {"label": "2428 興勤", "ticker": "2428", "name": "興勤", "weight": 1.19, "ret": 11.09, "pnl": 1163.0, "change_rate": 7.97, "quantity": 36, "price": 291.33, "last_price": 325.0}, {"label": "5228 鈺鎧", "ticker": "5228", "name": "鈺鎧", "weight": 0.5, "ret": -13.2, "pnl": -738.0, "change_rate": 0.72, "quantity": 88, "price": 63.55, "last_price": 55.4}, {"label": "6870 騰雲", "ticker": "6870", "name": "騰雲", "weight": 0.41, "ret": 3.41, "pnl": 133.0, "change_rate": -1.36, "quantity": 14, "price": 278.43, "last_price": 289.0}, {"label": "2891 中信金", "ticker": "2891", "name": "中信金", "weight": 0.37, "ret": -1.82, "pnl": -67.0, "change_rate": -1.96, "quantity": 52, "price": 70.92, "last_price": 69.9}, {"label": "2368 金像電", "ticker": "2368", "name": "金像電", "weight": 0.33, "ret": -8.28, "pnl": -290.0, "change_rate": -6.52, "quantity": 3, "price": 1167.67, "last_price": 1075.0}, {"label": "2305 全友", "ticker": "2305", "name": "全友", "weight": 0.24, "ret": 0.13, "pnl": 3.0, "change_rate": 2.41, "quantity": 65, "price": 35.8, "last_price": 36.0}, {"label": "8021 尖點", "ticker": "8021", "name": "尖點", "weight": 0.11, "ret": -0.1, "pnl": -1.0, "change_rate": 0.57, "quantity": 2, "price": 519.5, "last_price": 521.0}], "total_weight": 100.01, "total_pnl": -23698.0, "win_rate": 43.5, "holding_count": 23, "winning": 10, "unrealized_ret": -2.3652, "realtime_change": -0.3166, "market_value": 982207, "total_balance": 1493545, "last_update": "2026/07/09 16:15", "cash": 511338, "realized_today": -275, "realized_year": 127208, "net_position_change": -19803};
+var SORTED_RECORDS      = [{"label": "2428 興勤", "ticker": "2428", "name": "興勤", "weight": 1.19, "ret": 11.09, "pnl": 1163.0, "change_rate": 7.97, "quantity": 36, "price": 291.33, "last_price": 325.0}, {"label": "5288 豐祥-KY", "ticker": "5288", "name": "豐祥-KY", "weight": 3.87, "ret": 3.91, "pnl": 1425.0, "change_rate": 2.15, "quantity": 200, "price": 182.05, "last_price": 190.0}, {"label": "6870 騰雲", "ticker": "6870", "name": "騰雲", "weight": 0.41, "ret": 3.41, "pnl": 133.0, "change_rate": -1.36, "quantity": 14, "price": 278.43, "last_price": 289.0}, {"label": "8926 台汽電", "ticker": "8926", "name": "台汽電", "weight": 6.12, "ret": 2.75, "pnl": 1604.0, "change_rate": -2.18, "quantity": 791, "price": 73.64, "last_price": 76.0}, {"label": "6446 藥華藥", "ticker": "6446", "name": "藥華藥", "weight": 6.8, "ret": 2.65, "pnl": 1716.0, "change_rate": -6.88, "quantity": 52, "price": 1246.37, "last_price": 1285.0}, {"label": "2414 精技", "ticker": "2414", "name": "精技", "weight": 12.17, "ret": 1.63, "pnl": 1913.0, "change_rate": 0.81, "quantity": 1941, "price": 60.34, "last_price": 61.6}, {"label": "00991A 主動復華未來50", "ticker": "00991A", "name": "主動復華未來50", "weight": 5.96, "ret": 1.25, "pnl": 721.0, "change_rate": 2.14, "quantity": 3000, "price": 19.22, "last_price": 19.51}, {"label": "3357 臺慶科", "ticker": "3357", "name": "臺慶科", "weight": 13.08, "ret": 0.46, "pnl": 580.0, "change_rate": 1.1, "quantity": 467, "price": 272.55, "last_price": 275.0}, {"label": "2059 川湖", "ticker": "2059", "name": "川湖", "weight": 4.2, "ret": 0.43, "pnl": 176.0, "change_rate": 1.91, "quantity": 5, "price": 8179.4, "last_price": 8250.0}, {"label": "2305 全友", "ticker": "2305", "name": "全友", "weight": 0.24, "ret": 0.13, "pnl": 3.0, "change_rate": 2.41, "quantity": 65, "price": 35.8, "last_price": 36.0}, {"label": "8021 尖點", "ticker": "8021", "name": "尖點", "weight": 0.11, "ret": -0.1, "pnl": -1.0, "change_rate": 0.57, "quantity": 2, "price": 519.5, "last_price": 521.0}, {"label": "2883 凱基金", "ticker": "2883", "name": "凱基金", "weight": 2.5, "ret": -0.18, "pnl": -43.0, "change_rate": -2.11, "quantity": 816, "price": 29.97, "last_price": 30.05}, {"label": "2891 中信金", "ticker": "2891", "name": "中信金", "weight": 0.37, "ret": -1.82, "pnl": -67.0, "change_rate": -1.96, "quantity": 52, "price": 70.92, "last_price": 69.9}, {"label": "6197 佳必琪", "ticker": "6197", "name": "佳必琪", "weight": 1.28, "ret": -2.09, "pnl": -267.0, "change_rate": -2.84, "quantity": 35, "price": 364.63, "last_price": 358.5}, {"label": "3624 光頡", "ticker": "3624", "name": "光頡", "weight": 8.53, "ret": -2.34, "pnl": -1998.0, "change_rate": 2.85, "quantity": 582, "price": 146.8, "last_price": 144.0}, {"label": "00981A 主動統一台股增長", "ticker": "00981A", "name": "主動統一台股增長", "weight": 9.15, "ret": -2.46, "pnl": -2262.0, "change_rate": 0.67, "quantity": 3000, "price": 30.63, "last_price": 29.95}, {"label": "1714 和桐", "ticker": "1714", "name": "和桐", "weight": 3.2, "ret": -8.27, "pnl": -2823.0, "change_rate": -2.81, "quantity": 1824, "price": 18.72, "last_price": 17.25}, {"label": "2368 金像電", "ticker": "2368", "name": "金像電", "weight": 0.33, "ret": -8.28, "pnl": -290.0, "change_rate": -6.52, "quantity": 3, "price": 1167.67, "last_price": 1075.0}, {"label": "2025 千興", "ticker": "2025", "name": "千興", "weight": 5.34, "ret": -9.52, "pnl": -5491.0, "change_rate": 0.41, "quantity": 4333, "price": 13.31, "last_price": 12.1}, {"label": "4739 康普", "ticker": "4739", "name": "康普", "weight": 5.26, "ret": -10.37, "pnl": -5952.0, "change_rate": -10.0, "quantity": 522, "price": 109.97, "last_price": 99.0}, {"label": "2327 國巨*", "ticker": "2327", "name": "國巨*", "weight": 5.5, "ret": -11.88, "pnl": -7246.0, "change_rate": 1.01, "quantity": 60, "price": 1016.83, "last_price": 900.0}, {"label": "5228 鈺鎧", "ticker": "5228", "name": "鈺鎧", "weight": 0.5, "ret": -13.2, "pnl": -738.0, "change_rate": 0.72, "quantity": 88, "price": 63.55, "last_price": 55.4}, {"label": "00988A 主動統一全球創新", "ticker": "00988A", "name": "主動統一全球創新", "weight": 3.9, "ret": -13.47, "pnl": -5954.0, "change_rate": 0.1, "quantity": 2000, "price": 22.1, "last_price": 19.17}];
+var SORTED_RECORDS_CR   = [{"label": "2428 興勤", "ticker": "2428", "name": "興勤", "weight": 1.19, "ret": 11.09, "pnl": 1163.0, "change_rate": 7.97, "quantity": 36, "price": 291.33, "last_price": 325.0}, {"label": "3624 光頡", "ticker": "3624", "name": "光頡", "weight": 8.53, "ret": -2.34, "pnl": -1998.0, "change_rate": 2.85, "quantity": 582, "price": 146.8, "last_price": 144.0}, {"label": "2305 全友", "ticker": "2305", "name": "全友", "weight": 0.24, "ret": 0.13, "pnl": 3.0, "change_rate": 2.41, "quantity": 65, "price": 35.8, "last_price": 36.0}, {"label": "5288 豐祥-KY", "ticker": "5288", "name": "豐祥-KY", "weight": 3.87, "ret": 3.91, "pnl": 1425.0, "change_rate": 2.15, "quantity": 200, "price": 182.05, "last_price": 190.0}, {"label": "00991A 主動復華未來50", "ticker": "00991A", "name": "主動復華未來50", "weight": 5.96, "ret": 1.25, "pnl": 721.0, "change_rate": 2.14, "quantity": 3000, "price": 19.22, "last_price": 19.51}, {"label": "2059 川湖", "ticker": "2059", "name": "川湖", "weight": 4.2, "ret": 0.43, "pnl": 176.0, "change_rate": 1.91, "quantity": 5, "price": 8179.4, "last_price": 8250.0}, {"label": "3357 臺慶科", "ticker": "3357", "name": "臺慶科", "weight": 13.08, "ret": 0.46, "pnl": 580.0, "change_rate": 1.1, "quantity": 467, "price": 272.55, "last_price": 275.0}, {"label": "2327 國巨*", "ticker": "2327", "name": "國巨*", "weight": 5.5, "ret": -11.88, "pnl": -7246.0, "change_rate": 1.01, "quantity": 60, "price": 1016.83, "last_price": 900.0}, {"label": "2414 精技", "ticker": "2414", "name": "精技", "weight": 12.17, "ret": 1.63, "pnl": 1913.0, "change_rate": 0.81, "quantity": 1941, "price": 60.34, "last_price": 61.6}, {"label": "5228 鈺鎧", "ticker": "5228", "name": "鈺鎧", "weight": 0.5, "ret": -13.2, "pnl": -738.0, "change_rate": 0.72, "quantity": 88, "price": 63.55, "last_price": 55.4}, {"label": "00981A 主動統一台股增長", "ticker": "00981A", "name": "主動統一台股增長", "weight": 9.15, "ret": -2.46, "pnl": -2262.0, "change_rate": 0.67, "quantity": 3000, "price": 30.63, "last_price": 29.95}, {"label": "8021 尖點", "ticker": "8021", "name": "尖點", "weight": 0.11, "ret": -0.1, "pnl": -1.0, "change_rate": 0.57, "quantity": 2, "price": 519.5, "last_price": 521.0}, {"label": "2025 千興", "ticker": "2025", "name": "千興", "weight": 5.34, "ret": -9.52, "pnl": -5491.0, "change_rate": 0.41, "quantity": 4333, "price": 13.31, "last_price": 12.1}, {"label": "00988A 主動統一全球創新", "ticker": "00988A", "name": "主動統一全球創新", "weight": 3.9, "ret": -13.47, "pnl": -5954.0, "change_rate": 0.1, "quantity": 2000, "price": 22.1, "last_price": 19.17}, {"label": "6870 騰雲", "ticker": "6870", "name": "騰雲", "weight": 0.41, "ret": 3.41, "pnl": 133.0, "change_rate": -1.36, "quantity": 14, "price": 278.43, "last_price": 289.0}, {"label": "2891 中信金", "ticker": "2891", "name": "中信金", "weight": 0.37, "ret": -1.82, "pnl": -67.0, "change_rate": -1.96, "quantity": 52, "price": 70.92, "last_price": 69.9}, {"label": "2883 凱基金", "ticker": "2883", "name": "凱基金", "weight": 2.5, "ret": -0.18, "pnl": -43.0, "change_rate": -2.11, "quantity": 816, "price": 29.97, "last_price": 30.05}, {"label": "8926 台汽電", "ticker": "8926", "name": "台汽電", "weight": 6.12, "ret": 2.75, "pnl": 1604.0, "change_rate": -2.18, "quantity": 791, "price": 73.64, "last_price": 76.0}, {"label": "1714 和桐", "ticker": "1714", "name": "和桐", "weight": 3.2, "ret": -8.27, "pnl": -2823.0, "change_rate": -2.81, "quantity": 1824, "price": 18.72, "last_price": 17.25}, {"label": "6197 佳必琪", "ticker": "6197", "name": "佳必琪", "weight": 1.28, "ret": -2.09, "pnl": -267.0, "change_rate": -2.84, "quantity": 35, "price": 364.63, "last_price": 358.5}, {"label": "2368 金像電", "ticker": "2368", "name": "金像電", "weight": 0.33, "ret": -8.28, "pnl": -290.0, "change_rate": -6.52, "quantity": 3, "price": 1167.67, "last_price": 1075.0}, {"label": "6446 藥華藥", "ticker": "6446", "name": "藥華藥", "weight": 6.8, "ret": 2.65, "pnl": 1716.0, "change_rate": -6.88, "quantity": 52, "price": 1246.37, "last_price": 1285.0}, {"label": "4739 康普", "ticker": "4739", "name": "康普", "weight": 5.26, "ret": -10.37, "pnl": -5952.0, "change_rate": -10.0, "quantity": 522, "price": 109.97, "last_price": 99.0}];
+var MARKET_DATA         = {"taiex": [{"t": "09:01", "v": 45850.71}, {"t": "09:02", "v": 45824.96}, {"t": "09:03", "v": 45804.6}, {"t": "09:04", "v": 45740.33}, {"t": "09:05", "v": 45627.26}, {"t": "09:06", "v": 45612.43}, {"t": "09:07", "v": 45689.66}, {"t": "09:08", "v": 45696.31}, {"t": "09:09", "v": 45770.92}, {"t": "09:10", "v": 45828.22}, {"t": "09:11", "v": 45834.7}, {"t": "09:12", "v": 45781.38}, {"t": "09:13", "v": 45734.41}, {"t": "09:14", "v": 45704.31}, {"t": "09:15", "v": 45733.7}, {"t": "09:16", "v": 45725.57}, {"t": "09:17", "v": 45676.07}, {"t": "09:18", "v": 45683.35}, {"t": "09:19", "v": 45722.49}, {"t": "09:20", "v": 45786.72}, {"t": "09:21", "v": 45796.9}, {"t": "09:22", "v": 45746.03}, {"t": "09:23", "v": 45815.29}, {"t": "09:24", "v": 45835.77}, {"t": "09:25", "v": 45810.39}, {"t": "09:26", "v": 45779.31}, {"t": "09:27", "v": 45758.06}, {"t": "09:28", "v": 45719.54}, {"t": "09:29", "v": 45780.31}, {"t": "09:30", "v": 45810.25}, {"t": "09:31", "v": 45805.48}, {"t": "09:32", "v": 45769.28}, {"t": "09:33", "v": 45840.19}, {"t": "09:34", "v": 45801.2}, {"t": "09:35", "v": 45850.7}, {"t": "09:36", "v": 45861.95}, {"t": "09:37", "v": 45913.14}, {"t": "09:38", "v": 45890.04}, {"t": "09:39", "v": 45927.58}, {"t": "09:40", "v": 45934.28}, {"t": "09:41", "v": 45925.67}, {"t": "09:42", "v": 45889.42}, {"t": "09:43", "v": 45941.54}, {"t": "09:44", "v": 45940.45}, {"t": "09:45", "v": 45937.69}, {"t": "09:46", "v": 46039.24}, {"t": "09:47", "v": 46006.58}, {"t": "09:48", "v": 46024.6}, {"t": "09:49", "v": 46059.4}, {"t": "09:50", "v": 46052.18}, {"t": "09:51", "v": 46012.7}, {"t": "09:52", "v": 46048.36}, {"t": "09:53", "v": 45984.95}, {"t": "09:54", "v": 45946.25}, {"t": "09:55", "v": 45871.36}, {"t": "09:56", "v": 45843.55}, {"t": "09:57", "v": 45775.54}, {"t": "09:58", "v": 45788.13}, {"t": "09:59", "v": 45720.36}, {"t": "10:00", "v": 45726.08}, {"t": "10:01", "v": 45746.1}, {"t": "10:02", "v": 45727.93}, {"t": "10:03", "v": 45688.49}, {"t": "10:04", "v": 45662.32}, {"t": "10:05", "v": 45703.51}, {"t": "10:06", "v": 45710.85}, {"t": "10:07", "v": 45719.14}, {"t": "10:08", "v": 45777.28}, {"t": "10:09", "v": 45764.05}, {"t": "10:10", "v": 45779.83}, {"t": "10:11", "v": 45839.37}, {"t": "10:12", "v": 45864.49}, {"t": "10:13", "v": 45869.06}, {"t": "10:14", "v": 45864.16}, {"t": "10:15", "v": 45880.82}, {"t": "10:16", "v": 45882.08}, {"t": "10:17", "v": 45865.43}, {"t": "10:18", "v": 45847.91}, {"t": "10:19", "v": 45871.56}, {"t": "10:20", "v": 45883.84}, {"t": "10:21", "v": 45897.61}, {"t": "10:22", "v": 45926.48}, {"t": "10:23", "v": 45911.09}, {"t": "10:24", "v": 45916.1}, {"t": "10:25", "v": 45946.73}, {"t": "10:26", "v": 45878.74}, {"t": "10:27", "v": 45910.26}, {"t": "10:28", "v": 45859.33}, {"t": "10:29", "v": 45856.64}, {"t": "10:30", "v": 45864.5}, {"t": "10:31", "v": 45914.9}, {"t": "10:32", "v": 45875.34}, {"t": "10:33", "v": 45873.7}, {"t": "10:34", "v": 45858.01}, {"t": "10:35", "v": 45866.87}, {"t": "10:36", "v": 45790.48}, {"t": "10:37", "v": 45751.93}, {"t": "10:38", "v": 45753.32}, {"t": "10:39", "v": 45797.07}, {"t": "10:40", "v": 45766.36}, {"t": "10:41", "v": 45761.23}, {"t": "10:42", "v": 45779.8}, {"t": "10:43", "v": 45776.71}, {"t": "10:44", "v": 45728.28}, {"t": "10:45", "v": 45706.31}, {"t": "10:46", "v": 45643.11}, {"t": "10:47", "v": 45654.76}, {"t": "10:48", "v": 45625.9}, {"t": "10:49", "v": 45627.93}, {"t": "10:50", "v": 45594.46}, {"t": "10:51", "v": 45620.69}, {"t": "10:52", "v": 45613.69}, {"t": "10:53", "v": 45564.31}, {"t": "10:54", "v": 45547.95}, {"t": "10:55", "v": 45604.49}, {"t": "10:56", "v": 45558.8}, {"t": "10:57", "v": 45616.15}, {"t": "10:58", "v": 45620.78}, {"t": "10:59", "v": 45603.03}, {"t": "11:00", "v": 45599.84}, {"t": "11:01", "v": 45545.97}, {"t": "11:02", "v": 45538.89}, {"t": "11:03", "v": 45534.39}, {"t": "11:04", "v": 45530.73}, {"t": "11:05", "v": 45520.71}, {"t": "11:06", "v": 45532.43}, {"t": "11:07", "v": 45575.89}, {"t": "11:08", "v": 45531.54}, {"t": "11:09", "v": 45565.64}, {"t": "11:10", "v": 45514.88}, {"t": "11:11", "v": 45454.45}, {"t": "11:12", "v": 45424.67}, {"t": "11:13", "v": 45413.31}, {"t": "11:14", "v": 45385.45}, {"t": "11:15", "v": 45407.6}, {"t": "11:16", "v": 45379.49}, {"t": "11:17", "v": 45372.85}, {"t": "11:18", "v": 45369.39}, {"t": "11:19", "v": 45352.41}, {"t": "11:20", "v": 45362.21}, {"t": "11:21", "v": 45383.16}, {"t": "11:22", "v": 45392.66}, {"t": "11:23", "v": 45444.18}, {"t": "11:24", "v": 45491.83}, {"t": "11:25", "v": 45464.51}, {"t": "11:26", "v": 45490.76}, {"t": "11:27", "v": 45543.76}, {"t": "11:28", "v": 45587.77}, {"t": "11:29", "v": 45583.54}, {"t": "11:30", "v": 45586.94}, {"t": "11:31", "v": 45567.84}, {"t": "11:32", "v": 45604.63}, {"t": "11:33", "v": 45614.84}, {"t": "11:34", "v": 45644.9}, {"t": "11:35", "v": 45653.01}, {"t": "11:36", "v": 45648.47}, {"t": "11:37", "v": 45652.9}, {"t": "11:38", "v": 45618.92}, {"t": "11:39", "v": 45662.77}, {"t": "11:40", "v": 45657.99}, {"t": "11:41", "v": 45673.21}, {"t": "11:42", "v": 45696.3}, {"t": "11:43", "v": 45656.18}, {"t": "11:44", "v": 45656.22}, {"t": "11:45", "v": 45658.24}, {"t": "11:46", "v": 45726.64}, {"t": "11:47", "v": 45740.0}, {"t": "11:48", "v": 45708.87}, {"t": "11:49", "v": 45702.28}, {"t": "11:50", "v": 45704.19}, {"t": "11:51", "v": 45731.52}, {"t": "11:52", "v": 45700.97}, {"t": "11:53", "v": 45688.39}, {"t": "11:54", "v": 45706.89}, {"t": "11:55", "v": 45714.91}, {"t": "11:56", "v": 45755.7}, {"t": "11:57", "v": 45804.47}, {"t": "11:58", "v": 45800.42}, {"t": "11:59", "v": 45790.24}, {"t": "12:00", "v": 45748.29}, {"t": "12:01", "v": 45790.25}, {"t": "12:02", "v": 45765.19}, {"t": "12:03", "v": 45765.61}, {"t": "12:04", "v": 45806.63}, {"t": "12:05", "v": 45772.33}, {"t": "12:06", "v": 45814.54}, {"t": "12:07", "v": 45811.42}, {"t": "12:08", "v": 45793.55}, {"t": "12:09", "v": 45790.06}, {"t": "12:10", "v": 45761.37}, {"t": "12:11", "v": 45753.51}, {"t": "12:12", "v": 45748.53}, {"t": "12:13", "v": 45783.59}, {"t": "12:14", "v": 45751.13}, {"t": "12:15", "v": 45738.9}, {"t": "12:16", "v": 45734.63}, {"t": "12:17", "v": 45729.68}, {"t": "12:18", "v": 45723.58}, {"t": "12:19", "v": 45716.04}, {"t": "12:20", "v": 45704.59}, {"t": "12:21", "v": 45651.49}, {"t": "12:22", "v": 45702.71}, {"t": "12:23", "v": 45654.15}, {"t": "12:24", "v": 45649.33}, {"t": "12:25", "v": 45668.04}, {"t": "12:26", "v": 45612.6}, {"t": "12:27", "v": 45601.9}, {"t": "12:28", "v": 45591.06}, {"t": "12:29", "v": 45589.77}, {"t": "12:30", "v": 45592.81}, {"t": "12:31", "v": 45611.34}, {"t": "12:32", "v": 45630.13}, {"t": "12:33", "v": 45688.49}, {"t": "12:34", "v": 45692.93}, {"t": "12:35", "v": 45695.2}, {"t": "12:36", "v": 45733.83}, {"t": "12:37", "v": 45732.47}, {"t": "12:38", "v": 45699.4}, {"t": "12:39", "v": 45698.98}, {"t": "12:40", "v": 45692.6}, {"t": "12:41", "v": 45736.5}, {"t": "12:42", "v": 45702.0}, {"t": "12:43", "v": 45690.23}, {"t": "12:44", "v": 45651.17}, {"t": "12:45", "v": 45682.97}, {"t": "12:46", "v": 45637.94}, {"t": "12:47", "v": 45678.36}, {"t": "12:48", "v": 45638.84}, {"t": "12:49", "v": 45630.82}, {"t": "12:50", "v": 45626.19}, {"t": "12:51", "v": 45642.28}, {"t": "12:52", "v": 45658.23}, {"t": "12:53", "v": 45702.01}, {"t": "12:54", "v": 45658.66}, {"t": "12:55", "v": 45653.42}, {"t": "12:56", "v": 45698.15}, {"t": "12:57", "v": 45652.78}, {"t": "12:58", "v": 45686.76}, {"t": "12:59", "v": 45681.73}, {"t": "13:00", "v": 45649.35}, {"t": "13:01", "v": 45644.11}, {"t": "13:02", "v": 45666.2}, {"t": "13:03", "v": 45654.54}, {"t": "13:04", "v": 45637.38}, {"t": "13:05", "v": 45628.89}, {"t": "13:06", "v": 45602.02}, {"t": "13:07", "v": 45549.23}, {"t": "13:08", "v": 45589.94}, {"t": "13:09", "v": 45548.76}, {"t": "13:10", "v": 45537.96}, {"t": "13:11", "v": 45590.67}, {"t": "13:12", "v": 45682.14}, {"t": "13:13", "v": 45682.2}, {"t": "13:14", "v": 45645.68}, {"t": "13:15", "v": 45639.42}, {"t": "13:16", "v": 45619.73}, {"t": "13:17", "v": 45602.21}, {"t": "13:18", "v": 45635.64}, {"t": "13:19", "v": 45584.95}, {"t": "13:20", "v": 45572.5}, {"t": "13:21", "v": 45557.93}, {"t": "13:22", "v": 45546.96}, {"t": "13:23", "v": 45551.69}, {"t": "13:24", "v": 45507.85}, {"t": "13:25", "v": 45508.47}, {"t": "13:26", "v": 45540.86}, {"t": "13:27", "v": 45540.86}, {"t": "13:28", "v": 45540.86}, {"t": "13:29", "v": 45540.86}, {"t": "13:30", "v": 45354.61}], "otc": [{"t": "09:01", "v": 426.26}, {"t": "09:02", "v": 427.62}, {"t": "09:03", "v": 425.72}, {"t": "09:04", "v": 425.86}, {"t": "09:05", "v": 425.94}, {"t": "09:06", "v": 425.34}, {"t": "09:07", "v": 426.57}, {"t": "09:08", "v": 427.97}, {"t": "09:09", "v": 428.25}, {"t": "09:10", "v": 427.97}, {"t": "09:11", "v": 427.9}, {"t": "09:12", "v": 427.59}, {"t": "09:13", "v": 427.18}, {"t": "09:14", "v": 427.12}, {"t": "09:15", "v": 427.49}, {"t": "09:16", "v": 427.83}, {"t": "09:17", "v": 427.57}, {"t": "09:18", "v": 427.03}, {"t": "09:19", "v": 428.07}, {"t": "09:20", "v": 427.89}, {"t": "09:21", "v": 428.01}, {"t": "09:22", "v": 427.94}, {"t": "09:23", "v": 428.24}, {"t": "09:24", "v": 428.44}, {"t": "09:25", "v": 428.64}, {"t": "09:26", "v": 428.75}, {"t": "09:27", "v": 428.81}, {"t": "09:28", "v": 428.73}, {"t": "09:29", "v": 428.95}, {"t": "09:30", "v": 429.27}, {"t": "09:31", "v": 429.64}, {"t": "09:32", "v": 429.3}, {"t": "09:33", "v": 430.32}, {"t": "09:34", "v": 430.45}, {"t": "09:35", "v": 430.69}, {"t": "09:36", "v": 430.75}, {"t": "09:37", "v": 430.84}, {"t": "09:38", "v": 430.79}, {"t": "09:39", "v": 430.79}, {"t": "09:40", "v": 430.8}, {"t": "09:41", "v": 431.06}, {"t": "09:42", "v": 431.27}, {"t": "09:43", "v": 431.41}, {"t": "09:44", "v": 431.51}, {"t": "09:45", "v": 431.72}, {"t": "09:46", "v": 431.94}, {"t": "09:47", "v": 431.85}, {"t": "09:48", "v": 431.85}, {"t": "09:49", "v": 431.91}, {"t": "09:50", "v": 431.7}, {"t": "09:51", "v": 431.63}, {"t": "09:52", "v": 431.52}, {"t": "09:53", "v": 431.33}, {"t": "09:54", "v": 430.76}, {"t": "09:55", "v": 430.51}, {"t": "09:56", "v": 430.05}, {"t": "09:57", "v": 429.8}, {"t": "09:58", "v": 429.29}, {"t": "09:59", "v": 428.97}, {"t": "10:00", "v": 428.63}, {"t": "10:01", "v": 428.32}, {"t": "10:02", "v": 428.39}, {"t": "10:03", "v": 428.28}, {"t": "10:04", "v": 428.72}, {"t": "10:05", "v": 428.91}, {"t": "10:06", "v": 429.04}, {"t": "10:07", "v": 429.09}, {"t": "10:08", "v": 429.26}, {"t": "10:09", "v": 429.5}, {"t": "10:10", "v": 429.9}, {"t": "10:11", "v": 430.25}, {"t": "10:12", "v": 430.25}, {"t": "10:13", "v": 430.77}, {"t": "10:14", "v": 430.73}, {"t": "10:15", "v": 430.68}, {"t": "10:16", "v": 430.57}, {"t": "10:17", "v": 430.21}, {"t": "10:18", "v": 430.01}, {"t": "10:19", "v": 430.04}, {"t": "10:20", "v": 430.18}, {"t": "10:21", "v": 430.42}, {"t": "10:22", "v": 430.47}, {"t": "10:23", "v": 430.57}, {"t": "10:24", "v": 430.59}, {"t": "10:25", "v": 430.61}, {"t": "10:26", "v": 430.58}, {"t": "10:27", "v": 430.27}, {"t": "10:28", "v": 429.94}, {"t": "10:29", "v": 430.08}, {"t": "10:30", "v": 429.93}, {"t": "10:31", "v": 430.2}, {"t": "10:32", "v": 430.18}, {"t": "10:33", "v": 430.12}, {"t": "10:34", "v": 429.94}, {"t": "10:35", "v": 429.63}, {"t": "10:36", "v": 429.01}, {"t": "10:37", "v": 428.81}, {"t": "10:38", "v": 428.89}, {"t": "10:39", "v": 428.96}, {"t": "10:40", "v": 429.01}, {"t": "10:41", "v": 428.81}, {"t": "10:42", "v": 428.64}, {"t": "10:43", "v": 428.63}, {"t": "10:44", "v": 428.58}, {"t": "10:45", "v": 428.23}, {"t": "10:46", "v": 427.64}, {"t": "10:47", "v": 427.55}, {"t": "10:48", "v": 427.52}, {"t": "10:49", "v": 427.75}, {"t": "10:50", "v": 427.36}, {"t": "10:51", "v": 427.33}, {"t": "10:52", "v": 427.2}, {"t": "10:53", "v": 426.94}, {"t": "10:54", "v": 426.82}, {"t": "10:55", "v": 426.86}, {"t": "10:56", "v": 426.85}, {"t": "10:57", "v": 427.05}, {"t": "10:58", "v": 427.13}, {"t": "10:59", "v": 426.93}, {"t": "11:00", "v": 426.76}, {"t": "11:01", "v": 426.67}, {"t": "11:02", "v": 426.48}, {"t": "11:03", "v": 426.49}, {"t": "11:04", "v": 426.33}, {"t": "11:05", "v": 426.15}, {"t": "11:06", "v": 426.16}, {"t": "11:07", "v": 426.3}, {"t": "11:08", "v": 426.2}, {"t": "11:09", "v": 426.11}, {"t": "11:10", "v": 425.95}, {"t": "11:11", "v": 425.84}, {"t": "11:12", "v": 425.56}, {"t": "11:13", "v": 425.24}, {"t": "11:14", "v": 425.02}, {"t": "11:15", "v": 424.72}, {"t": "11:16", "v": 424.66}, {"t": "11:17", "v": 424.72}, {"t": "11:18", "v": 424.72}, {"t": "11:19", "v": 424.58}, {"t": "11:20", "v": 424.7}, {"t": "11:21", "v": 424.97}, {"t": "11:22", "v": 425.11}, {"t": "11:23", "v": 425.7}, {"t": "11:24", "v": 425.73}, {"t": "11:25", "v": 426.04}, {"t": "11:26", "v": 426.2}, {"t": "11:27", "v": 426.4}, {"t": "11:28", "v": 426.46}, {"t": "11:29", "v": 426.57}, {"t": "11:30", "v": 426.73}, {"t": "11:31", "v": 426.84}, {"t": "11:32", "v": 426.87}, {"t": "11:33", "v": 426.84}, {"t": "11:34", "v": 427.01}, {"t": "11:35", "v": 426.99}, {"t": "11:36", "v": 427.16}, {"t": "11:37", "v": 427.14}, {"t": "11:38", "v": 426.98}, {"t": "11:39", "v": 427.1}, {"t": "11:40", "v": 427.07}, {"t": "11:41", "v": 427.07}, {"t": "11:42", "v": 427.09}, {"t": "11:43", "v": 427.06}, {"t": "11:44", "v": 427.17}, {"t": "11:45", "v": 427.11}, {"t": "11:46", "v": 427.26}, {"t": "11:47", "v": 427.44}, {"t": "11:48", "v": 427.66}, {"t": "11:49", "v": 427.72}, {"t": "11:50", "v": 427.77}, {"t": "11:51", "v": 427.76}, {"t": "11:52", "v": 427.74}, {"t": "11:53", "v": 427.71}, {"t": "11:54", "v": 427.82}, {"t": "11:55", "v": 427.68}, {"t": "11:56", "v": 427.72}, {"t": "11:57", "v": 427.75}, {"t": "11:58", "v": 427.68}, {"t": "11:59", "v": 427.6}, {"t": "12:00", "v": 427.41}, {"t": "12:01", "v": 427.45}, {"t": "12:02", "v": 427.39}, {"t": "12:03", "v": 427.55}, {"t": "12:04", "v": 427.68}, {"t": "12:05", "v": 427.6}, {"t": "12:06", "v": 427.54}, {"t": "12:07", "v": 427.27}, {"t": "12:08", "v": 427.3}, {"t": "12:09", "v": 427.27}, {"t": "12:10", "v": 427.45}, {"t": "12:11", "v": 427.35}, {"t": "12:12", "v": 427.28}, {"t": "12:13", "v": 427.2}, {"t": "12:14", "v": 427.16}, {"t": "12:15", "v": 427.07}, {"t": "12:16", "v": 426.99}, {"t": "12:17", "v": 426.95}, {"t": "12:18", "v": 426.87}, {"t": "12:19", "v": 426.97}, {"t": "12:20", "v": 426.87}, {"t": "12:21", "v": 426.95}, {"t": "12:22", "v": 427.04}, {"t": "12:23", "v": 426.94}, {"t": "12:24", "v": 426.8}, {"t": "12:25", "v": 426.63}, {"t": "12:26", "v": 426.46}, {"t": "12:27", "v": 426.28}, {"t": "12:28", "v": 426.09}, {"t": "12:29", "v": 426.01}, {"t": "12:30", "v": 425.92}, {"t": "12:31", "v": 426.02}, {"t": "12:32", "v": 426.4}, {"t": "12:33", "v": 426.5}, {"t": "12:34", "v": 426.58}, {"t": "12:35", "v": 426.62}, {"t": "12:36", "v": 426.52}, {"t": "12:37", "v": 426.66}, {"t": "12:38", "v": 426.63}, {"t": "12:39", "v": 426.61}, {"t": "12:40", "v": 426.45}, {"t": "12:41", "v": 426.34}, {"t": "12:42", "v": 426.49}, {"t": "12:43", "v": 426.42}, {"t": "12:44", "v": 426.28}, {"t": "12:45", "v": 426.37}, {"t": "12:46", "v": 426.43}, {"t": "12:47", "v": 426.45}, {"t": "12:48", "v": 426.33}, {"t": "12:49", "v": 426.3}, {"t": "12:50", "v": 426.18}, {"t": "12:51", "v": 426.23}, {"t": "12:52", "v": 426.36}, {"t": "12:53", "v": 426.34}, {"t": "12:54", "v": 426.36}, {"t": "12:55", "v": 426.3}, {"t": "12:56", "v": 426.33}, {"t": "12:57", "v": 426.22}, {"t": "12:58", "v": 426.08}, {"t": "12:59", "v": 426.12}, {"t": "13:00", "v": 426.18}, {"t": "13:01", "v": 426.16}, {"t": "13:02", "v": 426.13}, {"t": "13:03", "v": 426.06}, {"t": "13:04", "v": 425.92}, {"t": "13:05", "v": 425.76}, {"t": "13:06", "v": 425.52}, {"t": "13:07", "v": 425.52}, {"t": "13:08", "v": 425.48}, {"t": "13:09", "v": 425.41}, {"t": "13:10", "v": 425.4}, {"t": "13:11", "v": 425.72}, {"t": "13:12", "v": 426.03}, {"t": "13:13", "v": 426.12}, {"t": "13:14", "v": 426.11}, {"t": "13:15", "v": 426.02}, {"t": "13:16", "v": 425.93}, {"t": "13:17", "v": 425.86}, {"t": "13:18", "v": 425.69}, {"t": "13:19", "v": 425.55}, {"t": "13:20", "v": 425.44}, {"t": "13:21", "v": 425.2}, {"t": "13:22", "v": 425.26}, {"t": "13:23", "v": 425.15}, {"t": "13:24", "v": 425.01}, {"t": "13:25", "v": 425.13}, {"t": "13:26", "v": 425.28}, {"t": "13:27", "v": 425.28}, {"t": "13:28", "v": 425.28}, {"t": "13:29", "v": 425.28}, {"t": "13:30", "v": 424.99}], "taiex_summary": {"last": 45354.61, "chg_pct": -1.08}, "otc_summary": {"last": 424.99, "chg_pct": -0.3}};
+var ORDER_RECORDS       = [{"stock_id": "00991A", "status": "Filled", "action": "Sell", "price": 19.85, "quantity": 1, "deal_quantity": 1, "order_type": "ROD", "price_type": "LMT", "order_time": "2026-07-09T09:46:34"}, {"stock_id": "00991A", "status": "Submitted", "action": "Sell", "price": 19.71, "quantity": 1, "deal_quantity": 0, "order_type": "ROD", "price_type": "LMT", "order_time": "2026-07-09T12:08:26"}];
+var REALIZED_RECORDS    = [{"stock_id": "00991A", "cond": "Cash", "date": "2026-07-09", "quantity": 1000, "price": 19.85, "pnl": -275.0, "ret": -1.37}, {"stock_id": "00981A", "cond": "Cash", "date": "2026-06-30", "quantity": 2000, "price": 30.8, "pnl": 2758.0, "ret": 4.7}, {"stock_id": "00981A", "cond": "Cash", "date": "2026-06-30", "quantity": 2000, "price": 30.68, "pnl": 1927.0, "ret": 3.25}, {"stock_id": "00981A", "cond": "Cash", "date": "2026-06-30", "quantity": 1000, "price": 31.03, "pnl": 61.0, "ret": 0.2}, {"stock_id": "00981A", "cond": "Cash", "date": "2026-06-30", "quantity": 1000, "price": 31.18, "pnl": 212.0, "ret": 0.69}, {"stock_id": "00988A", "cond": "Cash", "date": "2026-06-30", "quantity": 2000, "price": 21.94, "pnl": -757.0, "ret": -1.7}, {"stock_id": "00988A", "cond": "Cash", "date": "2026-06-30", "quantity": 2000, "price": 21.84, "pnl": -527.0, "ret": -1.19}, {"stock_id": "00988A", "cond": "Cash", "date": "2026-06-30", "quantity": 1000, "price": 21.98, "pnl": -293.0, "ret": -1.32}, {"stock_id": "00988A", "cond": "Cash", "date": "2026-06-30", "quantity": 1000, "price": 22.05, "pnl": -134.0, "ret": -0.61}, {"stock_id": "2025", "cond": "Cash", "date": "2026-06-30", "quantity": 667, "price": 13.6, "pnl": -720.0, "ret": -7.38}, {"stock_id": "2059", "cond": "Cash", "date": "2026-06-30", "quantity": 1, "price": 7165.0, "pnl": 84.0, "ret": 1.19}, {"stock_id": "2059", "cond": "Cash", "date": "2026-06-30", "quantity": 1, "price": 7300.0, "pnl": 534.0, "ret": 7.93}, {"stock_id": "2059", "cond": "Cash", "date": "2026-06-30", "quantity": 1, "price": 7350.0, "pnl": 584.0, "ret": 8.67}, {"stock_id": "2059", "cond": "Cash", "date": "2026-06-30", "quantity": 2, "price": 7350.0, "pnl": 556.0, "ret": 3.95}, {"stock_id": "2305", "cond": "Cash", "date": "2026-06-30", "quantity": 72, "price": 37.6, "pnl": 118.0, "ret": 4.58}, {"stock_id": "2305", "cond": "Cash", "date": "2026-06-30", "quantity": 77, "price": 37.65, "pnl": 131.0, "ret": 4.75}, {"stock_id": "2305", "cond": "Cash", "date": "2026-06-30", "quantity": 33, "price": 38.6, "pnl": 88.0, "ret": 7.45}, {"stock_id": "2327", "cond": "Cash", "date": "2026-06-30", "quantity": 23, "price": 1055.0, "pnl": 1909.0, "ret": 8.58}, {"stock_id": "2327", "cond": "Cash", "date": "2026-06-30", "quantity": 15, "price": 1115.0, "pnl": 2206.0, "ret": 15.27}, {"stock_id": "2327", "cond": "Cash", "date": "2026-06-30", "quantity": 16, "price": 1130.0, "pnl": 2651.0, "ret": 17.27}, {"stock_id": "2327", "cond": "Cash", "date": "2026-06-30", "quantity": 15, "price": 1140.0, "pnl": 1851.0, "ret": 12.2}, {"stock_id": "2327", "cond": "Cash", "date": "2026-06-30", "quantity": 15, "price": 1140.0, "pnl": 1328.0, "ret": 8.46}, {"stock_id": "2368", "cond": "Cash", "date": "2026-06-30", "quantity": 1, "price": 1215.0, "pnl": -116.0, "ret": -8.74}, {"stock_id": "2368", "cond": "Cash", "date": "2026-06-30", "quantity": 1, "price": 1210.0, "pnl": -120.0, "ret": -9.05}, {"stock_id": "2414", "cond": "Cash", "date": "2026-06-30", "quantity": 325, "price": 59.6, "pnl": -829.0, "ret": -4.12}, {"stock_id": "2414", "cond": "Cash", "date": "2026-06-30", "quantity": 12, "price": 60.3, "pnl": -22.0, "ret": -2.96}, {"stock_id": "2414", "cond": "Cash", "date": "2026-06-30", "quantity": 1000, "price": 60.3, "pnl": -1044.0, "ret": -1.71}, {"stock_id": "2414", "cond": "Cash", "date": "2026-06-30", "quantity": 338, "price": 60.3, "pnl": 329.0, "ret": 1.65}, {"stock_id": "2428", "cond": "Cash", "date": "2026-06-30", "quantity": 8, "price": 308.5, "pnl": 134.0, "ret": 5.77}, {"stock_id": "2428", "cond": "Cash", "date": "2026-06-30", "quantity": 8, "price": 310.0, "pnl": 147.0, "ret": 6.33}, {"stock_id": "2883", "cond": "Cash", "date": "2026-06-30", "quantity": 175, "price": 28.05, "pnl": -160.0, "ret": -3.17}, {"stock_id": "2883", "cond": "Cash", "date": "2026-06-30", "quantity": 232, "price": 28.55, "pnl": -95.0, "ret": -1.42}, {"stock_id": "2883", "cond": "Cash", "date": "2026-06-30", "quantity": 118, "price": 28.65, "pnl": -51.0, "ret": -1.49}, {"stock_id": "2883", "cond": "Cash", "date": "2026-06-30", "quantity": 115, "price": 28.7, "pnl": -58.0, "ret": -1.73}, {"stock_id": "3357", "cond": "Cash", "date": "2026-06-30", "quantity": 99, "price": 299.0, "pnl": -511.0, "ret": -1.7}, {"stock_id": "3357", "cond": "Cash", "date": "2026-06-30", "quantity": 68, "price": 308.0, "pnl": 362.0, "ret": 1.77}, {"stock_id": "3357", "cond": "Cash", "date": "2026-06-30", "quantity": 67, "price": 316.5, "pnl": 1023.0, "ret": 5.09}, {"stock_id": "3357", "cond": "Cash", "date": "2026-06-30", "quantity": 66, "price": 319.0, "pnl": 1171.0, "ret": 5.92}, {"stock_id": "3357", "cond": "Cash", "date": "2026-06-30", "quantity": 67, "price": 319.0, "pnl": 1190.0, "ret": 5.92}, {"stock_id": "3624", "cond": "Cash", "date": "2026-06-30", "quantity": 174, "price": 148.0, "pnl": 1418.0, "ret": 5.85}, {"stock_id": "3624", "cond": "Cash", "date": "2026-06-30", "quantity": 117, "price": 149.0, "pnl": 374.0, "ret": 2.2}, {"stock_id": "4739", "cond": "Cash", "date": "2026-06-30", "quantity": 112, "price": 108.5, "pnl": -1697.0, "ret": -12.3}, {"stock_id": "4739", "cond": "Cash", "date": "2026-06-30", "quantity": 75, "price": 109.5, "pnl": -640.0, "ret": -7.26}, {"stock_id": "4739", "cond": "Cash", "date": "2026-06-30", "quantity": 75, "price": 111.0, "pnl": -347.0, "ret": -4.02}, {"stock_id": "4739", "cond": "Cash", "date": "2026-06-30", "quantity": 73, "price": 113.5, "pnl": -82.0, "ret": -0.98}, {"stock_id": "4739", "cond": "Cash", "date": "2026-06-30", "quantity": 76, "price": 115.5, "pnl": 139.0, "ret": 1.62}, {"stock_id": "5228", "cond": "Cash", "date": "2026-06-30", "quantity": 67, "price": 60.9, "pnl": -969.0, "ret": -19.26}, {"stock_id": "5228", "cond": "Cash", "date": "2026-06-30", "quantity": 44, "price": 63.5, "pnl": -466.0, "ret": -14.34}, {"stock_id": "5228", "cond": "Cash", "date": "2026-06-30", "quantity": 44, "price": 65.1, "pnl": -347.0, "ret": -10.85}, {"stock_id": "5228", "cond": "Cash", "date": "2026-06-30", "quantity": 43, "price": 67.2, "pnl": -65.0, "ret": -2.21}, {"stock_id": "5228", "cond": "Cash", "date": "2026-06-30", "quantity": 45, "price": 67.2, "pnl": 113.0, "ret": 3.9}, {"stock_id": "5288", "cond": "Cash", "date": "2026-06-30", "quantity": 38, "price": 178.0, "pnl": -507.0, "ret": -7.0}, {"stock_id": "6197", "cond": "Cash", "date": "2026-06-30", "quantity": 6, "price": 349.0, "pnl": -102.0, "ret": -4.66}, {"stock_id": "6197", "cond": "Cash", "date": "2026-06-30", "quantity": 5, "price": 351.5, "pnl": -73.0, "ret": -4.0}, {"stock_id": "6197", "cond": "Cash", "date": "2026-06-30", "quantity": 16, "price": 350.5, "pnl": -247.0, "ret": -4.24}, {"stock_id": "6446", "cond": "Cash", "date": "2026-06-30", "quantity": 11, "price": 1370.0, "pnl": 4440.0, "ret": 42.03}, {"stock_id": "6446", "cond": "Cash", "date": "2026-06-30", "quantity": 20, "price": 1365.0, "pnl": 7554.0, "ret": 38.49}, {"stock_id": "6870", "cond": "Cash", "date": "2026-06-30", "quantity": 4, "price": 246.5, "pnl": -212.0, "ret": -17.74}, {"stock_id": "6870", "cond": "Cash", "date": "2026-06-30", "quantity": 9, "price": 254.5, "pnl": -211.0, "ret": -8.47}, {"stock_id": "6870", "cond": "Cash", "date": "2026-06-30", "quantity": 3, "price": 258.5, "pnl": -28.0, "ret": -3.5}, {"stock_id": "8021", "cond": "Cash", "date": "2026-06-30", "quantity": 2, "price": 555.0, "pnl": 87.0, "ret": 8.54}, {"stock_id": "8021", "cond": "Cash", "date": "2026-06-30", "quantity": 2, "price": 558.0, "pnl": 72.0, "ret": 6.92}, {"stock_id": "8021", "cond": "Cash", "date": "2026-06-30", "quantity": 2, "price": 571.0, "pnl": 99.0, "ret": 9.53}, {"stock_id": "8021", "cond": "Cash", "date": "2026-06-30", "quantity": 2, "price": 574.0, "pnl": 105.0, "ret": 10.11}, {"stock_id": "4576", "cond": "Cash", "date": "2026-06-15", "quantity": 47, "price": 211.0, "pnl": -2062.0, "ret": -17.28}, {"stock_id": "2345", "cond": "Cash", "date": "2026-06-12", "quantity": 12, "price": 2320.0, "pnl": -3285.0, "ret": -10.6}, {"stock_id": "00981A", "cond": "Cash", "date": "2026-06-09", "quantity": 2000, "price": 30.91, "pnl": 5452.0, "ret": 9.7}, {"stock_id": "00981A", "cond": "Cash", "date": "2026-06-09", "quantity": 2000, "price": 30.92, "pnl": 2317.0, "ret": 3.9}, {"stock_id": "00981A", "cond": "Cash", "date": "2026-06-09", "quantity": 2000, "price": 30.94, "pnl": 4210.0, "ret": 7.32}, {"stock_id": "00981A", "cond": "Cash", "date": "2026-06-09", "quantity": 1000, "price": 30.96, "pnl": 2146.0, "ret": 7.47}, {"stock_id": "00988A", "cond": "Cash", "date": "2026-06-09", "quantity": 1000, "price": 20.6, "pnl": -829.0, "ret": -3.88}, {"stock_id": "00988A", "cond": "Cash", "date": "2026-06-09", "quantity": 1000, "price": 20.62, "pnl": 643.0, "ret": 3.23}, {"stock_id": "00988A", "cond": "Cash", "date": "2026-06-09", "quantity": 1000, "price": 20.65, "pnl": 673.0, "ret": 3.38}, {"stock_id": "2451", "cond": "Cash", "date": "2026-06-09", "quantity": 39, "price": 307.0, "pnl": -1023.0, "ret": -7.9}, {"stock_id": "2302", "cond": "Cash", "date": "2026-06-04", "quantity": 2, "price": 35.3, "pnl": 18.0, "ret": 35.29}, {"stock_id": "00981A", "cond": "Cash", "date": "2026-06-03", "quantity": 1000, "price": 32.03, "pnl": 3253.0, "ret": 11.33}, {"stock_id": "1590", "cond": "Cash", "date": "2026-06-03", "quantity": 4, "price": 1375.0, "pnl": -331.0, "ret": -5.7}, {"stock_id": "2059", "cond": "Cash", "date": "2026-06-03", "quantity": 2, "price": 5330.0, "pnl": -200.0, "ret": -1.85}, {"stock_id": "2301", "cond": "Cash", "date": "2026-06-03", "quantity": 10, "price": 243.0, "pnl": 86.0, "ret": 3.68}, {"stock_id": "2376", "cond": "Cash", "date": "2026-06-03", "quantity": 60, "price": 392.0, "pnl": 4456.0, "ret": 23.5}, {"stock_id": "2395", "cond": "Cash", "date": "2026-06-03", "quantity": 28, "price": 515.0, "pnl": 1022.0, "ret": 7.66}, {"stock_id": "3090", "cond": "Cash", "date": "2026-06-03", "quantity": 89, "price": 222.5, "pnl": 9266.0, "ret": 88.68}, {"stock_id": "3691", "cond": "Cash", "date": "2026-06-03", "quantity": 23, "price": 165.0, "pnl": 371.0, "ret": 10.89}, {"stock_id": "6417", "cond": "Cash", "date": "2026-06-03", "quantity": 86, "price": 141.5, "pnl": 149.0, "ret": 1.25}, {"stock_id": "8926", "cond": "Cash", "date": "2026-06-03", "quantity": 29, "price": 70.5, "pnl": 473.0, "ret": 30.26}, {"stock_id": "00981A", "cond": "Cash", "date": "2026-06-02", "quantity": 1000, "price": 31.65, "pnl": 2443.0, "ret": 8.39}, {"stock_id": "00981A", "cond": "Cash", "date": "2026-06-02", "quantity": 1000, "price": 31.28, "pnl": 1914.0, "ret": 6.53}, {"stock_id": "00981A", "cond": "Cash", "date": "2026-06-02", "quantity": 1000, "price": 31.22, "pnl": 2004.0, "ret": 6.88}, {"stock_id": "1560", "cond": "Cash", "date": "2026-06-02", "quantity": 2, "price": 708.0, "pnl": 95.0, "ret": 7.22}, {"stock_id": "1560", "cond": "Cash", "date": "2026-06-02", "quantity": 1, "price": 710.0, "pnl": 85.0, "ret": 13.67}, {"stock_id": "2408", "cond": "Cash", "date": "2026-06-02", "quantity": 4, "price": 419.5, "pnl": 427.0, "ret": 34.32}, {"stock_id": "3006", "cond": "Cash", "date": "2026-06-02", "quantity": 20, "price": 269.0, "pnl": 968.0, "ret": 22.06}, {"stock_id": "3036", "cond": "Cash", "date": "2026-06-02", "quantity": 51, "price": 296.5, "pnl": 1472.0, "ret": 10.84}, {"stock_id": "3055", "cond": "Cash", "date": "2026-06-02", "quantity": 26, "price": 104.0, "pnl": -186.0, "ret": -6.46}, {"stock_id": "3209", "cond": "Cash", "date": "2026-06-02", "quantity": 185, "price": 76.6, "pnl": 1978.0, "ret": 16.31}, {"stock_id": "3229", "cond": "Cash", "date": "2026-06-02", "quantity": 133, "price": 50.8, "pnl": 738.0, "ret": 12.32}, {"stock_id": "3354", "cond": "Cash", "date": "2026-06-02", "quantity": 264, "price": 34.65, "pnl": 164.0, "ret": 1.83}, {"stock_id": "4127", "cond": "Cash", "date": "2026-06-02", "quantity": 34, "price": 68.7, "pnl": 796.0, "ret": 52.06}, {"stock_id": "6005", "cond": "Cash", "date": "2026-06-02", "quantity": 750, "price": 40.5, "pnl": 6302.0, "ret": 26.33}, {"stock_id": "6021", "cond": "Cash", "date": "2026-06-02", "quantity": 146, "price": 38.55, "pnl": 564.0, "ret": 11.19}, {"stock_id": "6166", "cond": "Cash", "date": "2026-06-02", "quantity": 306, "price": 132.0, "pnl": 8088.0, "ret": 25.18}, {"stock_id": "6834", "cond": "Cash", "date": "2026-06-02", "quantity": 349, "price": 73.9, "pnl": 9520.0, "ret": 58.92}, {"stock_id": "8271", "cond": "Cash", "date": "2026-06-02", "quantity": 5, "price": 257.5, "pnl": 40.0, "ret": 3.22}, {"stock_id": "00981A", "cond": "Cash", "date": "2026-05-22", "quantity": 1000, "price": 29.9, "pnl": 638.0, "ret": 2.19}, {"stock_id": "00988A", "cond": "Cash", "date": "2026-05-22", "quantity": 1000, "price": 20.04, "pnl": 365.0, "ret": 1.86}, {"stock_id": "1590", "cond": "Cash", "date": "2026-05-22", "quantity": 4, "price": 1410.0, "pnl": -612.0, "ret": -9.83}, {"stock_id": "2059", "cond": "Cash", "date": "2026-05-22", "quantity": 1, "price": 4850.0, "pnl": -683.0, "ret": -12.39}, {"stock_id": "2376", "cond": "Cash", "date": "2026-05-22", "quantity": 46, "price": 320.5, "pnl": -247.0, "ret": -1.65}, {"stock_id": "2395", "cond": "Cash", "date": "2026-05-22", "quantity": 20, "price": 471.0, "pnl": -565.0, "ret": -5.68}, {"stock_id": "2408", "cond": "Cash", "date": "2026-05-22", "quantity": 3, "price": 304.0, "pnl": -20.0, "ret": -2.15}, {"stock_id": "2451", "cond": "Cash", "date": "2026-05-22", "quantity": 29, "price": 321.0, "pnl": -1055.0, "ret": -10.22}, {"stock_id": "3006", "cond": "Cash", "date": "2026-05-22", "quantity": 9, "price": 230.0, "pnl": 70.0, "ret": 3.51}, {"stock_id": "3036", "cond": "Cash", "date": "2026-05-22", "quantity": 36, "price": 295.5, "pnl": 1057.0, "ret": 11.09}, {"stock_id": "3090", "cond": "Cash", "date": "2026-05-22", "quantity": 45, "price": 192.5, "pnl": 3375.0, "ret": 64.29}, {"stock_id": "3229", "cond": "Cash", "date": "2026-05-22", "quantity": 67, "price": 39.3, "pnl": -313.0, "ret": -10.66}, {"stock_id": "3354", "cond": "Cash", "date": "2026-05-22", "quantity": 199, "price": 33.1, "pnl": -417.0, "ret": -5.98}, {"stock_id": "3691", "cond": "Cash", "date": "2026-05-22", "quantity": 16, "price": 144.5, "pnl": -52.0, "ret": -2.21}, {"stock_id": "4127", "cond": "Cash", "date": "2026-05-22", "quantity": 16, "price": 62.9, "pnl": 259.0, "ret": 34.86}, {"stock_id": "4576", "cond": "Cash", "date": "2026-05-22", "quantity": 23, "price": 259.5, "pnl": -23.0, "ret": -0.39}, {"stock_id": "5289", "cond": "Cash", "date": "2026-05-22", "quantity": 1, "price": 1795.0, "pnl": 31.0, "ret": 1.76}, {"stock_id": "6005", "cond": "Cash", "date": "2026-05-22", "quantity": 562, "price": 31.9, "pnl": -498.0, "ret": -2.71}, {"stock_id": "6166", "cond": "Cash", "date": "2026-05-22", "quantity": 229, "price": 124.0, "pnl": 6485.0, "ret": 29.77}, {"stock_id": "6417", "cond": "Cash", "date": "2026-05-22", "quantity": 64, "price": 131.5, "pnl": -708.0, "ret": -7.79}, {"stock_id": "6834", "cond": "Cash", "date": "2026-05-22", "quantity": 262, "price": 73.2, "pnl": 7366.0, "ret": 62.81}, {"stock_id": "8271", "cond": "Cash", "date": "2026-05-22", "quantity": 3, "price": 225.0, "pnl": -97.0, "ret": -12.61}, {"stock_id": "8926", "cond": "Cash", "date": "2026-05-22", "quantity": 13, "price": 62.2, "pnl": 135.0, "ret": 20.15}, {"stock_id": "2382", "cond": "Cash", "date": "2026-05-05", "quantity": 16, "price": 317.0, "pnl": -132.0, "ret": -2.55}, {"stock_id": "6693", "cond": "Cash", "date": "2026-05-05", "quantity": 115, "price": 148.5, "pnl": 16.0, "ret": 0.09}, {"stock_id": "6693", "cond": "Cash", "date": "2026-05-05", "quantity": 41, "price": 149.0, "pnl": 27.0, "ret": 0.45}, {"stock_id": "2305", "cond": "Cash", "date": "2026-04-29", "quantity": 681, "price": 16.0, "pnl": -1391.0, "ret": -11.36}, {"stock_id": "6903", "cond": "Cash", "date": "2026-04-24", "quantity": 1, "price": 395.0, "pnl": -17.0, "ret": -4.15}, {"stock_id": "6894", "cond": "Cash", "date": "2026-04-23", "quantity": 11, "price": 353.5, "pnl": -417.0, "ret": -9.72}, {"stock_id": "2360", "cond": "Cash", "date": "2026-04-22", "quantity": 5, "price": 2070.0, "pnl": 1067.0, "ret": 11.55}, {"stock_id": "2467", "cond": "Cash", "date": "2026-04-22", "quantity": 10, "price": 585.0, "pnl": 386.0, "ret": 7.1}, {"stock_id": "3028", "cond": "Cash", "date": "2026-04-22", "quantity": 12, "price": 62.6, "pnl": -6.0, "ret": -0.8}, {"stock_id": "3037", "cond": "Cash", "date": "2026-04-22", "quantity": 1, "price": 725.0, "pnl": 84.0, "ret": 13.17}, {"stock_id": "3081", "cond": "Cash", "date": "2026-04-22", "quantity": 1, "price": 2965.0, "pnl": 825.0, "ret": 38.77}, {"stock_id": "3171", "cond": "Cash", "date": "2026-04-22", "quantity": 106, "price": 67.1, "pnl": -308.0, "ret": -4.17}, {"stock_id": "3264", "cond": "Cash", "date": "2026-04-22", "quantity": 19, "price": 205.0, "pnl": 284.0, "ret": 7.9}, {"stock_id": "3491", "cond": "Cash", "date": "2026-04-22", "quantity": 1, "price": 1765.0, "pnl": -59.0, "ret": -3.25}, {"stock_id": "5475", "cond": "Cash", "date": "2026-04-22", "quantity": 2, "price": 384.0, "pnl": 181.0, "ret": 30.99}, {"stock_id": "6274", "cond": "Cash", "date": "2026-04-22", "quantity": 5, "price": 966.0, "pnl": 526.0, "ret": 12.28}, {"stock_id": "6291", "cond": "Cash", "date": "2026-04-22", "quantity": 3, "price": 482.0, "pnl": 190.0, "ret": 15.2}, {"stock_id": "8046", "cond": "Cash", "date": "2026-04-22", "quantity": 1, "price": 812.0, "pnl": 164.0, "ret": 25.43}, {"stock_id": "8091", "cond": "Cash", "date": "2026-04-22", "quantity": 17, "price": 188.0, "pnl": 120.0, "ret": 3.92}, {"stock_id": "8438", "cond": "Cash", "date": "2026-04-22", "quantity": 8, "price": 89.4, "pnl": 27.0, "ret": 3.94}, {"stock_id": "8996", "cond": "Cash", "date": "2026-04-22", "quantity": 15, "price": 1210.0, "pnl": 1398.0, "ret": 8.38}, {"stock_id": "2305", "cond": "Cash", "date": "2026-04-21", "quantity": 1000, "price": 17.2, "pnl": -2303.0, "ret": -11.85}, {"stock_id": "2305", "cond": "Cash", "date": "2026-04-21", "quantity": 291, "price": 17.2, "pnl": -670.0, "ret": -11.85}, {"stock_id": "2305", "cond": "Cash", "date": "2026-04-21", "quantity": 248, "price": 17.25, "pnl": -558.0, "ret": -11.58}, {"stock_id": "2305", "cond": "Cash", "date": "2026-04-21", "quantity": 504, "price": 17.15, "pnl": -1123.0, "ret": -11.54}, {"stock_id": "2308", "cond": "Cash", "date": "2026-04-21", "quantity": 1, "price": 1955.0, "pnl": 211.0, "ret": 12.15}, {"stock_id": "2360", "cond": "Cash", "date": "2026-04-21", "quantity": 11, "price": 2025.0, "pnl": 1854.0, "ret": 9.12}, {"stock_id": "2360", "cond": "Cash", "date": "2026-04-21", "quantity": 5, "price": 2015.0, "pnl": 793.0, "ret": 8.58}, {"stock_id": "2368", "cond": "Cash", "date": "2026-04-21", "quantity": 1, "price": 1240.0, "pnl": 144.0, "ret": 13.19}, {"stock_id": "2368", "cond": "Cash", "date": "2026-04-21", "quantity": 1, "price": 1215.0, "pnl": 120.0, "ret": 11.0}, {"stock_id": "2382", "cond": "Cash", "date": "2026-04-21", "quantity": 49, "price": 338.5, "pnl": 1049.0, "ret": 6.78}, {"stock_id": "2383", "cond": "Cash", "date": "2026-04-21", "quantity": 1, "price": 3915.0, "pnl": 514.0, "ret": 15.18}, {"stock_id": "2383", "cond": "Cash", "date": "2026-04-21", "quantity": 1, "price": 3890.0, "pnl": 490.0, "ret": 14.48}, {"stock_id": "3028", "cond": "Cash", "date": "2026-04-21", "quantity": 25, "price": 61.8, "pnl": 51.0, "ret": 3.43}, {"stock_id": "3028", "cond": "Cash", "date": "2026-04-21", "quantity": 13, "price": 62.1, "pnl": 29.0, "ret": 3.74}, {"stock_id": "3037", "cond": "Cash", "date": "2026-04-21", "quantity": 2, "price": 701.0, "pnl": 119.0, "ret": 9.31}, {"stock_id": "3081", "cond": "Cash", "date": "2026-04-21", "quantity": 3, "price": 2845.0, "pnl": 1544.0, "ret": 22.2}, {"stock_id": "3081", "cond": "Cash", "date": "2026-04-21", "quantity": 1, "price": 2920.0, "pnl": 780.0, "ret": 36.65}, {"stock_id": "3171", "cond": "Cash", "date": "2026-04-21", "quantity": 213, "price": 64.3, "pnl": -1338.0, "ret": -8.94}, {"stock_id": "3171", "cond": "Cash", "date": "2026-04-21", "quantity": 106, "price": 64.7, "pnl": -622.0, "ret": -8.35}, {"stock_id": "3264", "cond": "Cash", "date": "2026-04-21", "quantity": 19, "price": 206.0, "pnl": 302.0, "ret": 8.4}, {"stock_id": "3264", "cond": "Cash", "date": "2026-04-21", "quantity": 21, "price": 204.0, "pnl": 291.0, "ret": 7.32}, {"stock_id": "3491", "cond": "Cash", "date": "2026-04-21", "quantity": 2, "price": 1680.0, "pnl": -289.0, "ret": -7.95}, {"stock_id": "3491", "cond": "Cash", "date": "2026-04-21", "quantity": 1, "price": 1650.0, "pnl": -174.0, "ret": -9.57}, {"stock_id": "5475", "cond": "Cash", "date": "2026-04-21", "quantity": 2, "price": 397.5, "pnl": 207.0, "ret": 35.38}, {"stock_id": "5475", "cond": "Cash", "date": "2026-04-21", "quantity": 3, "price": 399.5, "pnl": 317.0, "ret": 36.15}, {"stock_id": "6274", "cond": "Cash", "date": "2026-04-21", "quantity": 16, "price": 961.0, "pnl": 2500.0, "ret": 19.52}, {"stock_id": "6291", "cond": "Cash", "date": "2026-04-21", "quantity": 8, "price": 415.0, "pnl": -30.0, "ret": -0.9}, {"stock_id": "6291", "cond": "Cash", "date": "2026-04-21", "quantity": 4, "price": 415.5, "pnl": -12.0, "ret": -0.72}, {"stock_id": "6640", "cond": "Cash", "date": "2026-04-21", "quantity": 2, "price": 1615.0, "pnl": -308.0, "ret": -8.74}, {"stock_id": "6640", "cond": "Cash", "date": "2026-04-21", "quantity": 1, "price": 1605.0, "pnl": -163.0, "ret": -9.25}, {"stock_id": "6693", "cond": "Cash", "date": "2026-04-21", "quantity": 150, "price": 153.5, "pnl": 767.0, "ret": 3.46}, {"stock_id": "6693", "cond": "Cash", "date": "2026-04-21", "quantity": 163, "price": 152.0, "pnl": 591.0, "ret": 2.45}, {"stock_id": "6894", "cond": "Cash", "date": "2026-04-21", "quantity": 12, "price": 356.5, "pnl": -421.0, "ret": -8.99}, {"stock_id": "6894", "cond": "Cash", "date": "2026-04-21", "quantity": 12, "price": 361.5, "pnl": -362.0, "ret": -7.73}, {"stock_id": "6903", "cond": "Cash", "date": "2026-04-21", "quantity": 4, "price": 395.5, "pnl": -66.0, "ret": -4.02}, {"stock_id": "8046", "cond": "Cash", "date": "2026-04-21", "quantity": 2, "price": 785.0, "pnl": 238.0, "ret": 17.95}, {"stock_id": "8046", "cond": "Cash", "date": "2026-04-21", "quantity": 1, "price": 802.0, "pnl": 137.0, "ret": 20.69}, {"stock_id": "8091", "cond": "Cash", "date": "2026-04-21", "quantity": 16, "price": 188.0, "pnl": 110.0, "ret": 3.81}, {"stock_id": "8091", "cond": "Cash", "date": "2026-04-21", "quantity": 18, "price": 189.0, "pnl": 143.0, "ret": 4.41}, {"stock_id": "8438", "cond": "Cash", "date": "2026-04-21", "quantity": 25, "price": 88.0, "pnl": -44.0, "ret": -1.97}, {"stock_id": "8996", "cond": "Cash", "date": "2026-04-21", "quantity": 45, "price": 1180.0, "pnl": 6000.0, "ret": 12.8}, {"stock_id": "1785", "cond": "Cash", "date": "2026-04-08", "quantity": 82, "price": 96.2, "pnl": 440.0, "ret": 5.93}, {"stock_id": "1785", "cond": "Cash", "date": "2026-04-08", "quantity": 126, "price": 96.5, "pnl": 724.0, "ret": 6.36}, {"stock_id": "2485", "cond": "Cash", "date": "2026-04-08", "quantity": 66, "price": 73.9, "pnl": -154.0, "ret": -3.07}, {"stock_id": "3054", "cond": "Cash", "date": "2026-04-08", "quantity": 259, "price": 62.3, "pnl": -585.0, "ret": -3.51}, {"stock_id": "3188", "cond": "Cash", "date": "2026-04-08", "quantity": 1000, "price": 28.1, "pnl": -2223.0, "ret": -7.36}, {"stock_id": "3188", "cond": "Cash", "date": "2026-04-08", "quantity": 383, "price": 28.1, "pnl": -584.0, "ret": -5.17}, {"stock_id": "3535", "cond": "Cash", "date": "2026-04-08", "quantity": 70, "price": 122.5, "pnl": 442.0, "ret": 5.46}, {"stock_id": "4989", "cond": "Cash", "date": "2026-04-08", "quantity": 17, "price": 68.1, "pnl": 19.0, "ret": 1.68}, {"stock_id": "5289", "cond": "Cash", "date": "2026-04-08", "quantity": 75, "price": 1075.0, "pnl": 4182.0, "ret": 5.5}, {"stock_id": "6894", "cond": "Cash", "date": "2026-04-08", "quantity": 47, "price": 351.0, "pnl": -943.0, "ret": -5.43}, {"stock_id": "8271", "cond": "Cash", "date": "2026-04-08", "quantity": 52, "price": 151.5, "pnl": -569.0, "ret": -6.76}, {"stock_id": "1785", "cond": "Cash", "date": "2026-04-02", "quantity": 209, "price": 91.3, "pnl": -109.0, "ret": -0.57}, {"stock_id": "2485", "cond": "Cash", "date": "2026-04-02", "quantity": 67, "price": 81.5, "pnl": 199.0, "ret": 3.8}, {"stock_id": "3054", "cond": "Cash", "date": "2026-04-02", "quantity": 260, "price": 81.7, "pnl": 1415.0, "ret": 7.17}, {"stock_id": "3535", "cond": "Cash", "date": "2026-04-02", "quantity": 70, "price": 108.5, "pnl": -813.0, "ret": -9.71}, {"stock_id": "4989", "cond": "Cash", "date": "2026-04-02", "quantity": 17, "price": 67.6, "pnl": 19.0, "ret": 1.69}, {"stock_id": "6894", "cond": "Cash", "date": "2026-04-02", "quantity": 48, "price": 327.0, "pnl": -2135.0, "ret": -12.02}, {"stock_id": "8271", "cond": "Cash", "date": "2026-04-02", "quantity": 51, "price": 147.0, "pnl": -1685.0, "ret": -18.42}, {"stock_id": "00981A", "cond": "Cash", "date": "2026-04-01", "quantity": 2000, "price": 20.29, "pnl": 497.0, "ret": 1.24}, {"stock_id": "00981A", "cond": "Cash", "date": "2026-04-01", "quantity": 2000, "price": 20.27, "pnl": 737.0, "ret": 1.86}, {"stock_id": "00981A", "cond": "Cash", "date": "2026-04-01", "quantity": 1000, "price": 20.29, "pnl": 564.0, "ret": 2.87}, {"stock_id": "00981A", "cond": "Cash", "date": "2026-04-01", "quantity": 1000, "price": 20.32, "pnl": 805.0, "ret": 4.14}, {"stock_id": "00981A", "cond": "Cash", "date": "2026-04-01", "quantity": 1000, "price": 20.34, "pnl": 705.0, "ret": 3.6}, {"stock_id": "1785", "cond": "Cash", "date": "2026-04-01", "quantity": 200, "price": 92.8, "pnl": -610.0, "ret": -3.2}, {"stock_id": "1785", "cond": "Cash", "date": "2026-04-01", "quantity": 8, "price": 92.9, "pnl": -20.0, "ret": -2.63}, {"stock_id": "2485", "cond": "Cash", "date": "2026-04-01", "quantity": 34, "price": 81.3, "pnl": 94.0, "ret": 3.54}, {"stock_id": "4989", "cond": "Cash", "date": "2026-04-01", "quantity": 16, "price": 67.8, "pnl": -52.0, "ret": -4.59}, {"stock_id": "4989", "cond": "Cash", "date": "2026-04-01", "quantity": 1, "price": 67.8, "pnl": -4.0, "ret": -5.71}, {"stock_id": "5289", "cond": "Cash", "date": "2026-04-01", "quantity": 38, "price": 931.0, "pnl": -8229.0, "ret": -18.94}, {"stock_id": "6894", "cond": "Cash", "date": "2026-04-01", "quantity": 1, "price": 317.0, "pnl": -45.0, "ret": -12.47}, {"stock_id": "6894", "cond": "Cash", "date": "2026-04-01", "quantity": 46, "price": 317.5, "pnl": -2099.0, "ret": -12.61}, {"stock_id": "00981A", "cond": "Cash", "date": "2026-03-25", "quantity": 3000, "price": 20.66, "pnl": 795.0, "ret": 1.3}, {"stock_id": "00981A", "cond": "Cash", "date": "2026-03-25", "quantity": 2000, "price": 20.7, "pnl": 1115.0, "ret": 2.77}, {"stock_id": "00981A", "cond": "Cash", "date": "2026-03-25", "quantity": 2000, "price": 20.7, "pnl": 1585.0, "ret": 3.99}, {"stock_id": "1785", "cond": "Cash", "date": "2026-03-19", "quantity": 208, "price": 103.0, "pnl": 4147.0, "ret": 24.13}, {"stock_id": "2485", "cond": "Cash", "date": "2026-03-19", "quantity": 66, "price": 79.5, "pnl": 1776.0, "ret": 51.49}, {"stock_id": "3036", "cond": "Cash", "date": "2026-03-19", "quantity": 6, "price": 250.5, "pnl": 137.0, "ret": 10.07}, {"stock_id": "3054", "cond": "Cash", "date": "2026-03-19", "quantity": 259, "price": 85.0, "pnl": 5216.0, "ret": 31.23}, {"stock_id": "3188", "cond": "Cash", "date": "2026-03-19", "quantity": 671, "price": 34.5, "pnl": -381.0, "ret": -1.63}, {"stock_id": "3535", "cond": "Cash", "date": "2026-03-19", "quantity": 64, "price": 124.5, "pnl": -108.0, "ret": -1.34}, {"stock_id": "4989", "cond": "Cash", "date": "2026-03-19", "quantity": 17, "price": 74.0, "pnl": 114.0, "ret": 10.0}, {"stock_id": "5289", "cond": "Cash", "date": "2026-03-19", "quantity": 37, "price": 1330.0, "pnl": 11941.0, "ret": 32.23}, {"stock_id": "6894", "cond": "Cash", "date": "2026-03-19", "quantity": 32, "price": 378.0, "pnl": 2061.0, "ret": 20.65}, {"stock_id": "6894", "cond": "Cash", "date": "2026-03-19", "quantity": 15, "price": 375.5, "pnl": 930.0, "ret": 19.88}, {"stock_id": "8271", "cond": "Cash", "date": "2026-03-19", "quantity": 52, "price": 208.0, "pnl": 3583.0, "ret": 49.86}, {"stock_id": "1785", "cond": "Cash", "date": "2026-03-13", "quantity": 209, "price": 82.1, "pnl": 1616.0, "ret": 10.45}, {"stock_id": "1785", "cond": "Cash", "date": "2026-03-13", "quantity": 162, "price": 83.9, "pnl": 1544.0, "ret": 12.88}, {"stock_id": "1785", "cond": "Cash", "date": "2026-03-13", "quantity": 47, "price": 82.7, "pnl": 383.0, "ret": 10.98}, {"stock_id": "2485", "cond": "Cash", "date": "2026-03-13", "quantity": 67, "price": 64.0, "pnl": 768.0, "ret": 21.93}, {"stock_id": "3036", "cond": "Cash", "date": "2026-03-13", "quantity": 7, "price": 232.5, "pnl": 15.0, "ret": 0.93}, {"stock_id": "3036", "cond": "Cash", "date": "2026-03-13", "quantity": 6, "price": 235.5, "pnl": 32.0, "ret": 2.33}, {"stock_id": "3036", "cond": "Cash", "date": "2026-03-13", "quantity": 1, "price": 234.5, "pnl": 6.0, "ret": 2.64}, {"stock_id": "3188", "cond": "Cash", "date": "2026-03-13", "quantity": 519, "price": 33.8, "pnl": -854.0, "ret": -4.66}, {"stock_id": "3188", "cond": "Cash", "date": "2026-03-13", "quantity": 150, "price": 33.85, "pnl": -240.0, "ret": -4.53}, {"stock_id": "3535", "cond": "Cash", "date": "2026-03-13", "quantity": 65, "price": 120.5, "pnl": -762.0, "ret": -8.9}, {"stock_id": "3535", "cond": "Cash", "date": "2026-03-13", "quantity": 65, "price": 120.5, "pnl": -755.0, "ret": -8.83}, {"stock_id": "4989", "cond": "Cash", "date": "2026-03-13", "quantity": 17, "price": 71.8, "pnl": 75.0, "ret": 6.57}, {"stock_id": "5289", "cond": "Cash", "date": "2026-03-13", "quantity": 38, "price": 1030.0, "pnl": 1599.0, "ret": 4.28}, {"stock_id": "5289", "cond": "Cash", "date": "2026-03-13", "quantity": 38, "price": 1035.0, "pnl": 1770.0, "ret": 4.73}, {"stock_id": "6894", "cond": "Cash", "date": "2026-03-13", "quantity": 48, "price": 341.5, "pnl": 1346.0, "ret": 8.99}, {"stock_id": "8271", "cond": "Cash", "date": "2026-03-13", "quantity": 52, "price": 173.5, "pnl": 1797.0, "ret": 25.01}, {"stock_id": "1590", "cond": "Cash", "date": "2026-03-11", "quantity": 1, "price": 990.0, "pnl": -114.0, "ret": -10.35}, {"stock_id": "2337", "cond": "Cash", "date": "2026-03-11", "quantity": 55, "price": 96.3, "pnl": -31.0, "ret": -0.58}, {"stock_id": "2368", "cond": "Cash", "date": "2026-03-11", "quantity": 5, "price": 892.0, "pnl": 803.0, "ret": 22.07}, {"stock_id": "2383", "cond": "Cash", "date": "2026-03-11", "quantity": 1, "price": 2480.0, "pnl": 207.0, "ret": 9.15}, {"stock_id": "2436", "cond": "Cash", "date": "2026-03-11", "quantity": 46, "price": 56.0, "pnl": 17.0, "ret": 0.67}, {"stock_id": "3037", "cond": "Cash", "date": "2026-03-11", "quantity": 56, "price": 446.5, "pnl": 1111.0, "ret": 4.67}, {"stock_id": "3167", "cond": "Cash", "date": "2026-03-11", "quantity": 28, "price": 314.0, "pnl": 1154.0, "ret": 15.18}, {"stock_id": "3189", "cond": "Cash", "date": "2026-03-11", "quantity": 161, "price": 285.5, "pnl": -1321.0, "ret": -2.81}, {"stock_id": "3324", "cond": "Cash", "date": "2026-03-11", "quantity": 62, "price": 969.0, "pnl": -2115.0, "ret": -3.42}, {"stock_id": "3526", "cond": "Cash", "date": "2026-03-11", "quantity": 143, "price": 281.5, "pnl": -3.0, "ret": -0.01}, {"stock_id": "3653", "cond": "Cash", "date": "2026-03-11", "quantity": 3, "price": 3460.0, "pnl": 1623.0, "ret": 18.63}, {"stock_id": "5475", "cond": "Cash", "date": "2026-03-11", "quantity": 374, "price": 200.0, "pnl": 1488.0, "ret": 2.04}, {"stock_id": "6291", "cond": "Cash", "date": "2026-03-11", "quantity": 325, "price": 291.5, "pnl": 7452.0, "ret": 8.58}, {"stock_id": "6515", "cond": "Cash", "date": "2026-03-11", "quantity": 1, "price": 5850.0, "pnl": 1209.0, "ret": 26.19}, {"stock_id": "6584", "cond": "Cash", "date": "2026-03-11", "quantity": 92, "price": 364.0, "pnl": -887.0, "ret": -2.59}, {"stock_id": "7734", "cond": "Cash", "date": "2026-03-11", "quantity": 1, "price": 1670.0, "pnl": 81.0, "ret": 5.12}, {"stock_id": "8147", "cond": "Cash", "date": "2026-03-11", "quantity": 20, "price": 123.5, "pnl": -39.0, "ret": -1.56}, {"stock_id": "8147", "cond": "Cash", "date": "2026-03-11", "quantity": 21, "price": 125.0, "pnl": 14.0, "ret": 0.54}, {"stock_id": "8996", "cond": "Cash", "date": "2026-03-11", "quantity": 41, "price": 820.0, "pnl": 499.0, "ret": 1.51}, {"stock_id": "00981A", "cond": "Cash", "date": "2026-03-10", "quantity": 13000, "price": 18.99, "pnl": 8165.0, "ret": 3.43}, {"stock_id": "1590", "cond": "Cash", "date": "2026-03-10", "quantity": 3, "price": 973.0, "pnl": -591.0, "ret": -16.9}, {"stock_id": "2337", "cond": "Cash", "date": "2026-03-10", "quantity": 82, "price": 94.9, "pnl": -597.0, "ret": -7.15}, {"stock_id": "2368", "cond": "Cash", "date": "2026-03-10", "quantity": 7, "price": 814.0, "pnl": 246.0, "ret": 4.53}, {"stock_id": "2383", "cond": "Cash", "date": "2026-03-10", "quantity": 2, "price": 2390.0, "pnl": 159.0, "ret": 3.46}, {"stock_id": "2436", "cond": "Cash", "date": "2026-03-10", "quantity": 69, "price": 52.2, "pnl": -401.0, "ret": -10.06}, {"stock_id": "3037", "cond": "Cash", "date": "2026-03-10", "quantity": 84, "price": 416.0, "pnl": -2869.0, "ret": -7.62}, {"stock_id": "3167", "cond": "Cash", "date": "2026-03-10", "quantity": 42, "price": 290.0, "pnl": -156.0, "ret": -1.27}, {"stock_id": "3189", "cond": "Cash", "date": "2026-03-10", "quantity": 243, "price": 281.0, "pnl": -7192.0, "ret": -9.57}, {"stock_id": "3324", "cond": "Cash", "date": "2026-03-10", "quantity": 92, "price": 928.0, "pnl": -12899.0, "ret": -13.18}, {"stock_id": "3526", "cond": "Cash", "date": "2026-03-10", "quantity": 213, "price": 283.0, "pnl": -1941.0, "ret": -3.13}, {"stock_id": "3653", "cond": "Cash", "date": "2026-03-10", "quantity": 5, "price": 3465.0, "pnl": 2055.0, "ret": 13.52}, {"stock_id": "6291", "cond": "Cash", "date": "2026-03-10", "quantity": 487, "price": 256.5, "pnl": -11162.0, "ret": -8.24}, {"stock_id": "6515", "cond": "Cash", "date": "2026-03-10", "quantity": 1, "price": 5250.0, "pnl": 442.0, "ret": 9.24}, {"stock_id": "6584", "cond": "Cash", "date": "2026-03-10", "quantity": 61, "price": 356.0, "pnl": -3974.0, "ret": -15.53}, {"stock_id": "6584", "cond": "Cash", "date": "2026-03-10", "quantity": 79, "price": 357.5, "pnl": -4183.0, "ret": -12.95}, {"stock_id": "7734", "cond": "Cash", "date": "2026-03-10", "quantity": 2, "price": 1635.0, "pnl": -277.0, "ret": -7.84}, {"stock_id": "8147", "cond": "Cash", "date": "2026-03-10", "quantity": 63, "price": 121.5, "pnl": -523.0, "ret": -6.42}, {"stock_id": "1590", "cond": "Cash", "date": "2026-02-23", "quantity": 1, "price": 1220.0, "pnl": 0.0, "ret": 0.0}, {"stock_id": "2337", "cond": "Cash", "date": "2026-02-23", "quantity": 36, "price": 105.0, "pnl": 391.0, "ret": 11.59}, {"stock_id": "2368", "cond": "Cash", "date": "2026-02-23", "quantity": 3, "price": 843.0, "pnl": -13.0, "ret": -0.51}, {"stock_id": "2436", "cond": "Cash", "date": "2026-02-23", "quantity": 30, "price": 59.5, "pnl": 19.0, "ret": 1.08}, {"stock_id": "3037", "cond": "Cash", "date": "2026-02-23", "quantity": 37, "price": 403.0, "pnl": 981.0, "ret": 7.08}, {"stock_id": "3167", "cond": "Cash", "date": "2026-02-23", "quantity": 18, "price": 286.5, "pnl": 251.0, "ret": 5.14}, {"stock_id": "3189", "cond": "Cash", "date": "2026-02-23", "quantity": 107, "price": 289.5, "pnl": 4073.0, "ret": 15.22}, {"stock_id": "3324", "cond": "Cash", "date": "2026-02-23", "quantity": 41, "price": 1050.0, "pnl": -661.0, "ret": -1.52}, {"stock_id": "3526", "cond": "Cash", "date": "2026-02-23", "quantity": 105, "price": 278.0, "pnl": -1456.0, "ret": -4.77}, {"stock_id": "5475", "cond": "Cash", "date": "2026-02-23", "quantity": 79, "price": 179.0, "pnl": 1462.0, "ret": 11.59}, {"stock_id": "6291", "cond": "Cash", "date": "2026-02-23", "quantity": 216, "price": 304.0, "pnl": 10055.0, "ret": 18.18}, {"stock_id": "6584", "cond": "Cash", "date": "2026-02-23", "quantity": 61, "price": 445.5, "pnl": 1400.0, "ret": 5.46}, {"stock_id": "7734", "cond": "Cash", "date": "2026-02-23", "quantity": 1, "price": 1525.0, "pnl": -43.0, "ret": -2.75}, {"stock_id": "8147", "cond": "Cash", "date": "2026-02-23", "quantity": 27, "price": 136.0, "pnl": 169.0, "ret": 4.85}, {"stock_id": "8996", "cond": "Cash", "date": "2026-02-23", "quantity": 10, "price": 874.0, "pnl": 54.0, "ret": 0.62}, {"stock_id": "1312", "cond": "Cash", "date": "2026-02-11", "quantity": 4000, "price": 12.5, "pnl": -1282.0, "ret": -2.51}, {"stock_id": "1312", "cond": "Cash", "date": "2026-02-11", "quantity": 361, "price": 12.7, "pnl": -26.0, "ret": -0.57}, {"stock_id": "3025", "cond": "Cash", "date": "2026-02-11", "quantity": 87, "price": 54.7, "pnl": -1107.0, "ret": -18.94}, {"stock_id": "3131", "cond": "Cash", "date": "2026-02-11", "quantity": 22, "price": 1525.0, "pnl": -1921.0, "ret": -5.44}, {"stock_id": "3189", "cond": "Cash", "date": "2026-02-11", "quantity": 137, "price": 259.0, "pnl": 2301.0, "ret": 6.97}, {"stock_id": "3360", "cond": "Cash", "date": "2026-02-11", "quantity": 2000, "price": 15.2, "pnl": 1738.0, "ret": 6.09}, {"stock_id": "3360", "cond": "Cash", "date": "2026-02-11", "quantity": 447, "price": 15.8, "pnl": 586.0, "ret": 9.09}, {"stock_id": "3372", "cond": "Cash", "date": "2026-02-11", "quantity": 1000, "price": 20.4, "pnl": -774.0, "ret": -3.67}, {"stock_id": "3372", "cond": "Cash", "date": "2026-02-11", "quantity": 85, "price": 20.65, "pnl": -12.0, "ret": -0.68}, {"stock_id": "3430", "cond": "Cash", "date": "2026-02-11", "quantity": 36, "price": 64.4, "pnl": 26.0, "ret": 1.14}, {"stock_id": "3443", "cond": "Cash", "date": "2026-02-11", "quantity": 1, "price": 2455.0, "pnl": -193.0, "ret": -7.32}, {"stock_id": "3491", "cond": "Cash", "date": "2026-02-11", "quantity": 7, "price": 1335.0, "pnl": 1979.0, "ret": 27.02}, {"stock_id": "3680", "cond": "Cash", "date": "2026-02-11", "quantity": 7, "price": 400.5, "pnl": -49.0, "ret": -1.72}, {"stock_id": "4768", "cond": "Cash", "date": "2026-02-11", "quantity": 103, "price": 394.0, "pnl": 493.0, "ret": 1.24}, {"stock_id": "4772", "cond": "Cash", "date": "2026-02-11", "quantity": 55, "price": 307.0, "pnl": -840.0, "ret": -4.76}, {"stock_id": "5228", "cond": "Cash", "date": "2026-02-11", "quantity": 14, "price": 20.95, "pnl": -17.0, "ret": -5.5}, {"stock_id": "5228", "cond": "Cash", "date": "2026-02-11", "quantity": 735, "price": 20.8, "pnl": -1015.0, "ret": -6.25}, {"stock_id": "5292", "cond": "Cash", "date": "2026-02-11", "quantity": 16, "price": 185.0, "pnl": -80.0, "ret": -2.64}, {"stock_id": "5864", "cond": "Cash", "date": "2026-02-11", "quantity": 256, "price": 22.7, "pnl": -150.0, "ret": -2.53}, {"stock_id": "6015", "cond": "Cash", "date": "2026-02-11", "quantity": 1000, "price": 13.35, "pnl": 8.0, "ret": 0.06}, {"stock_id": "6015", "cond": "Cash", "date": "2026-02-11", "quantity": 170, "price": 13.2, "pnl": -12.0, "ret": -0.53}, {"stock_id": "6015", "cond": "Cash", "date": "2026-02-11", "quantity": 530, "price": 13.2, "pnl": -38.0, "ret": -0.54}, {"stock_id": "6016", "cond": "Cash", "date": "2026-02-11", "quantity": 199, "price": 16.15, "pnl": -21.0, "ret": -0.65}, {"stock_id": "6239", "cond": "Cash", "date": "2026-02-11", "quantity": 96, "price": 240.5, "pnl": -925.0, "ret": -3.87}, {"stock_id": "6465", "cond": "Cash", "date": "2026-02-11", "quantity": 72, "price": 31.25, "pnl": -264.0, "ret": -10.54}, {"stock_id": "6531", "cond": "Cash", "date": "2026-02-11", "quantity": 71, "price": 407.0, "pnl": -1176.0, "ret": -3.93}, {"stock_id": "6603", "cond": "Cash", "date": "2026-02-11", "quantity": 174, "price": 24.25, "pnl": -271.0, "ret": -6.06}, {"stock_id": "6894", "cond": "Cash", "date": "2026-02-11", "quantity": 18, "price": 241.5, "pnl": 220.0, "ret": 5.36}, {"stock_id": "6903", "cond": "Cash", "date": "2026-02-11", "quantity": 172, "price": 271.0, "pnl": 2912.0, "ret": 6.7}, {"stock_id": "8064", "cond": "Cash", "date": "2026-02-11", "quantity": 59, "price": 46.25, "pnl": -343.0, "ret": -11.21}, {"stock_id": "8088", "cond": "Cash", "date": "2026-02-11", "quantity": 390, "price": 51.3, "pnl": -3059.0, "ret": -13.31}, {"stock_id": "8131", "cond": "Cash", "date": "2026-02-11", "quantity": 872, "price": 69.2, "pnl": -1558.0, "ret": -2.53}, {"stock_id": "8150", "cond": "Cash", "date": "2026-02-11", "quantity": 151, "price": 53.2, "pnl": -543.0, "ret": -6.36}, {"stock_id": "8996", "cond": "Cash", "date": "2026-02-11", "quantity": 3, "price": 945.0, "pnl": 510.0, "ret": 22.05}, {"stock_id": "9955", "cond": "Cash", "date": "2026-02-11", "quantity": 126, "price": 32.8, "pnl": -227.0, "ret": -5.23}, {"stock_id": "9955", "cond": "Cash", "date": "2026-02-11", "quantity": 4, "price": 32.8, "pnl": -1.0, "ret": -0.76}, {"stock_id": "1312", "cond": "Cash", "date": "2026-02-10", "quantity": 2000, "price": 12.65, "pnl": -1533.0, "ret": -5.74}, {"stock_id": "1312", "cond": "Cash", "date": "2026-02-10", "quantity": 436, "price": 12.65, "pnl": -381.0, "ret": -6.49}, {"stock_id": "3025", "cond": "Cash", "date": "2026-02-10", "quantity": 44, "price": 56.3, "pnl": -913.0, "ret": -27.01}, {"stock_id": "3025", "cond": "Cash", "date": "2026-02-10", "quantity": 72, "price": 56.0, "pnl": -891.0, "ret": -18.16}, {"stock_id": "3131", "cond": "Cash", "date": "2026-02-10", "quantity": 9, "price": 1545.0, "pnl": -2558.0, "ret": -15.59}, {"stock_id": "3131", "cond": "Cash", "date": "2026-02-10", "quantity": 10, "price": 1555.0, "pnl": -1527.0, "ret": -8.98}, {"stock_id": "3189", "cond": "Cash", "date": "2026-02-10", "quantity": 94, "price": 252.0, "pnl": 2810.0, "ret": 13.53}, {"stock_id": "3189", "cond": "Cash", "date": "2026-02-10", "quantity": 160, "price": 259.5, "pnl": 3442.0, "ret": 9.08}, {"stock_id": "3360", "cond": "Cash", "date": "2026-02-10", "quantity": 1000, "price": 15.3, "pnl": 213.0, "ret": 1.42}, {"stock_id": "3360", "cond": "Cash", "date": "2026-02-10", "quantity": 223, "price": 15.3, "pnl": 58.0, "ret": 1.74}, {"stock_id": "3360", "cond": "Cash", "date": "2026-02-10", "quantity": 1000, "price": 15.0, "pnl": 470.0, "ret": 3.25}, {"stock_id": "3360", "cond": "Cash", "date": "2026-02-10", "quantity": 847, "price": 15.0, "pnl": 647.0, "ret": 5.39}, {"stock_id": "3372", "cond": "Cash", "date": "2026-02-10", "quantity": 1000, "price": 20.45, "pnl": -1350.0, "ret": -6.22}, {"stock_id": "3372", "cond": "Cash", "date": "2026-02-10", "quantity": 49, "price": 20.45, "pnl": -41.0, "ret": -3.95}, {"stock_id": "3430", "cond": "Cash", "date": "2026-02-10", "quantity": 28, "price": 64.6, "pnl": -83.0, "ret": -4.41}, {"stock_id": "3430", "cond": "Cash", "date": "2026-02-10", "quantity": 2, "price": 65.7, "pnl": -1.0, "ret": -0.76}, {"stock_id": "3443", "cond": "Cash", "date": "2026-02-10", "quantity": 1, "price": 2500.0, "pnl": -93.0, "ret": -3.6}, {"stock_id": "3680", "cond": "Cash", "date": "2026-02-10", "quantity": 3, "price": 405.0, "pnl": -36.0, "ret": -2.89}, {"stock_id": "3680", "cond": "Cash", "date": "2026-02-10", "quantity": 2, "price": 405.0, "pnl": 5.0, "ret": 0.62}, {"stock_id": "4768", "cond": "Cash", "date": "2026-02-10", "quantity": 52, "price": 404.0, "pnl": 86.0, "ret": 0.41}, {"stock_id": "4768", "cond": "Cash", "date": "2026-02-10", "quantity": 48, "price": 410.0, "pnl": 366.0, "ret": 1.9}, {"stock_id": "4772", "cond": "Cash", "date": "2026-02-10", "quantity": 28, "price": 308.0, "pnl": -698.0, "ret": -7.52}, {"stock_id": "4772", "cond": "Cash", "date": "2026-02-10", "quantity": 47, "price": 308.5, "pnl": -732.0, "ret": -4.83}, {"stock_id": "5228", "cond": "Cash", "date": "2026-02-10", "quantity": 360, "price": 22.2, "pnl": -478.0, "ret": -5.67}, {"stock_id": "5228", "cond": "Cash", "date": "2026-02-10", "quantity": 417, "price": 22.3, "pnl": -354.0, "ret": -3.68}, {"stock_id": "5292", "cond": "Cash", "date": "2026-02-10", "quantity": 8, "price": 183.0, "pnl": -124.0, "ret": -7.84}, {"stock_id": "5292", "cond": "Cash", "date": "2026-02-10", "quantity": 8, "price": 183.0, "pnl": -77.0, "ret": -5.02}, {"stock_id": "5864", "cond": "Cash", "date": "2026-02-10", "quantity": 143, "price": 23.0, "pnl": -40.0, "ret": -1.21}, {"stock_id": "6015", "cond": "Cash", "date": "2026-02-10", "quantity": 851, "price": 13.3, "pnl": -916.0, "ret": -7.52}, {"stock_id": "6015", "cond": "Cash", "date": "2026-02-10", "quantity": 798, "price": 13.4, "pnl": -851.0, "ret": -7.4}, {"stock_id": "6016", "cond": "Cash", "date": "2026-02-10", "quantity": 98, "price": 16.35, "pnl": -72.0, "ret": -4.32}, {"stock_id": "6016", "cond": "Cash", "date": "2026-02-10", "quantity": 167, "price": 16.35, "pnl": -35.0, "ret": -1.27}, {"stock_id": "6239", "cond": "Cash", "date": "2026-02-10", "quantity": 46, "price": 241.5, "pnl": -616.0, "ret": -5.28}, {"stock_id": "6239", "cond": "Cash", "date": "2026-02-10", "quantity": 80, "price": 242.5, "pnl": -581.0, "ret": -2.92}, {"stock_id": "6465", "cond": "Cash", "date": "2026-02-10", "quantity": 96, "price": 31.8, "pnl": -299.0, "ret": -8.96}, {"stock_id": "6515", "cond": "Cash", "date": "2026-02-10", "quantity": 1, "price": 4850.0, "pnl": 845.0, "ret": 21.2}, {"stock_id": "6515", "cond": "Cash", "date": "2026-02-10", "quantity": 1, "price": 4840.0, "pnl": 414.0, "ret": 9.4}, {"stock_id": "6531", "cond": "Cash", "date": "2026-02-10", "quantity": 53, "price": 408.0, "pnl": -1845.0, "ret": -7.89}, {"stock_id": "6531", "cond": "Cash", "date": "2026-02-10", "quantity": 40, "price": 409.0, "pnl": -748.0, "ret": -4.39}, {"stock_id": "6603", "cond": "Cash", "date": "2026-02-10", "quantity": 87, "price": 24.55, "pnl": -192.0, "ret": -8.28}, {"stock_id": "6603", "cond": "Cash", "date": "2026-02-10", "quantity": 145, "price": 24.45, "pnl": -277.0, "ret": -7.28}, {"stock_id": "6894", "cond": "Cash", "date": "2026-02-10", "quantity": 11, "price": 236.5, "pnl": 78.0, "ret": 3.1}, {"stock_id": "6903", "cond": "Cash", "date": "2026-02-10", "quantity": 84, "price": 276.0, "pnl": 587.0, "ret": 2.61}, {"stock_id": "6903", "cond": "Cash", "date": "2026-02-10", "quantity": 144, "price": 276.0, "pnl": 2160.0, "ret": 5.77}, {"stock_id": "8064", "cond": "Cash", "date": "2026-02-10", "quantity": 29, "price": 46.95, "pnl": -266.0, "ret": -16.4}, {"stock_id": "8064", "cond": "Cash", "date": "2026-02-10", "quantity": 49, "price": 46.9, "pnl": -323.0, "ret": -12.37}, {"stock_id": "8088", "cond": "Cash", "date": "2026-02-10", "quantity": 193, "price": 52.1, "pnl": -2361.0, "ret": -19.08}, {"stock_id": "8088", "cond": "Cash", "date": "2026-02-10", "quantity": 326, "price": 52.3, "pnl": -3629.0, "ret": -17.61}, {"stock_id": "8131", "cond": "Cash", "date": "2026-02-10", "quantity": 435, "price": 65.3, "pnl": -5170.0, "ret": -15.46}, {"stock_id": "8131", "cond": "Cash", "date": "2026-02-10", "quantity": 730, "price": 65.8, "pnl": -6333.0, "ret": -11.69}, {"stock_id": "8150", "cond": "Cash", "date": "2026-02-10", "quantity": 77, "price": 53.1, "pnl": -745.0, "ret": -15.47}, {"stock_id": "8150", "cond": "Cash", "date": "2026-02-10", "quantity": 125, "price": 53.7, "pnl": -590.0, "ret": -8.11}, {"stock_id": "8996", "cond": "Cash", "date": "2026-02-10", "quantity": 4, "price": 933.0, "pnl": 780.0, "ret": 26.57}, {"stock_id": "8996", "cond": "Cash", "date": "2026-02-10", "quantity": 8, "price": 958.0, "pnl": 1604.0, "ret": 26.61}, {"stock_id": "9955", "cond": "Cash", "date": "2026-02-10", "quantity": 3, "price": 33.45, "pnl": -15.0, "ret": -13.16}, {"stock_id": "9955", "cond": "Cash", "date": "2026-02-10", "quantity": 31, "price": 33.7, "pnl": -135.0, "ret": -11.49}, {"stock_id": "1312", "cond": "Cash", "date": "2026-01-27", "quantity": 175, "price": 13.65, "pnl": 73.0, "ret": 3.17}, {"stock_id": "1312", "cond": "Cash", "date": "2026-01-27", "quantity": 1000, "price": 13.5, "pnl": 318.0, "ret": 2.42}, {"stock_id": "1312", "cond": "Cash", "date": "2026-01-27", "quantity": 2000, "price": 13.55, "pnl": 1795.0, "ret": 7.13}, {"stock_id": "1312", "cond": "Cash", "date": "2026-01-27", "quantity": 401, "price": 13.5, "pnl": 352.0, "ret": 6.99}, {"stock_id": "3025", "cond": "Cash", "date": "2026-01-27", "quantity": 85, "price": 77.5, "pnl": 140.0, "ret": 2.18}, {"stock_id": "3131", "cond": "Cash", "date": "2026-01-27", "quantity": 25, "price": 1780.0, "pnl": -1114.0, "ret": -2.45}, {"stock_id": "3189", "cond": "Cash", "date": "2026-01-27", "quantity": 117, "price": 218.5, "pnl": 4162.0, "ret": 19.55}, {"stock_id": "3189", "cond": "Cash", "date": "2026-01-27", "quantity": 116, "price": 218.0, "pnl": 4308.0, "ret": 20.64}, {"stock_id": "3360", "cond": "Cash", "date": "2026-01-27", "quantity": 2000, "price": 14.75, "pnl": -3431.0, "ret": -10.46}, {"stock_id": "3360", "cond": "Cash", "date": "2026-01-27", "quantity": 2, "price": 14.75, "pnl": -5.0, "ret": -15.15}, {"stock_id": "3360", "cond": "Cash", "date": "2026-01-27", "quantity": 464, "price": 14.8, "pnl": -607.0, "ret": -8.15}, {"stock_id": "3372", "cond": "Cash", "date": "2026-01-27", "quantity": 154, "price": 22.65, "pnl": -57.0, "ret": -1.61}, {"stock_id": "3372", "cond": "Cash", "date": "2026-01-27", "quantity": 180, "price": 22.6, "pnl": -77.0, "ret": -1.87}, {"stock_id": "3372", "cond": "Cash", "date": "2026-01-27", "quantity": 1000, "price": 22.1, "pnl": -470.0, "ret": -2.09}, {"stock_id": "3430", "cond": "Cash", "date": "2026-01-27", "quantity": 22, "price": 71.3, "pnl": -218.0, "ret": -12.25}, {"stock_id": "3430", "cond": "Cash", "date": "2026-01-27", "quantity": 1, "price": 71.2, "pnl": -10.0, "ret": -12.5}, {"stock_id": "3430", "cond": "Cash", "date": "2026-01-27", "quantity": 21, "price": 69.5, "pnl": -208.0, "ret": -12.52}, {"stock_id": "3443", "cond": "Cash", "date": "2026-01-27", "quantity": 1, "price": 2615.0, "pnl": 222.0, "ret": 9.32}, {"stock_id": "3491", "cond": "Cash", "date": "2026-01-27", "quantity": 8, "price": 1100.0, "pnl": 2406.0, "ret": 37.85}, {"stock_id": "3680", "cond": "Cash", "date": "2026-01-27", "quantity": 8, "price": 441.0, "pnl": 100.0, "ret": 2.93}, {"stock_id": "4768", "cond": "Cash", "date": "2026-01-27", "quantity": 59, "price": 385.5, "pnl": -2236.0, "ret": -8.99}, {"stock_id": "4768", "cond": "Cash", "date": "2026-01-27", "quantity": 63, "price": 387.0, "pnl": -1756.0, "ret": -6.75}, {"stock_id": "4772", "cond": "Cash", "date": "2026-01-27", "quantity": 34, "price": 334.0, "pnl": -1633.0, "ret": -12.62}, {"stock_id": "4772", "cond": "Cash", "date": "2026-01-27", "quantity": 34, "price": 334.5, "pnl": -1297.0, "ret": -10.28}, {"stock_id": "5228", "cond": "Cash", "date": "2026-01-27", "quantity": 910, "price": 25.45, "pnl": 1224.0, "ret": 5.61}, {"stock_id": "5292", "cond": "Cash", "date": "2026-01-27", "quantity": 20, "price": 198.0, "pnl": 333.0, "ret": 9.22}, {"stock_id": "5864", "cond": "Cash", "date": "2026-01-27", "quantity": 1, "price": 22.9, "pnl": 3.0, "ret": 16.67}, {"stock_id": "5864", "cond": "Cash", "date": "2026-01-27", "quantity": 208, "price": 22.9, "pnl": 1051.0, "ret": 28.47}, {"stock_id": "6015", "cond": "Cash", "date": "2026-01-27", "quantity": 103, "price": 13.15, "pnl": 29.0, "ret": 2.2}, {"stock_id": "6015", "cond": "Cash", "date": "2026-01-27", "quantity": 1000, "price": 13.0, "pnl": 259.0, "ret": 2.04}, {"stock_id": "6015", "cond": "Cash", "date": "2026-01-27", "quantity": 374, "price": 13.0, "pnl": 235.0, "ret": 5.1}, {"stock_id": "6016", "cond": "Cash", "date": "2026-01-27", "quantity": 195, "price": 16.1, "pnl": 198.0, "ret": 6.76}, {"stock_id": "6239", "cond": "Cash", "date": "2026-01-27", "quantity": 59, "price": 262.0, "pnl": 1191.0, "ret": 8.39}, {"stock_id": "6239", "cond": "Cash", "date": "2026-01-27", "quantity": 58, "price": 260.5, "pnl": 1170.0, "ret": 8.43}, {"stock_id": "6465", "cond": "Cash", "date": "2026-01-27", "quantity": 43, "price": 35.2, "pnl": -309.0, "ret": -17.02}, {"stock_id": "6465", "cond": "Cash", "date": "2026-01-27", "quantity": 44, "price": 35.25, "pnl": -189.0, "ret": -10.9}, {"stock_id": "6515", "cond": "Cash", "date": "2026-01-27", "quantity": 1, "price": 4020.0, "pnl": 554.0, "ret": 16.06}, {"stock_id": "6531", "cond": "Cash", "date": "2026-01-27", "quantity": 87, "price": 450.5, "pnl": -1968.0, "ret": -4.8}, {"stock_id": "6603", "cond": "Cash", "date": "2026-01-27", "quantity": 214, "price": 30.0, "pnl": -933.0, "ret": -12.74}, {"stock_id": "6894", "cond": "Cash", "date": "2026-01-27", "quantity": 1, "price": 233.5, "pnl": -20.0, "ret": -7.94}, {"stock_id": "6894", "cond": "Cash", "date": "2026-01-27", "quantity": 7, "price": 231.0, "pnl": -135.0, "ret": -7.73}, {"stock_id": "6903", "cond": "Cash", "date": "2026-01-27", "quantity": 104, "price": 258.0, "pnl": -1830.0, "ret": -6.41}, {"stock_id": "6903", "cond": "Cash", "date": "2026-01-27", "quantity": 105, "price": 259.0, "pnl": -1742.0, "ret": -6.04}, {"stock_id": "8064", "cond": "Cash", "date": "2026-01-27", "quantity": 36, "price": 56.7, "pnl": 22.0, "ret": 1.09}, {"stock_id": "8064", "cond": "Cash", "date": "2026-01-27", "quantity": 36, "price": 56.8, "pnl": 40.0, "ret": 2.0}, {"stock_id": "8088", "cond": "Cash", "date": "2026-01-27", "quantity": 239, "price": 62.5, "pnl": 1556.0, "ret": 11.69}, {"stock_id": "8088", "cond": "Cash", "date": "2026-01-27", "quantity": 239, "price": 62.3, "pnl": 1268.0, "ret": 9.35}, {"stock_id": "8131", "cond": "Cash", "date": "2026-01-27", "quantity": 320, "price": 83.0, "pnl": 4332.0, "ret": 19.59}, {"stock_id": "8131", "cond": "Cash", "date": "2026-01-27", "quantity": 537, "price": 82.3, "pnl": 7283.0, "ret": 19.83}, {"stock_id": "8150", "cond": "Cash", "date": "2026-01-27", "quantity": 93, "price": 66.4, "pnl": 430.0, "ret": 7.52}, {"stock_id": "8150", "cond": "Cash", "date": "2026-01-27", "quantity": 93, "price": 66.3, "pnl": 590.0, "ret": 10.63}, {"stock_id": "8996", "cond": "Cash", "date": "2026-01-27", "quantity": 10, "price": 726.0, "pnl": 19.0, "ret": 0.26}, {"stock_id": "9955", "cond": "Cash", "date": "2026-01-27", "quantity": 55, "price": 38.8, "pnl": 183.0, "ret": 9.42}, {"stock_id": "9955", "cond": "Cash", "date": "2026-01-27", "quantity": 54, "price": 39.25, "pnl": 175.0, "ret": 9.04}];
+var SETTLEMENT_RECORDS  = [{"T": 0, "date": "2026-07-09", "amount": -438234}, {"T": 1, "date": "2026-07-10", "amount": 0}, {"T": 2, "date": "2026-07-13", "amount": 19803}];
 
 var CHART_UP_HEX   = '#fb4d69';
 var CHART_DOWN_HEX = '#00d4a9';
+var INDEX_TSE_HEX  = '#7c5ce8';
+var INDEX_OTC_HEX  = '#3bb2f6';
+var TBL_TICKER_FS = '14px';
+var TBL_NAME_FS   = '14px';
 
 var GAP=2.8,CX=130,CY=130,R=100,INNER=82;
 var totalW = HOLDINGS_DATA.total_weight;
@@ -460,24 +652,16 @@ var H      = HOLDINGS_DATA;
 
 var mode = 'ret';
 
-/* ── Table mode / pagination / search ── */
-var tableMode        = 'compact';
-var PAGE_SIZE_FULL    = 13;
-var PAGE_SIZE_COMPACT = 19;
+/* ── Table mode / pagination (Holdings tab) ── */
+var tableMode        = 'full';
+var PAGE_SIZE_FULL    = 10;
+var PAGE_SIZE_COMPACT = 30;
 function pageSize(){ return tableMode==='compact' ? PAGE_SIZE_COMPACT : PAGE_SIZE_FULL; }
 
 var currentPage  = 1;
 var sortKey      = null;
 var sortDir      = 1;
-var searchQuery  = '';
 var tableRecords = H.records.slice();
-
-function getFilteredRecords(){
-  if(!searchQuery) return tableRecords;
-  return tableRecords.filter(function(r){
-    return r.ticker.toLowerCase().indexOf(searchQuery)>-1 || r.name.toLowerCase().indexOf(searchQuery)>-1;
-  });
-}
 
 /* ── helpers ── */
 function polar(cx,cy,r,deg){
@@ -502,83 +686,67 @@ function retColor(val){
 }
 function retHex(v){ return v>=0?CHART_UP_HEX:CHART_DOWN_HEX; }
 function fmtSign(v,dec){ dec=dec===undefined?2:dec; return (v>=0?'+':'')+v.toFixed(dec)+'%'; }
+function fmtNum(v){ return (v>=0?'+':'')+Math.round(v).toLocaleString(); }
 function getVal(rec){ return mode==='ret'?rec.ret:rec.change_rate; }
+function esc(s){ var d=document.createElement('div'); d.textContent=(s===undefined||s===null)?'':s; return d.innerHTML; }
 
-/* ── Fund Usage Bar ── */
-function fuBarColor(npc){ return npc>0?CHART_UP_HEX:CHART_DOWN_HEX; }
+/* ── Sidebar tab switching ── */
+var navItems = document.querySelectorAll('.nav-item');
+var panels   = document.querySelectorAll('.tab-panel');
+navItems.forEach(function(item){
+  item.addEventListener('click',function(){
+    var tab = item.getAttribute('data-tab');
+    navItems.forEach(function(i){ i.classList.toggle('active', i===item); });
+    panels.forEach(function(p){ p.classList.toggle('active', p.id==='panel-'+tab); });
+    if(tab==='market' && !marketChartBuilt){ buildMarketChart(); }
+  });
+});
 
-var fuSolidEnd=0, fuHatchEnd=0, fuCurPct=0, fuNetPct=0, fuCashPct=0;
+/* ── Usage Bar Header ── */
+(function initUsageBar(){
+  var mv=H.market_value, bal=H.total_balance;
+  var pct=bal>0?(mv/bal*100):0;
+  var pnl=H.total_pnl, ret=H.unrealized_ret;
 
-function initFundUsage(){
-  var mv=H.market_value, bal=H.total_balance, cash=H.cash, npc=H.net_position_change;
-  var curPct  = bal>0?Math.min(Math.max(mv/bal*100,0),100):0;
-  var netPct  = bal>0?(npc/bal*100):0;
-  var prevPct = Math.min(Math.max(curPct-netPct,0),100);
-  var cashPct = bal>0?(cash/bal*100):0;
-  var barColor= fuBarColor(npc);
+  document.getElementById('ub-market-value').textContent='NT$ '+mv.toLocaleString();
+  document.getElementById('ub-total-balance').textContent='/ '+bal.toLocaleString();
+  document.getElementById('ub-fill').style.width=Math.min(pct,100).toFixed(2)+'%';
+  document.getElementById('ub-used-label').textContent=pct.toFixed(0)+'% used';
+  document.getElementById('ub-pnl-tri').className=pnl>=0?'tri-up':'tri-down';
 
-  var solidEnd,hatchEnd,handlePos=curPct;
-  if(npc>=0){ solidEnd=prevPct; hatchEnd=curPct; }
-  else       { solidEnd=curPct; hatchEnd=prevPct; }
-  fuSolidEnd=solidEnd; fuHatchEnd=hatchEnd; fuCurPct=curPct; fuNetPct=netPct; fuCashPct=cashPct;
+  var pnlAbsEl=document.getElementById('ub-pnl-abs');
+  pnlAbsEl.textContent=(pnl>=0?'+':'')+Math.abs(pnl).toLocaleString();
+  pnlAbsEl.style.color=retHex(pnl);
 
-  document.getElementById('fu-value').innerHTML=
-    'NT$ '+mv.toLocaleString()+'<span class="fu-sep"> / </span><span class="fu-total">'+bal.toLocaleString()+'</span>';
+  var pnlPctEl=document.getElementById('ub-pnl-pct');
+  pnlPctEl.textContent=fmtSign(ret);
+  pnlPctEl.style.color=retHex(pnl);
 
-  var npcColor=npc===0?'#848a94':barColor;
-  var npcText=npc===0?'0':(npc>0?'+':'-')+Math.abs(npc).toLocaleString();
-
-  var fillEl=document.getElementById('fu-fill');
-  fillEl.style.width=solidEnd+'%';
-  fillEl.style.background=barColor;
-
-  var hatchEl=document.getElementById('fu-hatch');
-  hatchEl.style.left=solidEnd+'%';
-  hatchEl.style.width=Math.max(hatchEnd-solidEnd,0)+'%';
-  hatchEl.style.background='repeating-linear-gradient(45deg,'+barColor+'b3 0px,'+barColor+'b3 2px,transparent 2px,transparent 6px)';
-
-  var handleEl=document.getElementById('fu-handle');
-  handleEl.style.left=handlePos+'%';
-  handleEl.style.borderColor=barColor;
-
-  document.getElementById('fu-note').innerHTML=
-    'Used <b>'+curPct.toFixed(0)+'%</b>，Net Position Change <b style="color:'+npcColor+';">'+npcText+'</b>，Cash <b style="color:#ebf9ff;">NT$ '+cash.toLocaleString()+'</b>';
-
-  var track=document.getElementById('fu-track');
-  track.addEventListener('mousemove',  showFuTt);
-  track.addEventListener('mouseleave', hideTt);
-}
-function showFuTt(e){
-  var rect=e.currentTarget.getBoundingClientRect();
-  var relX=Math.min(Math.max((e.clientX-rect.left)/rect.width*100,0),100);
-  var barColor=fuBarColor(H.net_position_change);
-  var label,valText,valColor;
-  if(relX<fuSolidEnd){
-    label='Used'; valText=fuCurPct.toFixed(1)+'%'; valColor=barColor;
-  } else if(relX<fuHatchEnd){
-    label='Net Position Change'; valText=(fuNetPct>=0?'+':'')+fuNetPct.toFixed(1)+'%'; valColor=barColor;
-  } else {
-    label='Cash %'; valText=fuCashPct.toFixed(1)+'%'; valColor='#848a94';
+  function setAdVal(id,v){
+    var el=document.getElementById(id);
+    el.textContent=v===0?'0':(v>=0?'+':'-')+Math.abs(v).toLocaleString();
+    el.style.color=v>0?CHART_UP_HEX:v<0?CHART_DOWN_HEX:'rgba(235,249,255,0.55)';
   }
-  tt.innerHTML='<div>'+label+': <b style="color:'+valColor+';font-weight:400;">'+valText+'</b></div>';
-  tt.style.display='block';
-  moveTt(e);
-}
 
-/* ── Table toolbar stats ── */
-function initTableStats(){
-  var retEl=document.getElementById('st-ret');
-  var pnlText=(H.total_pnl>=0?'+':'')+H.total_pnl.toLocaleString();
-  retEl.textContent=fmtSign(H.unrealized_ret)+' ('+pnlText+')';
-  retEl.style.color=retHex(H.total_pnl);
+  var cashEl=document.getElementById('ad-cash');
+  cashEl.textContent=H.cash.toLocaleString();
+  cashEl.style.color='rgba(235,249,255,0.85)';
 
-  var wrEl=document.getElementById('st-winrate');
+  var netChgEl=document.getElementById('ad-net-change');
+  var npc=H.net_position_change;
+  netChgEl.textContent=(npc>=0?'+':'')+npc.toLocaleString();
+  netChgEl.style.color=npc>0?CHART_UP_HEX:npc<0?CHART_DOWN_HEX:'rgba(235,249,255,0.55)';
+
+  var wrEl=document.getElementById('ad-win-rate');
   wrEl.textContent=H.win_rate+'% ('+H.winning+'/'+H.holding_count+')';
   wrEl.style.color=H.win_rate>=50?CHART_UP_HEX:CHART_DOWN_HEX;
 
-  document.getElementById('st-mv').textContent='NT$ '+H.market_value.toLocaleString();
-  document.getElementById('st-cost').textContent='NT$ '+H.total_cost.toLocaleString();
-}
+  setAdVal('ad-today',H.realized_today);
+  setAdVal('ad-year', H.realized_year);
+
+  var utEl=document.getElementById('tbl-update-time');
+  if(utEl){ utEl.textContent='Last Updated '+H.last_update; }
+})();
 
 /* ── Donut ── */
 var cTicker=document.getElementById('cTicker');
@@ -708,7 +876,7 @@ function updateMode(newMode){
 document.getElementById('btnUR').addEventListener('click',function(){ updateMode('ret'); });
 document.getElementById('btnRC').addEventListener('click',function(){ updateMode('change_rate'); });
 
-/* ── Table mode toggle (小 / 大) ── */
+/* ── Table mode toggle (full / compact) — Holdings tab ── */
 function setTableMode(newTableMode){
   tableMode=newTableMode;
   document.getElementById('btnFull').classList.toggle('active',tableMode==='full');
@@ -720,21 +888,16 @@ function setTableMode(newTableMode){
 document.getElementById('btnFull').addEventListener('click',function(){ setTableMode('full'); });
 document.getElementById('btnCompact').addEventListener('click',function(){ setTableMode('compact'); });
 
-/* ── Table search ── */
-document.getElementById('tableSearch').addEventListener('input',function(e){
-  searchQuery=e.target.value.trim().toLowerCase();
-  currentPage=1;
-  renderTable(); renderPagination();
-});
-
-/* ── Table (styleC column layout) ── */
+/* ── Holdings table ── */
 var cols=[
-  {key:'ticker_name', label:'Symbol',           sortable:false},
-  {key:'weight',      label:'Weight',           sortable:true},
-  {key:'quantity',    label:'Quantity',         sortable:true},
-  {key:'last_price',  label:'Cost → Price', sortable:true},
-  {key:'change_rate', label:'Change',           sortable:true},
-  {key:'ret',         label:'Return / PnL',     sortable:true},
+  {key:'ticker_name', label:'Symbol',   sortable:false},
+  {key:'weight',      label:'Weight',   sortable:true},
+  {key:'quantity',    label:'Quantity', sortable:true},
+  {key:'price',       label:'Avg cost', sortable:true},
+  {key:'last_price',  label:'Price',    sortable:true},
+  {key:'change_rate', label:'Change',   sortable:true},
+  {key:'pnl',         label:'PnL',      sortable:true},
+  {key:'ret',         label:'Return',   sortable:true},
 ];
 
 function sortRecords(key){
@@ -748,84 +911,78 @@ function sortRecords(key){
   renderTable(); renderPagination();
 }
 
-function tri(v){ return v>0?'▲':(v<0?'▼':''); }
+function renderThead(){
+  var thead=document.createElement('thead');
+  var tr=document.createElement('tr');
+  cols.forEach(function(c){
+    var th=document.createElement('th');
+    th.innerHTML=c.label+'<span class="sort-icon"></span>';
+    if(c.sortable){
+      if(sortKey===c.key) th.classList.add(sortDir===1?'sort-asc':'sort-desc');
+      (function(k){ th.addEventListener('click',function(){ sortRecords(k); }); })(c.key);
+    }
+    tr.appendChild(th);
+  });
+  thead.appendChild(tr);
+  return thead;
+}
 
-function chgChip(cr){
+function chgCell(cr){
+  var triCls=cr>=0?'chg-tri-up':'chg-tri-down';
+  var txt=fmtSign(cr);
   var col=retHex(cr);
-  return '<span class="tint-chip" style="color:'+col+';"><span class="tri">'+tri(cr)+'</span>'+fmtSign(cr)+'</span>';
-}
-
-function costPriceChip(avg,last,ret){
-  var col=retHex(ret);
-  return '<span class="tint-chip"><span class="cost-val">'+avg.toFixed(2)+'</span><span class="arrow" style="color:'+col+';">→</span><span class="price-val">'+last.toFixed(2)+'</span></span>';
-}
-
-function retPnlChip(ret,pnl){
-  var col=retHex(ret);
-  return '<span class="tint-chip" style="color:'+col+';">'+fmtSign(ret)+'<span class="pnl-sep" style="color:#848a94;"> / </span><span class="pnl-val">'+(pnl>=0?'+':'')+pnl.toLocaleString()+'</span></span>';
+  return '<span class="chg-cell" style="color:'+col+'"><span class="'+triCls+'"></span>'+txt+'</span>';
 }
 
 function symbolCellHtml(r){
-  return '<div><span class="tbl-sym">'+r.ticker+'</span><span class="tbl-name">'+r.name+'</span></div>';
+  if(tableMode==='compact'){
+    return '<td>'
+      +'<span style="font-size:13px;font-weight:400;">'+r.ticker+'</span> '
+      +'<span style="font-size:13px;color:#848a94;font-weight:400;">'+r.name+'</span>'
+      +'</td>';
+  }
+  return '<td>'
+    +'<span style="font-size:'+TBL_TICKER_FS+';font-weight:400;">'+r.ticker+'</span><br>'
+    +'<span style="font-size:'+TBL_NAME_FS+';color:#848a94;font-weight:400;">'+r.name+'</span>'
+    +'</td>';
 }
 
-function renderHeadRow(){
-  var head=document.createElement('div');
-  head.className='table-headrow';
-  cols.forEach(function(c){
-    var div=document.createElement('div');
-    div.innerHTML=c.label+(c.sortable?'<span class="sort-icon"></span>':'');
-    if(c.sortable){
-      div.classList.add('sortable');
-      if(sortKey===c.key) div.classList.add(sortDir===1?'sort-asc':'sort-desc');
-      (function(k){ div.addEventListener('click',function(){ sortRecords(k); }); })(c.key);
-    }
-    head.appendChild(div);
+function renderTbody(){
+  var ps=pageSize();
+  var start=(currentPage-1)*ps;
+  var pageRecs=tableRecords.slice(start,start+ps);
+  var tbody=document.createElement('tbody');
+
+  pageRecs.forEach(function(r){
+    var tr=document.createElement('tr');
+    tr.dataset.ticker=r.ticker;
+    tr.innerHTML=
+      symbolCellHtml(r)
+      +'<td><span style="font-weight:400;">'+r.weight.toFixed(1)+'%</span></td>'
+      +'<td><span style="font-weight:400;">'+r.quantity.toLocaleString()+'</span></td>'
+      +'<td><span style="color:#848a94;font-weight:400;">'+r.price.toFixed(2)+'</span></td>'
+      +'<td><span style="font-weight:400;">'+r.last_price.toFixed(2)+'</span></td>'
+      +'<td>'+chgCell(r.change_rate)+'</td>'
+      +'<td><span style="color:'+retHex(r.pnl)+';font-weight:400;">'+(r.pnl>=0?'+':'')+r.pnl.toLocaleString()+'</span></td>'
+      +'<td><span style="color:'+retHex(r.ret)+';font-weight:400;">'+fmtSign(r.ret)+'</span></td>';
+    tbody.appendChild(tr);
   });
-  return head;
-}
 
-function renderRow(r){
-  var row=document.createElement('div');
-  row.className='table-row';
-  row.dataset.ticker=r.ticker;
-  row.innerHTML=
-    symbolCellHtml(r)
-    +'<div>'+r.weight.toFixed(1)+'%</div>'
-    +'<div>'+r.quantity.toLocaleString()+'</div>'
-    +'<div class="cost-cell tint-cell">'+costPriceChip(r.price,r.last_price,r.ret)+'</div>'
-    +'<div class="chg-cell tint-cell">'+chgChip(r.change_rate)+'</div>'
-    +'<div class="pl-cell tint-cell">'+retPnlChip(r.ret,r.pnl)+'</div>';
-  return row;
+  return tbody;
 }
 
 function renderTable(){
-  var container=document.getElementById('posTable');
-  container.innerHTML='';
-  container.appendChild(renderHeadRow());
-  var body=document.createElement('div');
-  body.className='table-body';
-  var ps=pageSize();
-  var filtered=getFilteredRecords();
-  var start=(currentPage-1)*ps;
-  var pageRecs=filtered.slice(start,start+ps);
-  if(pageRecs.length===0){
-    var empty=document.createElement('div');
-    empty.className='table-empty';
-    empty.textContent='找不到符合的持股';
-    body.appendChild(empty);
-  } else {
-    pageRecs.forEach(function(r){ body.appendChild(renderRow(r)); });
-  }
-  container.appendChild(body);
+  var tbl=document.getElementById('posTable');
+  tbl.innerHTML='';
+  tbl.appendChild(renderThead());
+  tbl.appendChild(renderTbody());
 }
 
 function renderPagination(){
   var pg=document.getElementById('pagination');
   pg.innerHTML='';
   var ps=pageSize();
-  var filtered=getFilteredRecords();
-  var total=filtered.length;
+  var total=tableRecords.length;
   if(total<=ps){ pg.style.display='none'; return; }
   pg.style.display='flex';
   var totalPages=Math.ceil(total/ps);
@@ -872,6 +1029,208 @@ function getPgRange(cur,total){
   return [...s].sort(function(a,b){ return a-b; });
 }
 
+/* ── 委託單 table ── */
+function statusColor(status){
+  if(status==='Filled') return CHART_UP_HEX;
+  if(status==='Cancelled' || status==='Failed') return '#848a94';
+  return INDEX_OTC_HEX;
+}
+function renderOrdersTable(){
+  var tbl=document.getElementById('ordersTable');
+  tbl.innerHTML='';
+  var thead=document.createElement('thead');
+  var htr=document.createElement('tr');
+  ['股票代碼','狀態','買賣','價格','數量','成交量','單別','時間'].forEach(function(label){
+    var th=document.createElement('th');
+    th.textContent=label;
+    htr.appendChild(th);
+  });
+  thead.appendChild(htr);
+  tbl.appendChild(thead);
+
+  var tbody=document.createElement('tbody');
+  if(ORDER_RECORDS.length===0){
+    var tr=document.createElement('tr');
+    var td=document.createElement('td');
+    td.colSpan=8; td.style.textAlign='center'; td.style.padding='30px 14px'; td.style.color='#848a94';
+    td.textContent='目前沒有委託單';
+    tr.appendChild(td); tbody.appendChild(tr);
+  } else {
+    ORDER_RECORDS.forEach(function(r){
+      var tr=document.createElement('tr');
+      var sc=statusColor(r.status);
+      tr.innerHTML=
+        '<td>'+esc(r.stock_id)+'</td>'
+        +'<td><span class="status-pill" style="color:'+sc+';background:'+sc+'22;">'+esc(r.status)+'</span></td>'
+        +'<td style="color:'+(r.action==='Buy'?CHART_UP_HEX:CHART_DOWN_HEX)+';">'+esc(r.action)+'</td>'
+        +'<td>'+r.price.toFixed(2)+'</td>'
+        +'<td>'+r.quantity.toLocaleString()+'</td>'
+        +'<td>'+r.deal_quantity.toLocaleString()+'</td>'
+        +'<td>'+esc(r.order_type)+' / '+esc(r.price_type)+'</td>'
+        +'<td>'+esc(r.order_time)+'</td>';
+      tbody.appendChild(tr);
+    });
+  }
+  tbl.appendChild(tbody);
+}
+
+/* ── 已實現損益 table ── */
+function renderRealizedTable(){
+  document.getElementById('rz-today').textContent=fmtNum(H.realized_today);
+  document.getElementById('rz-today').style.color=retHex(H.realized_today);
+  document.getElementById('rz-year').textContent=fmtNum(H.realized_year);
+  document.getElementById('rz-year').style.color=retHex(H.realized_year);
+
+  var tbl=document.getElementById('realizedTable');
+  tbl.innerHTML='';
+  var thead=document.createElement('thead');
+  var htr=document.createElement('tr');
+  ['股票代碼','交易別','日期','數量','成交價','損益','報酬率'].forEach(function(label){
+    var th=document.createElement('th');
+    th.textContent=label;
+    htr.appendChild(th);
+  });
+  thead.appendChild(htr);
+  tbl.appendChild(thead);
+
+  var tbody=document.createElement('tbody');
+  if(REALIZED_RECORDS.length===0){
+    var tr=document.createElement('tr');
+    var td=document.createElement('td');
+    td.colSpan=7; td.style.textAlign='center'; td.style.padding='30px 14px'; td.style.color='#848a94';
+    td.textContent='今年度尚無已實現損益紀錄';
+    tr.appendChild(td); tbody.appendChild(tr);
+  } else {
+    REALIZED_RECORDS.forEach(function(r){
+      var tr=document.createElement('tr');
+      tr.innerHTML=
+        '<td>'+esc(r.stock_id)+'</td>'
+        +'<td>'+esc(r.cond)+'</td>'
+        +'<td>'+esc(r.date)+'</td>'
+        +'<td>'+r.quantity.toLocaleString()+'</td>'
+        +'<td>'+r.price.toFixed(2)+'</td>'
+        +'<td style="color:'+retHex(r.pnl)+';">'+(r.pnl>=0?'+':'')+r.pnl.toLocaleString()+'</td>'
+        +'<td style="color:'+retHex(r.ret)+';">'+fmtSign(r.ret)+'</td>';
+      tbody.appendChild(tr);
+    });
+  }
+  tbl.appendChild(tbody);
+}
+
+/* ── 交割款項 table ── */
+function renderSettlementTable(){
+  var total=SETTLEMENT_RECORDS.reduce(function(sum,r){ return sum+r.amount; },0);
+  var totalEl=document.getElementById('st-total');
+  totalEl.textContent=fmtNum(total);
+  totalEl.style.color=retHex(total);
+
+  var tbl=document.getElementById('settlementTable');
+  tbl.innerHTML='';
+  var thead=document.createElement('thead');
+  var htr=document.createElement('tr');
+  ['交割日','T','金額'].forEach(function(label){
+    var th=document.createElement('th');
+    th.textContent=label;
+    htr.appendChild(th);
+  });
+  thead.appendChild(htr);
+  tbl.appendChild(thead);
+
+  var tbody=document.createElement('tbody');
+  SETTLEMENT_RECORDS.forEach(function(r){
+    var tr=document.createElement('tr');
+    tr.innerHTML=
+      '<td>'+esc(r.date)+'</td>'
+      +'<td>T+'+r.T+'</td>'
+      +'<td style="color:'+retHex(r.amount)+';">'+(r.amount>=0?'+':'')+r.amount.toLocaleString()+'</td>';
+    tbody.appendChild(tr);
+  });
+  tbl.appendChild(tbody);
+}
+
+/* ── 市場總覽 chart (pure SVG, normalized % change) ── */
+var marketChartBuilt=false;
+function buildMarketChart(){
+  marketChartBuilt=true;
+  var taiex=MARKET_DATA.taiex, otc=MARKET_DATA.otc;
+  var taiexSum=MARKET_DATA.taiex_summary, otcSum=MARKET_DATA.otc_summary;
+
+  var tVal=document.getElementById('mk-taiex-val');
+  var tChg=document.getElementById('mk-taiex-chg');
+  tVal.textContent=taiexSum.last!==null?taiexSum.last.toLocaleString():'--';
+  tChg.textContent=taiexSum.last!==null?fmtSign(taiexSum.chg_pct):'';
+  tChg.style.color=retHex(taiexSum.chg_pct);
+
+  var oVal=document.getElementById('mk-otc-val');
+  var oChg=document.getElementById('mk-otc-chg');
+  oVal.textContent=otcSum.last!==null?otcSum.last.toLocaleString():'--';
+  oChg.textContent=otcSum.last!==null?fmtSign(otcSum.chg_pct):'';
+  oChg.style.color=retHex(otcSum.chg_pct);
+
+  var host=document.getElementById('marketChartHost');
+  if((!taiex||taiex.length<2) && (!otc||otc.length<2)){
+    host.innerHTML='<div class="market-empty">目前無法取得盤中分鐘走勢（非交易時段或資料不足）</div>';
+    return;
+  }
+
+  var W=860,H2=220,padL=44,padR=10,padT=14,padB=24;
+  function toPct(series){
+    if(!series||series.length===0) return [];
+    var base=series[0].v;
+    return series.map(function(p){ return {t:p.t, v: base? (p.v-base)/base*100 : 0}; });
+  }
+  var tp=toPct(taiex), op=toPct(otc);
+  var allVals=tp.concat(op).map(function(p){ return p.v; });
+  var maxAbs=Math.max.apply(null,allVals.map(Math.abs).concat([0.05]));
+  var yMin=-maxAbs*1.15, yMax=maxAbs*1.15;
+  var n=Math.max(tp.length,op.length,2);
+
+  function xAt(i){ return padL+(W-padL-padR)*(i/(n-1)); }
+  function yAt(v){ return padT+(H2-padT-padB)*(1-(v-yMin)/(yMax-yMin)); }
+
+  function lineFor(series,color){
+    if(series.length<2) return '';
+    var d=series.map(function(p,i){ return (i===0?'M':'L')+xAt(i).toFixed(1)+','+yAt(p.v).toFixed(1); }).join(' ');
+    return '<path d="'+d+'" fill="none" stroke="'+color+'" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>';
+  }
+
+  var zeroY=yAt(0).toFixed(1);
+  var svg='<svg width="100%" viewBox="0 0 '+W+' '+H2+'" preserveAspectRatio="none" style="display:block;">';
+  svg+='<line x1="'+padL+'" y1="'+zeroY+'" x2="'+(W-padR)+'" y2="'+zeroY+'" stroke="rgba(255,255,255,0.14)" stroke-width="1"/>';
+  svg+='<text x="4" y="'+(Number(zeroY)+4)+'" font-size="10" fill="#848a94">0%</text>';
+  svg+='<text x="4" y="'+(padT+8)+'" font-size="10" fill="#848a94">'+fmtSign(yMax,1)+'</text>';
+  svg+='<text x="4" y="'+(H2-padB+2)+'" font-size="10" fill="#848a94">'+fmtSign(yMin,1)+'</text>';
+  svg+=lineFor(tp,INDEX_TSE_HEX);
+  svg+=lineFor(op,INDEX_OTC_HEX);
+  svg+='</svg>';
+  host.innerHTML=svg;
+
+  var overlay=document.createElement('div');
+  overlay.style.cssText='position:relative;margin-top:-'+H2+'px;height:'+H2+'px;';
+  host.appendChild(overlay);
+  overlay.addEventListener('mousemove',function(ev){
+    var rect=host.querySelector('svg').getBoundingClientRect();
+    var relX=(ev.clientX-rect.left)/rect.width;
+    var idx=Math.round(relX*(n-1));
+    idx=Math.max(0,Math.min(n-1,idx));
+    var tp2=tp[idx], op2=op[idx];
+    var lines=[];
+    if(tp2) lines.push('<div>加權 '+tp2.t+': <b style="color:'+INDEX_TSE_HEX+';font-weight:400;">'+fmtSign(tp2.v)+'</b></div>');
+    if(op2) lines.push('<div>櫃買 '+op2.t+': <b style="color:'+INDEX_OTC_HEX+';font-weight:400;">'+fmtSign(op2.v)+'</b></div>');
+    tt.innerHTML=lines.join('');
+    tt.style.display='block';
+    moveTt(ev);
+  });
+  overlay.addEventListener('mouseleave',function(){ hideTt(); });
+}
+
+/* ── Initial render ── */
+buildDonut(); buildBars(); resetCenter();
+renderTable(); renderPagination();
+renderOrdersTable();
+renderRealizedTable();
+renderSettlementTable();
+
 /* ── Tooltip ── */
 var tt=document.getElementById('tt');
 function showTt(r,e){
@@ -894,12 +1253,6 @@ function moveTt(e){
   tt.style.left=x+'px'; tt.style.top=y+'px';
 }
 function hideTt(){ tt.style.display='none'; }
-
-/* ── Initial render ── */
-initFundUsage();
-initTableStats();
-buildDonut(); buildBars(); resetCenter();
-renderTable(); renderPagination();
 </script>
 </body>
 </html>
