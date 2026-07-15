@@ -97,11 +97,13 @@ body::before{
   color:rgba(235,249,255,0.75);
   background:rgba(255,255,255,0.04);
 }
-.density-btn{
+.mode-btn{
   display:inline-flex;
   align-items:center;
+  justify-content:center;
   padding:6px 14px;
 }
+.mode-btn svg{display:block;}
 
 /* ── Viz wrap ── */
 .viz-wrap{
@@ -196,7 +198,7 @@ body::before{
   z-index:0;
 }
 
-/* ── Table toggle row (search + mode toggle) ── */
+/* ── Table toggle row (search + view mode toggle) ── */
 .table-toggle-row{
   display:flex;
   justify-content:space-between;
@@ -206,6 +208,7 @@ body::before{
   position:relative;
   z-index:1;
 }
+.table-toggle-row.mobile-view .table-search-wrap{display:none;}
 
 .pos-tbl{position:relative;z-index:1;}
 .table-headrow,.table-row{
@@ -237,6 +240,9 @@ body::before{
   font-weight:400;
   color:#ebf9ff;
   border-bottom:1px solid rgba(255,255,255,0.05);
+  padding-top:4px;
+  padding-bottom:4px;
+  line-height:1.15;
   transition:background 0.12s;
 }
 .table-body .table-row:nth-child(even){background:rgba(255,255,255,0.015);}
@@ -246,11 +252,6 @@ body::before{
 
 .tbl-sym{font-size:14px;font-weight:400;}
 .tbl-name{font-size:14px;color:#ebf9ff;font-weight:400;margin-left:7px;}
-
-/* ── Compact (小) table mode ── */
-.pos-tbl.compact .table-headrow{font-size:12px;}
-.pos-tbl.compact .table-row{padding-top:4px;padding-bottom:4px;font-size:14px;line-height:1.15;}
-.pos-tbl.compact .tbl-sym,.pos-tbl.compact .tbl-name{font-size:14px;}
 
 /* ── styleC tint chips (Cost→Price / Change / Return-PnL cells) ── */
 .tint-cell{display:flex;justify-content:flex-end;}
@@ -266,6 +267,47 @@ body::before{
 
 .pl-cell .tint-chip{gap:6px;font-weight:400;background:transparent !important;padding:6px 0;}
 .pl-cell .pnl-val{font-weight:400;font-size:12px;opacity:0.8;}
+
+/* ── Mobile view table (4-column simplified layout, matches mobile design) ── */
+.pos-tbl.mobile-view .table-headrow,
+.pos-tbl.mobile-view .table-row{
+  grid-template-columns:1.7fr 0.7fr 0.9fr 1fr;
+  padding:6px 12px;
+}
+.pos-tbl.mobile-view .table-body .table-row{
+  font-size:13px;
+  cursor:pointer;
+}
+.pos-tbl.mobile-view .table-row:active{background:rgba(235,249,255,0.07);}
+
+/* ── Position detail modal (opened by tapping a row) ── */
+.pos-modal-overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.6);
+  z-index:1000;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+.pos-modal-overlay.show{display:flex;}
+.pos-modal-card{
+  width:320px;
+  max-width:100%;
+  background:#0a0e13;
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:16px;
+  padding:22px 20px;
+  box-shadow:0 12px 40px rgba(0,0,0,0.55);
+}
+.pm-title{font-size:18px;font-weight:700;color:#ebf9ff;margin-bottom:18px;}
+.pm-row{display:flex;gap:16px;margin-bottom:14px;}
+.pm-item{flex:1;min-width:0;}
+.pm-lbl{font-size:12px;font-weight:400;color:#848a94;margin-bottom:4px;}
+.pm-val{font-size:16px;font-weight:700;color:#ebf9ff;}
+.pm-val.big{font-size:22px;}
+.pm-divider{height:1px;background:rgba(255,255,255,0.07);margin:14px 0;}
 
 /* ── Table Footer ── */
 .table-footer{display:flex;justify-content:space-between;align-items:center;padding:10px 16px 10px;border-top:1px solid rgba(255,255,255,0.05);position:relative;z-index:1;}
@@ -333,13 +375,12 @@ body::before{
   .stat-lbl{font-size:10px;}
   .stat-val{font-size:12px;}
 
-  /* Table: horizontal scroll */
+  /* Table: horizontal scroll (desktop layout only — mobile-view table already fits) */
   .table-wrap{border-radius:12px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
-  .table-headrow,.table-row{min-width:560px;padding:10px 10px 8px;}
-  .table-headrow{font-size:11px;}
-  .table-body .table-row{padding:9px 10px;font-size:13px;}
-  .pos-tbl.compact .table-headrow{font-size:12px;}
-  .pos-tbl.compact .table-row{padding:4px 10px;font-size:14px;line-height:1.15;}
+  .pos-tbl:not(.mobile-view) .table-headrow,
+  .pos-tbl:not(.mobile-view) .table-row{min-width:560px;padding:10px 10px 8px;}
+  .pos-tbl:not(.mobile-view) .table-headrow{font-size:11px;}
+  .pos-tbl:not(.mobile-view) .table-body .table-row{padding:9px 10px;font-size:13px;}
 
   /* Table footer */
   .table-footer{flex-direction:column;gap:8px;align-items:flex-start;}
@@ -413,7 +454,7 @@ body::before{
   </div>
 
   <div class="table-wrap">
-    <div class="table-toggle-row">
+    <div class="table-toggle-row" id="tableToggleRow">
       <div class="table-search-wrap">
         <svg class="table-search-icon" width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
           <circle cx="5.5" cy="5.5" r="4.3" stroke="currentColor" stroke-width="1.3"/>
@@ -421,12 +462,19 @@ body::before{
         </svg>
         <input type="text" id="tableSearch" class="table-search-input" placeholder="Search" autocomplete="off">
       </div>
-      <div class="tsB densityB">
-        <button class="t-btn density-btn active" id="btnCompact" title="-">
-          <span>-</span>
+      <div class="tsB viewModeB">
+        <button class="t-btn mode-btn active" id="btnDesktop" title="桌面版">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="20" height="13" rx="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+          </svg>
         </button>
-        <button class="t-btn density-btn" id="btnFull" title="+">
-          <span>+</span>
+        <button class="t-btn mode-btn" id="btnMobile" title="手機版">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="7" y="2" width="10" height="20" rx="2"></rect>
+            <line x1="11" y1="18" x2="13" y2="18"></line>
+          </svg>
         </button>
       </div>
     </div>
@@ -436,7 +484,7 @@ body::before{
       <div class="stat-item"><span class="stat-lbl">Market Value</span><span class="stat-val" id="st-mv"></span></div>
       <div class="stat-item"><span class="stat-lbl">Cost</span><span class="stat-val" id="st-cost"></span></div>
     </div>
-    <div class="pos-tbl compact" id="posTable"></div>
+    <div class="pos-tbl" id="posTable"></div>
     <div class="table-footer">
       <div class="pagination" id="pagination"></div>
       <div class="table-update-time" id="tbl-update-time" style="margin-left:auto;"></div>
@@ -444,12 +492,34 @@ body::before{
   </div>
 </div>
 
+<!-- Position detail modal (tap a row in mobile view) -->
+<div class="pos-modal-overlay" id="posModalOverlay">
+  <div class="pos-modal-card" id="posModalCard">
+    <div class="pm-title" id="pmTitle"></div>
+    <div class="pm-row">
+      <div class="pm-item"><div class="pm-lbl">PnL (NT$)</div><div class="pm-val big" id="pmPnl"></div></div>
+      <div class="pm-item"><div class="pm-lbl">Return</div><div class="pm-val big" id="pmRet"></div></div>
+    </div>
+    <div class="pm-divider"></div>
+    <div class="pm-row">
+      <div class="pm-item"><div class="pm-lbl">Quantity</div><div class="pm-val" id="pmQty"></div></div>
+      <div class="pm-item"><div class="pm-lbl">Weight</div><div class="pm-val" id="pmWeight"></div></div>
+    </div>
+    <div class="pm-row">
+      <div class="pm-item"><div class="pm-lbl">Avg cost</div><div class="pm-val" id="pmAvgCost"></div></div>
+      <div class="pm-item"><div class="pm-lbl">Price</div><div class="pm-val" id="pmPrice"></div></div>
+    </div>
+    <div class="pm-divider"></div>
+    <div class="pm-item"><div class="pm-lbl">Change</div><div class="pm-val" id="pmChange"></div></div>
+  </div>
+</div>
+
 <div id="tt"></div>
 
 <script>
-var HOLDINGS_DATA     = {"records": [{"label": "3004 豐達科", "ticker": "3004", "name": "豐達科", "weight": 21.9, "ret": 1.59, "pnl": 4328.0, "change_rate": -0.64, "quantity": 1810, "price": 150.43, "last_price": 153.5}, {"label": "8383 千附", "ticker": "8383", "name": "千附", "weight": 15.81, "ret": 0.11, "pnl": 218.0, "change_rate": 9.92, "quantity": 2383, "price": 83.74, "last_price": 84.2}, {"label": "7714 創泓科技", "ticker": "7714", "name": "創泓科技", "weight": 8.12, "ret": 6.04, "pnl": 5842.0, "change_rate": 9.48, "quantity": 510, "price": 189.66, "last_price": 202.0}, {"label": "5351 鈺創", "ticker": "5351", "name": "鈺創", "weight": 7.76, "ret": -3.2, "pnl": -3237.0, "change_rate": -4.8, "quantity": 1034, "price": 97.92, "last_price": 95.2}, {"label": "00981A 主動統一台股增長", "ticker": "00981A", "name": "主動統一台股增長", "weight": 6.71, "ret": -7.51, "pnl": -6903.0, "change_rate": -3.23, "quantity": 3000, "price": 30.63, "last_price": 28.4}, {"label": "6834 天二科技", "ticker": "6834", "name": "天二科技", "weight": 6.31, "ret": -4.27, "pnl": -3561.0, "change_rate": -8.52, "quantity": 679, "price": 122.73, "last_price": 118.0}, {"label": "8046 南電", "ticker": "8046", "name": "南電", "weight": 6.1, "ret": 4.63, "pnl": 3411.0, "change_rate": 1.57, "quantity": 60, "price": 1227.58, "last_price": 1290.0}, {"label": "4541 晟田", "ticker": "4541", "name": "晟田", "weight": 5.8, "ret": 2.87, "pnl": 2043.0, "change_rate": 5.21, "quantity": 1042, "price": 68.33, "last_price": 70.6}, {"label": "00991A 主動復華未來50", "ticker": "00991A", "name": "主動復華未來50", "weight": 4.36, "ret": -4.31, "pnl": -2483.0, "change_rate": -3.2, "quantity": 3000, "price": 19.22, "last_price": 18.44}, {"label": "3374 精材", "ticker": "3374", "name": "精材", "weight": 3.49, "ret": 3.32, "pnl": 1415.0, "change_rate": 2.09, "quantity": 121, "price": 352.21, "last_price": 365.5}, {"label": "2465 麗臺", "ticker": "2465", "name": "麗臺", "weight": 3.13, "ret": 3.73, "pnl": 1421.0, "change_rate": -1.16, "quantity": 468, "price": 81.49, "last_price": 84.9}, {"label": "00988A 主動統一全球創新", "ticker": "00988A", "name": "主動統一全球創新", "weight": 2.91, "ret": -16.54, "pnl": -7310.0, "change_rate": -0.85, "quantity": 2000, "price": 22.1, "last_price": 18.49}, {"label": "4916 事欣科", "ticker": "4916", "name": "事欣科", "weight": 2.44, "ret": -2.55, "pnl": -809.0, "change_rate": -6.77, "quantity": 282, "price": 112.4, "last_price": 110.0}, {"label": "8421 旭源", "ticker": "8421", "name": "旭源", "weight": 1.74, "ret": 1.99, "pnl": 431.0, "change_rate": 9.77, "quantity": 1314, "price": 16.45, "last_price": 16.85}, {"label": "5434 崇越", "ticker": "5434", "name": "崇越", "weight": 1.08, "ret": 0.45, "pnl": 61.0, "change_rate": -1.61, "quantity": 25, "price": 545.28, "last_price": 550.0}, {"label": "2637 慧洋-KY", "ticker": "2637", "name": "慧洋-KY", "weight": 1.04, "ret": 0.64, "pnl": 84.0, "change_rate": -1.06, "quantity": 158, "price": 82.91, "last_price": 83.8}, {"label": "8150 南茂", "ticker": "8150", "name": "南茂", "weight": 0.48, "ret": -3.75, "pnl": -234.0, "change_rate": -9.56, "quantity": 58, "price": 107.64, "last_price": 104.0}, {"label": "2645 長榮航太", "ticker": "2645", "name": "長榮航太", "weight": 0.47, "ret": -1.51, "pnl": -92.0, "change_rate": -4.17, "quantity": 25, "price": 243.68, "last_price": 241.0}, {"label": "2395 研華", "ticker": "2395", "name": "研華", "weight": 0.33, "ret": 0.57, "pnl": 24.0, "change_rate": -1.3, "quantity": 8, "price": 524.0, "last_price": 529.0}], "total_weight": 99.98, "total_pnl": -5351.0, "win_rate": 57.9, "holding_count": 19, "winning": 11, "unrealized_ret": -0.4216, "realtime_change": 1.2481, "market_value": 1268926, "total_balance": 1443667, "total_cost": 1269070, "last_update": "2026/07/14 14:52", "cash": 174741, "net_position_change": 336597};
-var SORTED_RECORDS    = [{"label": "7714 創泓科技", "ticker": "7714", "name": "創泓科技", "weight": 8.12, "ret": 6.04, "pnl": 5842.0, "change_rate": 9.48, "quantity": 510, "price": 189.66, "last_price": 202.0}, {"label": "8046 南電", "ticker": "8046", "name": "南電", "weight": 6.1, "ret": 4.63, "pnl": 3411.0, "change_rate": 1.57, "quantity": 60, "price": 1227.58, "last_price": 1290.0}, {"label": "2465 麗臺", "ticker": "2465", "name": "麗臺", "weight": 3.13, "ret": 3.73, "pnl": 1421.0, "change_rate": -1.16, "quantity": 468, "price": 81.49, "last_price": 84.9}, {"label": "3374 精材", "ticker": "3374", "name": "精材", "weight": 3.49, "ret": 3.32, "pnl": 1415.0, "change_rate": 2.09, "quantity": 121, "price": 352.21, "last_price": 365.5}, {"label": "4541 晟田", "ticker": "4541", "name": "晟田", "weight": 5.8, "ret": 2.87, "pnl": 2043.0, "change_rate": 5.21, "quantity": 1042, "price": 68.33, "last_price": 70.6}, {"label": "8421 旭源", "ticker": "8421", "name": "旭源", "weight": 1.74, "ret": 1.99, "pnl": 431.0, "change_rate": 9.77, "quantity": 1314, "price": 16.45, "last_price": 16.85}, {"label": "3004 豐達科", "ticker": "3004", "name": "豐達科", "weight": 21.9, "ret": 1.59, "pnl": 4328.0, "change_rate": -0.64, "quantity": 1810, "price": 150.43, "last_price": 153.5}, {"label": "2637 慧洋-KY", "ticker": "2637", "name": "慧洋-KY", "weight": 1.04, "ret": 0.64, "pnl": 84.0, "change_rate": -1.06, "quantity": 158, "price": 82.91, "last_price": 83.8}, {"label": "2395 研華", "ticker": "2395", "name": "研華", "weight": 0.33, "ret": 0.57, "pnl": 24.0, "change_rate": -1.3, "quantity": 8, "price": 524.0, "last_price": 529.0}, {"label": "5434 崇越", "ticker": "5434", "name": "崇越", "weight": 1.08, "ret": 0.45, "pnl": 61.0, "change_rate": -1.61, "quantity": 25, "price": 545.28, "last_price": 550.0}, {"label": "8383 千附", "ticker": "8383", "name": "千附", "weight": 15.81, "ret": 0.11, "pnl": 218.0, "change_rate": 9.92, "quantity": 2383, "price": 83.74, "last_price": 84.2}, {"label": "2645 長榮航太", "ticker": "2645", "name": "長榮航太", "weight": 0.47, "ret": -1.51, "pnl": -92.0, "change_rate": -4.17, "quantity": 25, "price": 243.68, "last_price": 241.0}, {"label": "4916 事欣科", "ticker": "4916", "name": "事欣科", "weight": 2.44, "ret": -2.55, "pnl": -809.0, "change_rate": -6.77, "quantity": 282, "price": 112.4, "last_price": 110.0}, {"label": "5351 鈺創", "ticker": "5351", "name": "鈺創", "weight": 7.76, "ret": -3.2, "pnl": -3237.0, "change_rate": -4.8, "quantity": 1034, "price": 97.92, "last_price": 95.2}, {"label": "8150 南茂", "ticker": "8150", "name": "南茂", "weight": 0.48, "ret": -3.75, "pnl": -234.0, "change_rate": -9.56, "quantity": 58, "price": 107.64, "last_price": 104.0}, {"label": "6834 天二科技", "ticker": "6834", "name": "天二科技", "weight": 6.31, "ret": -4.27, "pnl": -3561.0, "change_rate": -8.52, "quantity": 679, "price": 122.73, "last_price": 118.0}, {"label": "00991A 主動復華未來50", "ticker": "00991A", "name": "主動復華未來50", "weight": 4.36, "ret": -4.31, "pnl": -2483.0, "change_rate": -3.2, "quantity": 3000, "price": 19.22, "last_price": 18.44}, {"label": "00981A 主動統一台股增長", "ticker": "00981A", "name": "主動統一台股增長", "weight": 6.71, "ret": -7.51, "pnl": -6903.0, "change_rate": -3.23, "quantity": 3000, "price": 30.63, "last_price": 28.4}, {"label": "00988A 主動統一全球創新", "ticker": "00988A", "name": "主動統一全球創新", "weight": 2.91, "ret": -16.54, "pnl": -7310.0, "change_rate": -0.85, "quantity": 2000, "price": 22.1, "last_price": 18.49}];
-var SORTED_RECORDS_CR = [{"label": "8383 千附", "ticker": "8383", "name": "千附", "weight": 15.81, "ret": 0.11, "pnl": 218.0, "change_rate": 9.92, "quantity": 2383, "price": 83.74, "last_price": 84.2}, {"label": "8421 旭源", "ticker": "8421", "name": "旭源", "weight": 1.74, "ret": 1.99, "pnl": 431.0, "change_rate": 9.77, "quantity": 1314, "price": 16.45, "last_price": 16.85}, {"label": "7714 創泓科技", "ticker": "7714", "name": "創泓科技", "weight": 8.12, "ret": 6.04, "pnl": 5842.0, "change_rate": 9.48, "quantity": 510, "price": 189.66, "last_price": 202.0}, {"label": "4541 晟田", "ticker": "4541", "name": "晟田", "weight": 5.8, "ret": 2.87, "pnl": 2043.0, "change_rate": 5.21, "quantity": 1042, "price": 68.33, "last_price": 70.6}, {"label": "3374 精材", "ticker": "3374", "name": "精材", "weight": 3.49, "ret": 3.32, "pnl": 1415.0, "change_rate": 2.09, "quantity": 121, "price": 352.21, "last_price": 365.5}, {"label": "8046 南電", "ticker": "8046", "name": "南電", "weight": 6.1, "ret": 4.63, "pnl": 3411.0, "change_rate": 1.57, "quantity": 60, "price": 1227.58, "last_price": 1290.0}, {"label": "3004 豐達科", "ticker": "3004", "name": "豐達科", "weight": 21.9, "ret": 1.59, "pnl": 4328.0, "change_rate": -0.64, "quantity": 1810, "price": 150.43, "last_price": 153.5}, {"label": "00988A 主動統一全球創新", "ticker": "00988A", "name": "主動統一全球創新", "weight": 2.91, "ret": -16.54, "pnl": -7310.0, "change_rate": -0.85, "quantity": 2000, "price": 22.1, "last_price": 18.49}, {"label": "2637 慧洋-KY", "ticker": "2637", "name": "慧洋-KY", "weight": 1.04, "ret": 0.64, "pnl": 84.0, "change_rate": -1.06, "quantity": 158, "price": 82.91, "last_price": 83.8}, {"label": "2465 麗臺", "ticker": "2465", "name": "麗臺", "weight": 3.13, "ret": 3.73, "pnl": 1421.0, "change_rate": -1.16, "quantity": 468, "price": 81.49, "last_price": 84.9}, {"label": "2395 研華", "ticker": "2395", "name": "研華", "weight": 0.33, "ret": 0.57, "pnl": 24.0, "change_rate": -1.3, "quantity": 8, "price": 524.0, "last_price": 529.0}, {"label": "5434 崇越", "ticker": "5434", "name": "崇越", "weight": 1.08, "ret": 0.45, "pnl": 61.0, "change_rate": -1.61, "quantity": 25, "price": 545.28, "last_price": 550.0}, {"label": "00991A 主動復華未來50", "ticker": "00991A", "name": "主動復華未來50", "weight": 4.36, "ret": -4.31, "pnl": -2483.0, "change_rate": -3.2, "quantity": 3000, "price": 19.22, "last_price": 18.44}, {"label": "00981A 主動統一台股增長", "ticker": "00981A", "name": "主動統一台股增長", "weight": 6.71, "ret": -7.51, "pnl": -6903.0, "change_rate": -3.23, "quantity": 3000, "price": 30.63, "last_price": 28.4}, {"label": "2645 長榮航太", "ticker": "2645", "name": "長榮航太", "weight": 0.47, "ret": -1.51, "pnl": -92.0, "change_rate": -4.17, "quantity": 25, "price": 243.68, "last_price": 241.0}, {"label": "5351 鈺創", "ticker": "5351", "name": "鈺創", "weight": 7.76, "ret": -3.2, "pnl": -3237.0, "change_rate": -4.8, "quantity": 1034, "price": 97.92, "last_price": 95.2}, {"label": "4916 事欣科", "ticker": "4916", "name": "事欣科", "weight": 2.44, "ret": -2.55, "pnl": -809.0, "change_rate": -6.77, "quantity": 282, "price": 112.4, "last_price": 110.0}, {"label": "6834 天二科技", "ticker": "6834", "name": "天二科技", "weight": 6.31, "ret": -4.27, "pnl": -3561.0, "change_rate": -8.52, "quantity": 679, "price": 122.73, "last_price": 118.0}, {"label": "8150 南茂", "ticker": "8150", "name": "南茂", "weight": 0.48, "ret": -3.75, "pnl": -234.0, "change_rate": -9.56, "quantity": 58, "price": 107.64, "last_price": 104.0}];
+var HOLDINGS_DATA     = {"records": [{"label": "3004 豐達科", "ticker": "3004", "name": "豐達科", "weight": 20.81, "ret": -3.7, "pnl": -10087.0, "change_rate": -5.21, "quantity": 1810, "price": 150.43, "last_price": 145.5}, {"label": "8383 千附", "ticker": "8383", "name": "千附", "weight": 15.84, "ret": 3.07, "pnl": 5938.0, "change_rate": 2.93, "quantity": 2383, "price": 81.24, "last_price": 84.1}, {"label": "5351 鈺創", "ticker": "5351", "name": "鈺創", "weight": 8.54, "ret": 6.25, "pnl": 6332.0, "change_rate": 9.76, "quantity": 1034, "price": 97.92, "last_price": 104.5}, {"label": "7714 創泓科技", "ticker": "7714", "name": "創泓科技", "weight": 7.98, "ret": 3.94, "pnl": 3812.0, "change_rate": -1.98, "quantity": 510, "price": 189.66, "last_price": 198.0}, {"label": "00981A 主動統一台股增長", "ticker": "00981A", "name": "主動統一台股增長", "weight": 6.87, "ret": -5.59, "pnl": -5136.0, "change_rate": 2.07, "quantity": 3000, "price": 30.63, "last_price": 28.99}, {"label": "8046 南電", "ticker": "8046", "name": "南電", "weight": 6.71, "ret": 14.76, "pnl": 10874.0, "change_rate": 9.68, "quantity": 60, "price": 1227.58, "last_price": 1415.0}, {"label": "6834 天二科技", "ticker": "6834", "name": "天二科技", "weight": 5.71, "ret": -13.61, "pnl": -11338.0, "change_rate": -9.74, "quantity": 679, "price": 122.73, "last_price": 106.5}, {"label": "4541 晟田", "ticker": "4541", "name": "晟田", "weight": 5.56, "ret": -1.65, "pnl": -1172.0, "change_rate": -4.39, "quantity": 1042, "price": 68.33, "last_price": 67.5}, {"label": "00991A 主動復華未來50", "ticker": "00991A", "name": "主動復華未來50", "weight": 4.49, "ret": -1.76, "pnl": -1013.0, "change_rate": 2.65, "quantity": 3000, "price": 19.22, "last_price": 18.93}, {"label": "3374 精材", "ticker": "3374", "name": "精材", "weight": 3.84, "ret": 13.65, "pnl": 5817.0, "change_rate": 9.98, "quantity": 121, "price": 352.21, "last_price": 402.0}, {"label": "00988A 主動統一全球創新", "ticker": "00988A", "name": "主動統一全球創新", "weight": 3.0, "ret": -14.46, "pnl": -6392.0, "change_rate": 2.48, "quantity": 2000, "price": 22.1, "last_price": 18.95}, {"label": "2465 麗臺", "ticker": "2465", "name": "麗臺", "weight": 2.99, "ret": -1.28, "pnl": -488.0, "change_rate": -4.82, "quantity": 468, "price": 81.49, "last_price": 80.8}, {"label": "4916 事欣科", "ticker": "4916", "name": "事欣科", "weight": 2.47, "ret": -1.67, "pnl": -528.0, "change_rate": 0.9, "quantity": 282, "price": 112.4, "last_price": 111.0}, {"label": "8421 旭源", "ticker": "8421", "name": "旭源", "weight": 1.77, "ret": 2.91, "pnl": 628.0, "change_rate": 0.89, "quantity": 1314, "price": 16.45, "last_price": 17.0}, {"label": "5434 崇越", "ticker": "5434", "name": "崇越", "weight": 1.06, "ret": -1.57, "pnl": -214.0, "change_rate": -2.0, "quantity": 25, "price": 545.28, "last_price": 539.0}, {"label": "2637 慧洋-KY", "ticker": "2637", "name": "慧洋-KY", "weight": 1.04, "ret": 0.15, "pnl": 20.0, "change_rate": -0.47, "quantity": 158, "price": 82.91, "last_price": 83.4}, {"label": "8150 南茂", "ticker": "8150", "name": "南茂", "weight": 0.52, "ret": 4.55, "pnl": 284.0, "change_rate": 8.65, "quantity": 58, "price": 107.64, "last_price": 113.0}, {"label": "2645 長榮航太", "ticker": "2645", "name": "長榮航太", "weight": 0.46, "ret": -4.17, "pnl": -254.0, "change_rate": -2.69, "quantity": 25, "price": 243.68, "last_price": 234.5}, {"label": "2395 研華", "ticker": "2395", "name": "研華", "weight": 0.33, "ret": 0.38, "pnl": 16.0, "change_rate": -0.18, "quantity": 8, "price": 524.0, "last_price": 528.0}], "total_weight": 99.99, "total_pnl": -2901.0, "win_rate": 47.4, "holding_count": 19, "winning": 9, "unrealized_ret": -0.2297, "realtime_change": 0.5233, "market_value": 1265395, "total_balance": 1443315, "total_cost": 1263113, "last_update": "2026/07/15 09:44", "cash": 177920, "net_position_change": 0};
+var SORTED_RECORDS    = [{"label": "8046 南電", "ticker": "8046", "name": "南電", "weight": 6.71, "ret": 14.76, "pnl": 10874.0, "change_rate": 9.68, "quantity": 60, "price": 1227.58, "last_price": 1415.0}, {"label": "3374 精材", "ticker": "3374", "name": "精材", "weight": 3.84, "ret": 13.65, "pnl": 5817.0, "change_rate": 9.98, "quantity": 121, "price": 352.21, "last_price": 402.0}, {"label": "5351 鈺創", "ticker": "5351", "name": "鈺創", "weight": 8.54, "ret": 6.25, "pnl": 6332.0, "change_rate": 9.76, "quantity": 1034, "price": 97.92, "last_price": 104.5}, {"label": "8150 南茂", "ticker": "8150", "name": "南茂", "weight": 0.52, "ret": 4.55, "pnl": 284.0, "change_rate": 8.65, "quantity": 58, "price": 107.64, "last_price": 113.0}, {"label": "7714 創泓科技", "ticker": "7714", "name": "創泓科技", "weight": 7.98, "ret": 3.94, "pnl": 3812.0, "change_rate": -1.98, "quantity": 510, "price": 189.66, "last_price": 198.0}, {"label": "8383 千附", "ticker": "8383", "name": "千附", "weight": 15.84, "ret": 3.07, "pnl": 5938.0, "change_rate": 2.93, "quantity": 2383, "price": 81.24, "last_price": 84.1}, {"label": "8421 旭源", "ticker": "8421", "name": "旭源", "weight": 1.77, "ret": 2.91, "pnl": 628.0, "change_rate": 0.89, "quantity": 1314, "price": 16.45, "last_price": 17.0}, {"label": "2395 研華", "ticker": "2395", "name": "研華", "weight": 0.33, "ret": 0.38, "pnl": 16.0, "change_rate": -0.18, "quantity": 8, "price": 524.0, "last_price": 528.0}, {"label": "2637 慧洋-KY", "ticker": "2637", "name": "慧洋-KY", "weight": 1.04, "ret": 0.15, "pnl": 20.0, "change_rate": -0.47, "quantity": 158, "price": 82.91, "last_price": 83.4}, {"label": "2465 麗臺", "ticker": "2465", "name": "麗臺", "weight": 2.99, "ret": -1.28, "pnl": -488.0, "change_rate": -4.82, "quantity": 468, "price": 81.49, "last_price": 80.8}, {"label": "5434 崇越", "ticker": "5434", "name": "崇越", "weight": 1.06, "ret": -1.57, "pnl": -214.0, "change_rate": -2.0, "quantity": 25, "price": 545.28, "last_price": 539.0}, {"label": "4541 晟田", "ticker": "4541", "name": "晟田", "weight": 5.56, "ret": -1.65, "pnl": -1172.0, "change_rate": -4.39, "quantity": 1042, "price": 68.33, "last_price": 67.5}, {"label": "4916 事欣科", "ticker": "4916", "name": "事欣科", "weight": 2.47, "ret": -1.67, "pnl": -528.0, "change_rate": 0.9, "quantity": 282, "price": 112.4, "last_price": 111.0}, {"label": "00991A 主動復華未來50", "ticker": "00991A", "name": "主動復華未來50", "weight": 4.49, "ret": -1.76, "pnl": -1013.0, "change_rate": 2.65, "quantity": 3000, "price": 19.22, "last_price": 18.93}, {"label": "3004 豐達科", "ticker": "3004", "name": "豐達科", "weight": 20.81, "ret": -3.7, "pnl": -10087.0, "change_rate": -5.21, "quantity": 1810, "price": 150.43, "last_price": 145.5}, {"label": "2645 長榮航太", "ticker": "2645", "name": "長榮航太", "weight": 0.46, "ret": -4.17, "pnl": -254.0, "change_rate": -2.69, "quantity": 25, "price": 243.68, "last_price": 234.5}, {"label": "00981A 主動統一台股增長", "ticker": "00981A", "name": "主動統一台股增長", "weight": 6.87, "ret": -5.59, "pnl": -5136.0, "change_rate": 2.07, "quantity": 3000, "price": 30.63, "last_price": 28.99}, {"label": "6834 天二科技", "ticker": "6834", "name": "天二科技", "weight": 5.71, "ret": -13.61, "pnl": -11338.0, "change_rate": -9.74, "quantity": 679, "price": 122.73, "last_price": 106.5}, {"label": "00988A 主動統一全球創新", "ticker": "00988A", "name": "主動統一全球創新", "weight": 3.0, "ret": -14.46, "pnl": -6392.0, "change_rate": 2.48, "quantity": 2000, "price": 22.1, "last_price": 18.95}];
+var SORTED_RECORDS_CR = [{"label": "3374 精材", "ticker": "3374", "name": "精材", "weight": 3.84, "ret": 13.65, "pnl": 5817.0, "change_rate": 9.98, "quantity": 121, "price": 352.21, "last_price": 402.0}, {"label": "5351 鈺創", "ticker": "5351", "name": "鈺創", "weight": 8.54, "ret": 6.25, "pnl": 6332.0, "change_rate": 9.76, "quantity": 1034, "price": 97.92, "last_price": 104.5}, {"label": "8046 南電", "ticker": "8046", "name": "南電", "weight": 6.71, "ret": 14.76, "pnl": 10874.0, "change_rate": 9.68, "quantity": 60, "price": 1227.58, "last_price": 1415.0}, {"label": "8150 南茂", "ticker": "8150", "name": "南茂", "weight": 0.52, "ret": 4.55, "pnl": 284.0, "change_rate": 8.65, "quantity": 58, "price": 107.64, "last_price": 113.0}, {"label": "8383 千附", "ticker": "8383", "name": "千附", "weight": 15.84, "ret": 3.07, "pnl": 5938.0, "change_rate": 2.93, "quantity": 2383, "price": 81.24, "last_price": 84.1}, {"label": "00991A 主動復華未來50", "ticker": "00991A", "name": "主動復華未來50", "weight": 4.49, "ret": -1.76, "pnl": -1013.0, "change_rate": 2.65, "quantity": 3000, "price": 19.22, "last_price": 18.93}, {"label": "00988A 主動統一全球創新", "ticker": "00988A", "name": "主動統一全球創新", "weight": 3.0, "ret": -14.46, "pnl": -6392.0, "change_rate": 2.48, "quantity": 2000, "price": 22.1, "last_price": 18.95}, {"label": "00981A 主動統一台股增長", "ticker": "00981A", "name": "主動統一台股增長", "weight": 6.87, "ret": -5.59, "pnl": -5136.0, "change_rate": 2.07, "quantity": 3000, "price": 30.63, "last_price": 28.99}, {"label": "4916 事欣科", "ticker": "4916", "name": "事欣科", "weight": 2.47, "ret": -1.67, "pnl": -528.0, "change_rate": 0.9, "quantity": 282, "price": 112.4, "last_price": 111.0}, {"label": "8421 旭源", "ticker": "8421", "name": "旭源", "weight": 1.77, "ret": 2.91, "pnl": 628.0, "change_rate": 0.89, "quantity": 1314, "price": 16.45, "last_price": 17.0}, {"label": "2395 研華", "ticker": "2395", "name": "研華", "weight": 0.33, "ret": 0.38, "pnl": 16.0, "change_rate": -0.18, "quantity": 8, "price": 524.0, "last_price": 528.0}, {"label": "2637 慧洋-KY", "ticker": "2637", "name": "慧洋-KY", "weight": 1.04, "ret": 0.15, "pnl": 20.0, "change_rate": -0.47, "quantity": 158, "price": 82.91, "last_price": 83.4}, {"label": "7714 創泓科技", "ticker": "7714", "name": "創泓科技", "weight": 7.98, "ret": 3.94, "pnl": 3812.0, "change_rate": -1.98, "quantity": 510, "price": 189.66, "last_price": 198.0}, {"label": "5434 崇越", "ticker": "5434", "name": "崇越", "weight": 1.06, "ret": -1.57, "pnl": -214.0, "change_rate": -2.0, "quantity": 25, "price": 545.28, "last_price": 539.0}, {"label": "2645 長榮航太", "ticker": "2645", "name": "長榮航太", "weight": 0.46, "ret": -4.17, "pnl": -254.0, "change_rate": -2.69, "quantity": 25, "price": 243.68, "last_price": 234.5}, {"label": "4541 晟田", "ticker": "4541", "name": "晟田", "weight": 5.56, "ret": -1.65, "pnl": -1172.0, "change_rate": -4.39, "quantity": 1042, "price": 68.33, "last_price": 67.5}, {"label": "2465 麗臺", "ticker": "2465", "name": "麗臺", "weight": 2.99, "ret": -1.28, "pnl": -488.0, "change_rate": -4.82, "quantity": 468, "price": 81.49, "last_price": 80.8}, {"label": "3004 豐達科", "ticker": "3004", "name": "豐達科", "weight": 20.81, "ret": -3.7, "pnl": -10087.0, "change_rate": -5.21, "quantity": 1810, "price": 150.43, "last_price": 145.5}, {"label": "6834 天二科技", "ticker": "6834", "name": "天二科技", "weight": 5.71, "ret": -13.61, "pnl": -11338.0, "change_rate": -9.74, "quantity": 679, "price": 122.73, "last_price": 106.5}];
 
 var CHART_UP_HEX   = '#fb4d69';
 var CHART_DOWN_HEX = '#00d4a9';
@@ -461,11 +531,18 @@ var H      = HOLDINGS_DATA;
 
 var mode = 'ret';
 
-/* ── Table mode / pagination / search ── */
-var tableMode        = 'compact';
-var PAGE_SIZE_FULL    = 13;
-var PAGE_SIZE_COMPACT = 19;
-function pageSize(){ return tableMode==='compact' ? PAGE_SIZE_COMPACT : PAGE_SIZE_FULL; }
+/* ── View mode (desktop / mobile) / pagination / search ── */
+var viewMode          = 'desktop';
+var PAGE_SIZE_DESKTOP = 19;
+var PAGE_SIZE_MOBILE  = 15;
+function pageSize(){ return viewMode==='mobile' ? PAGE_SIZE_MOBILE : PAGE_SIZE_DESKTOP; }
+
+function detectMobileDevice(){
+  var ua=navigator.userAgent||'';
+  var uaMobile=/Android|iPhone|iPad|iPod|Mobile|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+  var narrow=window.matchMedia && window.matchMedia('(max-width:700px)').matches;
+  return uaMobile || narrow;
+}
 
 var currentPage  = 1;
 var sortKey      = null;
@@ -714,17 +791,18 @@ function updateMode(newMode){
 document.getElementById('btnUR').addEventListener('click',function(){ updateMode('ret'); });
 document.getElementById('btnRC').addEventListener('click',function(){ updateMode('change_rate'); });
 
-/* ── Table mode toggle (小 / 大) ── */
-function setTableMode(newTableMode){
-  tableMode=newTableMode;
-  document.getElementById('btnFull').classList.toggle('active',tableMode==='full');
-  document.getElementById('btnCompact').classList.toggle('active',tableMode==='compact');
-  document.getElementById('posTable').classList.toggle('compact',tableMode==='compact');
+/* ── View mode toggle (桌面 / 手機) ── */
+function setViewMode(newViewMode){
+  viewMode=newViewMode;
+  document.getElementById('btnDesktop').classList.toggle('active',viewMode==='desktop');
+  document.getElementById('btnMobile').classList.toggle('active',viewMode==='mobile');
+  document.getElementById('posTable').classList.toggle('mobile-view',viewMode==='mobile');
+  document.getElementById('tableToggleRow').classList.toggle('mobile-view',viewMode==='mobile');
   currentPage=1;
   renderTable(); renderPagination();
 }
-document.getElementById('btnFull').addEventListener('click',function(){ setTableMode('full'); });
-document.getElementById('btnCompact').addEventListener('click',function(){ setTableMode('compact'); });
+document.getElementById('btnDesktop').addEventListener('click',function(){ setViewMode('desktop'); });
+document.getElementById('btnMobile').addEventListener('click',function(){ setViewMode('mobile'); });
 
 /* ── Table search ── */
 document.getElementById('tableSearch').addEventListener('input',function(e){
@@ -733,14 +811,20 @@ document.getElementById('tableSearch').addEventListener('input',function(e){
   renderTable(); renderPagination();
 });
 
-/* ── Table (styleC column layout) ── */
-var cols=[
+/* ── Table columns (desktop: full styleC layout / mobile: simplified 4-col layout) ── */
+var colsDesktop=[
   {key:'ticker_name', label:'Symbol',           sortable:false},
   {key:'weight',      label:'Weight',           sortable:true},
   {key:'quantity',    label:'Quantity',         sortable:true},
   {key:'last_price',  label:'Cost → Price', sortable:true},
   {key:'change_rate', label:'Change',           sortable:true},
   {key:'ret',         label:'Return / PnL',     sortable:true},
+];
+var colsMobile=[
+  {key:'ticker_name', label:'代號/名稱', sortable:false},
+  {key:'weight',      label:'權重',     sortable:false},
+  {key:'change_rate', label:'漲跌',     sortable:false},
+  {key:'ret',         label:'報酬/損益', sortable:false},
 ];
 
 function sortRecords(key){
@@ -778,7 +862,8 @@ function symbolCellHtml(r){
 function renderHeadRow(){
   var head=document.createElement('div');
   head.className='table-headrow';
-  cols.forEach(function(c){
+  var activeCols=viewMode==='mobile'?colsMobile:colsDesktop;
+  activeCols.forEach(function(c){
     var div=document.createElement('div');
     div.innerHTML=c.label+(c.sortable?'<span class="sort-icon"></span>':'');
     if(c.sortable){
@@ -791,7 +876,7 @@ function renderHeadRow(){
   return head;
 }
 
-function renderRow(r){
+function renderRowDesktop(r){
   var row=document.createElement('div');
   row.className='table-row';
   row.dataset.ticker=r.ticker;
@@ -802,6 +887,21 @@ function renderRow(r){
     +'<div class="cost-cell tint-cell">'+costPriceChip(r.price,r.last_price,r.ret)+'</div>'
     +'<div class="chg-cell tint-cell">'+chgChip(r.change_rate)+'</div>'
     +'<div class="pl-cell tint-cell">'+retPnlChip(r.ret,r.pnl)+'</div>';
+  return row;
+}
+
+function renderRowMobile(r){
+  var row=document.createElement('div');
+  row.className='table-row';
+  row.dataset.ticker=r.ticker;
+  var chgCol=retHex(r.change_rate);
+  var retCol=retHex(r.ret);
+  row.innerHTML=
+    symbolCellHtml(r)
+    +'<div>'+r.weight.toFixed(1)+'%</div>'
+    +'<div style="color:'+chgCol+';">'+tri(r.change_rate)+' '+fmtSign(r.change_rate)+'</div>'
+    +'<div style="color:'+retCol+';">'+fmtSign(r.ret)+'</div>';
+  row.addEventListener('click',function(){ openPositionModal(r); });
   return row;
 }
 
@@ -821,7 +921,8 @@ function renderTable(){
     empty.textContent='找不到符合的持股';
     body.appendChild(empty);
   } else {
-    pageRecs.forEach(function(r){ body.appendChild(renderRow(r)); });
+    var rowRenderer=viewMode==='mobile'?renderRowMobile:renderRowDesktop;
+    pageRecs.forEach(function(r){ body.appendChild(rowRenderer(r)); });
   }
   container.appendChild(body);
 }
@@ -878,6 +979,28 @@ function getPgRange(cur,total){
   return [...s].sort(function(a,b){ return a-b; });
 }
 
+/* ── Position detail modal (tap a row in mobile view) ── */
+var posModalOverlay=document.getElementById('posModalOverlay');
+function openPositionModal(r){
+  document.getElementById('pmTitle').textContent=r.ticker+' '+r.name;
+  var pnlEl=document.getElementById('pmPnl');
+  pnlEl.textContent=(r.pnl>=0?'+':'')+r.pnl.toLocaleString();
+  pnlEl.style.color=retHex(r.pnl);
+  var retEl=document.getElementById('pmRet');
+  retEl.textContent=fmtSign(r.ret);
+  retEl.style.color=retHex(r.ret);
+  document.getElementById('pmQty').textContent=r.quantity.toLocaleString();
+  document.getElementById('pmWeight').textContent=r.weight.toFixed(1)+'%';
+  document.getElementById('pmAvgCost').textContent=r.price.toFixed(2);
+  document.getElementById('pmPrice').textContent=r.last_price.toFixed(2);
+  var chEl=document.getElementById('pmChange');
+  chEl.textContent=tri(r.change_rate)+' '+fmtSign(r.change_rate);
+  chEl.style.color=retHex(r.change_rate);
+  posModalOverlay.classList.add('show');
+}
+function closePositionModal(){ posModalOverlay.classList.remove('show'); }
+posModalOverlay.addEventListener('click',function(e){ if(e.target===posModalOverlay) closePositionModal(); });
+
 /* ── Tooltip ── */
 var tt=document.getElementById('tt');
 function showTt(r,e){
@@ -906,7 +1029,7 @@ initFundUsage();
 initTableStats();
 initTableUpdateTime();
 buildDonut(); buildBars(); resetCenter();
-renderTable(); renderPagination();
+setViewMode(detectMobileDevice() ? 'mobile' : 'desktop');
 </script>
 </body>
 </html>
