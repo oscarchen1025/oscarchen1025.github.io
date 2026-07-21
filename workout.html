@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>胸肩三頭・二頭・核心・腿部爆發力｜訓練與飲食計畫</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --void:#05060B;
+    --glass:rgba(255,255,255,0.055);
+    --glass-strong:rgba(255,255,255,0.095);
+    --glass-hi:rgba(255,255,255,0.16);
+    --border:rgba(255,255,255,0.14);
+    --border-strong:rgba(255,255,255,0.26);
+    --ink:#F4F7FD;
+    --ink-dim:rgba(244,247,253,0.64);
+    --ink-faint:rgba(244,247,253,0.38);
+    --cyan:#3EE1FF;
+    --violet:#8C7CFF;
+    --magenta:#FF6FD8;
+    --mint:#42F2B0;
+    --amber:#FFC857;
+    --power:#3EE1FF;
+    --power-dim:rgba(62,225,255,0.14);
+    --metabolic:#42F2B0;
+    --metabolic-dim:rgba(66,242,176,0.14);
+    --rest-dim:rgba(255,255,255,0.06);
+    --grad-power:linear-gradient(135deg,var(--cyan),var(--violet));
+    --grad-metabolic:linear-gradient(135deg,var(--mint),var(--cyan));
+    --radius:20px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  @keyframes drift1{
+    0%{transform:translate(0,0) scale(1);}
+    100%{transform:translate(40px,60px) scale(1.15);}
+  }
+  @keyframes drift2{
+    0%{transform:translate(0,0) scale(1);}
+    100%{transform:translate(-50px,-30px) scale(1.1);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+  body{
+    background:var(--void);
+    color:var(--ink);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    display:flex;
+    justify-content:center;
+    position:relative;
+    overflow-x:hidden;
+    min-height:100vh;
+  }
+  body::before,body::after{
+    content:'';
+    position:fixed;
+    border-radius:50%;
+    filter:blur(85px);
+    opacity:.42;
+    z-index:0;
+    pointer-events:none;
+  }
+  body::before{
+    width:480px;height:480px;
+    background:radial-gradient(circle at 30% 30%, var(--cyan), transparent 70%);
+    top:-180px;left:-140px;
+    animation:drift1 20s ease-in-out infinite alternate;
+  }
+  body::after{
+    width:460px;height:460px;
+    background:radial-gradient(circle at 60% 60%, var(--magenta), transparent 70%);
+    bottom:-160px;right:-120px;
+    animation:drift2 24s ease-in-out infinite alternate;
+  }
+  .phone{
+    width:100%;
+    max-width:460px;
+    min-height:100vh;
+    position:relative;
+    z-index:1;
+    padding-bottom:40px;
+  }
+  .phone::before{
+    content:'';
+    position:absolute;
+    top:120px;left:50%;
+    width:340px;height:340px;
+    background:radial-gradient(circle, var(--violet), transparent 70%);
+    filter:blur(90px);
+    opacity:.28;
+    transform:translateX(-50%);
+    z-index:-1;
+    pointer-events:none;
+  }
+
+  /* Glass base look, applied directly per component below */
+
+  /* Header */
+  .head{
+    margin:16px 16px 0;
+    padding:20px 18px 18px;
+    background:var(--glass);
+    border:1px solid var(--border);
+    border-radius:24px;
+    backdrop-filter:blur(22px) saturate(160%);
+    -webkit-backdrop-filter:blur(22px) saturate(160%);
+    box-shadow:0 12px 34px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.1);
+    position:relative;
+    overflow:hidden;
+  }
+  .head::before{
+    content:'';
+    position:absolute;top:0;left:10%;right:10%;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);
+  }
+  .head .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    letter-spacing:.16em;
+    color:var(--cyan);
+    font-weight:600;
+    text-transform:uppercase;
+    display:flex;align-items:center;gap:6px;
+  }
+  .head .eyebrow::before{
+    content:'';
+    width:6px;height:6px;border-radius:50%;
+    background:var(--cyan);
+    box-shadow:0 0 8px 2px var(--cyan);
+  }
+  .head h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:25px;
+    letter-spacing:.005em;
+    margin:8px 0 8px;
+    line-height:1.2;
+    background:linear-gradient(95deg,#FFFFFF 10%,var(--cyan) 45%,var(--violet) 75%,var(--magenta) 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .head .sub{
+    font-size:12.5px;
+    color:var(--ink-dim);
+    line-height:1.6;
+  }
+  .head .tags{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    margin-top:12px;
+  }
+  .tag{
+    font-size:11px;
+    padding:5px 10px;
+    border-radius:20px;
+    background:var(--glass-strong);
+    color:var(--ink-dim);
+    border:1px solid var(--border);
+    font-family:'JetBrains Mono',monospace;
+  }
+
+  /* Segmented control */
+  .segwrap{ padding:14px 16px 0; position:sticky; top:0; z-index:20; backdrop-filter:blur(2px); }
+  .seg{
+    display:flex;
+    background:var(--glass-strong);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:4px;
+    backdrop-filter:blur(20px) saturate(160%);
+    -webkit-backdrop-filter:blur(20px) saturate(160%);
+    box-shadow:0 8px 24px rgba(0,0,0,.35);
+  }
+  .seg button{
+    flex:1;
+    border:none;
+    background:transparent;
+    color:var(--ink-dim);
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:13.5px;
+    letter-spacing:.02em;
+    padding:10px 0;
+    border-radius:12px;
+    transition:all .2s ease;
+  }
+  .seg button.active{
+    background:var(--grad-power);
+    color:#04141A;
+    box-shadow:0 4px 16px rgba(62,225,255,.35);
+  }
+
+  /* Day chip strip */
+  .daystrip{
+    display:flex;
+    gap:8px;
+    padding:14px 16px 4px;
+    overflow-x:auto;
+    scrollbar-width:none;
+    position:sticky;
+    top:60px;
+    z-index:19;
+  }
+  .daystrip::-webkit-scrollbar{display:none;}
+  .chip{
+    flex:0 0 auto;
+    width:52px;
+    padding:9px 0 8px;
+    border-radius:16px;
+    background:var(--glass);
+    border:1px solid var(--border);
+    backdrop-filter:blur(18px) saturate(150%);
+    -webkit-backdrop-filter:blur(18px) saturate(150%);
+    text-align:center;
+    cursor:pointer;
+    transition:all .2s ease;
+  }
+  .chip .d{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:16px;
+  }
+  .chip .dot{
+    width:6px;height:6px;border-radius:50%;
+    margin:6px auto 0;
+    background:var(--ink-faint);
+  }
+  .chip.power .dot{background:var(--cyan);box-shadow:0 0 6px 1px rgba(62,225,255,.6);}
+  .chip.metabolic .dot{background:var(--mint);box-shadow:0 0 6px 1px rgba(66,242,176,.6);}
+  .chip.active{border-color:var(--border-strong);background:var(--glass-strong);box-shadow:0 0 0 1px rgba(255,255,255,.08), 0 8px 20px rgba(0,0,0,.35);}
+  .chip.complete .dot{background:var(--mint);box-shadow:0 0 8px 2px rgba(66,242,176,.7);}
+
+  main{padding:16px 16px 10px;}
+  .view{display:none;}
+  .view.active{display:block;}
+
+  /* Day card */
+  .daycard-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:14px;
+    gap:10px;
+  }
+  .daycard-head .titlewrap .kicker{
+    font-size:11px;
+    color:var(--ink-faint);
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    font-family:'JetBrains Mono',monospace;
+  }
+  .daycard-head h2{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:19px;
+    margin:3px 0 0;
+    line-height:1.3;
+  }
+  .badge{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:11px;
+    font-weight:600;
+    padding:6px 12px;
+    border-radius:20px;
+    white-space:nowrap;
+    border:1px solid var(--border);
+    backdrop-filter:blur(14px);
+  }
+  .badge.power{background:var(--power-dim);color:var(--cyan);border-color:rgba(62,225,255,.35);}
+  .badge.metabolic{background:var(--metabolic-dim);color:var(--mint);border-color:rgba(66,242,176,.35);}
+  .badge.rest{background:var(--rest-dim);color:var(--ink-dim);}
+
+  .warmup{
+    font-size:12.5px;
+    color:var(--ink-dim);
+    background:var(--glass);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:11px 14px;
+    margin-bottom:14px;
+    backdrop-filter:blur(18px) saturate(150%);
+    -webkit-backdrop-filter:blur(18px) saturate(150%);
+  }
+  .warmup b{color:var(--ink);}
+
+  .group{
+    margin-bottom:14px;
+    background:var(--glass);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    overflow:hidden;
+    backdrop-filter:blur(22px) saturate(160%);
+    -webkit-backdrop-filter:blur(22px) saturate(160%);
+    box-shadow:0 10px 28px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.07);
+    position:relative;
+  }
+  .group::before{
+    content:'';
+    position:absolute;top:0;left:8%;right:8%;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);
+  }
+  .group-head{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:12px 14px;
+    background:var(--glass-strong);
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:13.5px;
+    letter-spacing:.02em;
+  }
+  .group-head .bar{width:4px;height:14px;border-radius:2px;background:var(--grad-power);}
+  .group.metabolic .group-head .bar{background:var(--grad-metabolic);}
+
+  .ex{
+    display:flex;
+    align-items:center;
+    padding:12px 14px;
+    border-top:1px solid var(--border);
+    gap:10px;
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    user-select:none;
+    transition:background .15s ease;
+  }
+  .ex:active{background:rgba(255,255,255,.06);}
+  .ex .checkbox{
+    flex:0 0 auto;
+    width:24px;height:24px;
+    border-radius:50%;
+    border:1.5px solid var(--border-strong);
+    background:rgba(255,255,255,.03);
+    display:flex;align-items:center;justify-content:center;
+    transition:all .2s ease;
+  }
+  .ex .checkbox svg{width:13px;height:13px;opacity:0;transform:scale(.5);transition:all .2s ease;}
+  .ex.done .checkbox{background:var(--grad-power);border-color:transparent;box-shadow:0 0 12px 1px rgba(62,225,255,.5);}
+  .group.metabolic .ex.done .checkbox{background:var(--grad-metabolic);box-shadow:0 0 12px 1px rgba(66,242,176,.5);}
+  .ex.done .checkbox svg{opacity:1;transform:scale(1);}
+  .ex .body{flex:1 1 auto;display:flex;justify-content:space-between;align-items:center;gap:10px;min-width:0;}
+  .ex .name{font-size:14px;font-weight:500;line-height:1.4;transition:color .15s ease;}
+  .ex .name .en{display:block;font-size:10.5px;color:var(--ink-faint);margin-top:1px;font-family:'JetBrains Mono',monospace;}
+  .ex.done .name{color:var(--ink-faint);text-decoration:line-through;text-decoration-color:var(--ink-faint);}
+  .ex .stats{text-align:right;flex:0 0 auto;}
+  .ex .setsreps{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13.5px;color:var(--cyan);}
+  .group.metabolic .ex .setsreps{color:var(--mint);}
+  .ex.done .setsreps{color:var(--ink-faint);}
+  .ex .rest{font-size:10px;color:var(--ink-faint);margin-top:2px;font-family:'JetBrains Mono',monospace;}
+
+  .progresswrap{
+    display:flex;align-items:center;gap:10px;
+    margin-bottom:14px;
+    background:var(--glass);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:10px 12px;
+    backdrop-filter:blur(18px) saturate(150%);
+    -webkit-backdrop-filter:blur(18px) saturate(150%);
+  }
+  .progressbar{
+    flex:1 1 auto;
+    height:7px;
+    border-radius:4px;
+    background:rgba(255,255,255,.08);
+    overflow:hidden;
+  }
+  .progressbar i{display:block;height:100%;border-radius:4px;transition:width .3s ease;box-shadow:0 0 10px 1px rgba(62,225,255,.5);}
+  .progresstext{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11.5px;font-weight:600;
+    color:var(--ink-dim);
+    white-space:nowrap;
+  }
+  .resetbtn{
+    flex:0 0 auto;
+    font-family:'Space Grotesk',sans-serif;
+    font-size:11px;font-weight:600;
+    color:var(--ink-dim);
+    background:var(--glass-strong);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:7px 11px;
+    cursor:pointer;
+  }
+  .resetbtn:active{background:rgba(255,255,255,.12);}
+
+  .restday-card{
+    background:var(--glass);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:20px;
+    font-size:13.5px;
+    color:var(--ink-dim);
+    line-height:1.85;
+    backdrop-filter:blur(22px) saturate(160%);
+    -webkit-backdrop-filter:blur(22px) saturate(160%);
+    box-shadow:0 10px 28px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.07);
+  }
+  .restday-card b{color:var(--ink);}
+
+  .note-card{
+    margin-top:14px;
+    background:var(--glass);
+    border:1px solid var(--border);
+    border-left:3px solid var(--amber);
+    border-radius:12px;
+    padding:12px 14px;
+    font-size:12.5px;
+    color:var(--ink-dim);
+    line-height:1.7;
+    backdrop-filter:blur(18px);
+  }
+
+  /* Nutrition view */
+  .nut-hero{
+    background:linear-gradient(155deg,rgba(140,124,255,.16) 0%,rgba(62,225,255,.1) 100%);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:20px;
+    margin-bottom:16px;
+    backdrop-filter:blur(22px) saturate(170%);
+    -webkit-backdrop-filter:blur(22px) saturate(170%);
+    box-shadow:0 12px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.1);
+    position:relative;
+    overflow:hidden;
+  }
+  .nut-hero::before{
+    content:'';
+    position:absolute;top:0;left:8%;right:8%;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);
+  }
+  .nut-hero .label{font-size:11px;color:var(--ink-faint);letter-spacing:.1em;text-transform:uppercase;font-family:'JetBrains Mono',monospace;}
+  .nut-hero .kcal{font-family:'Space Grotesk',sans-serif;font-size:33px;font-weight:700;margin:6px 0;
+    background:linear-gradient(95deg,var(--cyan),var(--violet));
+    -webkit-background-clip:text;background-clip:text;color:transparent;}
+  .nut-hero .kcal span{font-size:14px;color:var(--ink-dim);font-weight:500;-webkit-text-fill-color:var(--ink-dim);}
+  .nut-hero .desc{font-size:12px;color:var(--ink-dim);line-height:1.6;}
+
+  .macrorow{display:flex;gap:10px;margin-bottom:16px;}
+  .macro{
+    flex:1;
+    background:var(--glass);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:13px 10px;
+    text-align:center;
+    backdrop-filter:blur(18px) saturate(150%);
+    -webkit-backdrop-filter:blur(18px) saturate(150%);
+  }
+  .macro .mname{font-size:10.5px;color:var(--ink-dim);font-family:'Space Grotesk',sans-serif;letter-spacing:.03em;}
+  .macro .mval{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:16px;margin:5px 0 7px;}
+  .macro .bar{height:5px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden;}
+  .macro .bar i{display:block;height:100%;border-radius:3px;}
+  .macro.protein .bar i{background:linear-gradient(90deg,var(--cyan),var(--violet));width:33%;box-shadow:0 0 8px rgba(62,225,255,.5);}
+  .macro.fat .bar i{background:var(--amber);width:27%;box-shadow:0 0 8px rgba(255,200,87,.5);}
+  .macro.carb .bar i{background:linear-gradient(90deg,var(--mint),var(--cyan));width:37%;box-shadow:0 0 8px rgba(66,242,176,.5);}
+
+  .section-title{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:14px;
+    font-weight:600;
+    letter-spacing:.02em;
+    margin:22px 0 10px;
+    color:var(--ink);
+    display:flex;align-items:center;gap:8px;
+  }
+  .section-title .bar{width:4px;height:14px;border-radius:2px;background:var(--grad-power);}
+
+  .carbtable{
+    background:var(--glass);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    overflow:hidden;
+    backdrop-filter:blur(20px) saturate(160%);
+    -webkit-backdrop-filter:blur(20px) saturate(160%);
+  }
+  .carbrow{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:13px 14px;
+    border-top:1px solid var(--border);
+    gap:10px;
+  }
+  .carbrow:first-child{border-top:none;}
+  .carbrow .ctype{font-size:13px;font-weight:600;}
+  .carbrow .ctype .days{display:block;font-size:11px;color:var(--ink-faint);font-weight:400;margin-top:2px;font-family:'JetBrains Mono',monospace;}
+  .carbrow .cgram{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:14px;color:var(--mint);white-space:nowrap;}
+
+  .meal{
+    background:var(--glass);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:13px 14px;
+    margin-bottom:8px;
+    backdrop-filter:blur(18px) saturate(150%);
+    -webkit-backdrop-filter:blur(18px) saturate(150%);
+  }
+  .meal .mealname{font-family:'Space Grotesk',sans-serif;font-size:12px;color:var(--cyan);font-weight:600;letter-spacing:.03em;}
+  .meal .content{font-size:13px;margin:5px 0 3px;line-height:1.5;}
+  .meal .protien{font-size:11px;color:var(--ink-faint);font-family:'JetBrains Mono',monospace;}
+
+  .rules{
+    background:var(--glass);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:15px;
+    backdrop-filter:blur(20px) saturate(160%);
+    -webkit-backdrop-filter:blur(20px) saturate(160%);
+  }
+  .rules li{font-size:12.5px;color:var(--ink-dim);line-height:1.75;margin-bottom:8px;}
+  .rules li:last-child{margin-bottom:0;}
+  .rules b{color:var(--ink);}
+
+  footer{
+    padding:22px 20px 4px;
+    font-size:10.5px;
+    color:var(--ink-faint);
+    text-align:center;
+    line-height:1.8;
+    font-family:'JetBrains Mono',monospace;
+  }
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <div class="head">
+    <div class="eyebrow">12 WEEK BODY PROTOCOL</div>
+    <h1>胸肩三頭・二頭・核心・腿部爆發力</h1>
+    <div class="sub">170cm／70kg／體脂 20%→12% ・中階・每週4練・林志傑／彭于晏體態取向</div>
+    <div class="tags">
+      <span class="tag">健身房全器材</span>
+      <span class="tag">60分鐘/次</span>
+      <span class="tag">背部僅輔助量</span>
+    </div>
+  </div>
+
+  <div class="segwrap">
+    <div class="seg">
+      <button id="tab-train" class="active" onclick="setTab('train')">訓練菜單</button>
+      <button id="tab-nut" onclick="setTab('nut')">飲食計畫</button>
+    </div>
+  </div>
+
+  <div class="daystrip" id="daystrip"></div>
+
+  <main>
+    <div id="view-train" class="view active"></div>
+    <div id="view-nut" class="view"></div>
+  </main>
+
+  <footer>依身體恢復與進度每2–4週微調重量與熱量 ・ 動作不熟悉先降重量練型</footer>
+</div>
+
+<script>
+const DAYS = [
+  {id:1, label:'一', type:'power', badge:'訓練日', title:'胸＋肩＋三頭＋核心',
+    warmup:'彈力帶繞肩、肩胛活動、輕重量伏地挺身 · 8分鐘',
+    groups:[
+      {name:'胸部', cls:'power', ex:[
+        {n:'槓鈴臥推', en:'Bench Press', sr:'4x8', rest:'90秒'},
+        {n:'上斜啞鈴臥推', en:'Incline DB Press', sr:'3x10', rest:'75秒'},
+        {n:'蝴蝶機夾胸', en:'Pec Deck Fly', sr:'3x12', rest:'60秒'},
+      ]},
+      {name:'肩部', cls:'power', ex:[
+        {n:'站姿槓鈴肩推', en:'Overhead Press', sr:'3x8', rest:'75秒'},
+        {n:'啞鈴側平舉', en:'Lateral Raise', sr:'3x12-15', rest:'45秒'},
+      ]},
+      {name:'三頭', cls:'power', ex:[
+        {n:'雙槓撐體（或繩索下壓）', en:'Dips / Pushdown', sr:'3x10-12', rest:'60秒'},
+        {n:'過頭繩索三頭伸展', en:'Overhead Triceps Ext.', sr:'3x12', rest:'45秒'},
+      ]},
+      {name:'爆發力保留', cls:'power', ex:[
+        {n:'藥球胸拋', en:'Med Ball Chest Pass', sr:'3x6', rest:'60秒'},
+      ]},
+      {name:'核心收尾', cls:'power', ex:[
+        {n:'繩索捲腹', en:'Cable Crunch', sr:'3x15', rest:'-'},
+      ]},
+    ]},
+  {id:2, label:'二', type:'power', badge:'訓練日', title:'下肢爆發力＋核心',
+    warmup:'跳繩3分＋動態伸展（弓箭步轉體、開合跳、高抬腿）· 8分鐘',
+    groups:[
+      {name:'主項力量', cls:'power', ex:[
+        {n:'槓鈴後蹲舉', en:'Back Squat', sr:'4x6', rest:'90秒'},
+        {n:'羅馬尼亞硬舉', en:'RDL', sr:'3x8', rest:'75秒'},
+        {n:'保加利亞分腿蹲', en:'Bulgarian Split Squat', sr:'3x8/腿', rest:'60秒'},
+      ]},
+      {name:'爆發力', cls:'power', ex:[
+        {n:'跳箱', en:'Box Jump', sr:'5x3', rest:'90秒'},
+        {n:'立定跳遠', en:'Broad Jump', sr:'4x4', rest:'90秒'},
+        {n:'藥球轉體拋擲', en:'Rotational Throw', sr:'3x6/側', rest:'60秒'},
+      ]},
+      {name:'核心收尾', cls:'power', ex:[
+        {n:'懸吊抬腿', en:'Hanging Leg Raise', sr:'3x12', rest:'-'},
+        {n:'農夫走路', en:"Farmer's Carry", sr:'3x30m', rest:'-'},
+      ]},
+    ]},
+  {id:3, label:'三', type:'rest', badge:'恢復日', title:'休息／低強度有氧',
+    rest:'快走、騎車或游泳，心率維持在「微喘但能講話」的 Zone 2，20–30分鐘。目的是加速恢復並增加消耗，<b>強度別拉高</b>，不安排也可以完全休息。'},
+  {id:4, label:'四', type:'power', badge:'訓練日', title:'背（輔助量）＋二頭＋核心',
+    warmup:'肩胛活動、彈力帶 Face Pull · 8分鐘',
+    groups:[
+      {name:'背部（維持量）', cls:'power', ex:[
+        {n:'引體向上／滑輪下拉', en:'Pull-up / Lat Pulldown', sr:'3x8', rest:'75秒'},
+        {n:'面拉', en:'Face Pull', sr:'2x15', rest:'45秒'},
+      ]},
+      {name:'二頭（本日主軸）', cls:'power', ex:[
+        {n:'槓鈴彎舉', en:'Barbell Curl', sr:'4x10', rest:'60秒'},
+        {n:'啞鈴槌式彎舉', en:'Hammer Curl', sr:'3x12', rest:'45秒'},
+        {n:'集中彎舉', en:'Concentration Curl', sr:'3x12/側', rest:'45秒'},
+      ]},
+      {name:'核心收尾', cls:'power', ex:[
+        {n:'負重俄羅斯轉體', en:'Weighted Russian Twist', sr:'3x16', rest:'-'},
+        {n:'平板棒式', en:'Plank', sr:'3x40秒', rest:'-'},
+      ]},
+    ]},
+  {id:5, label:'五', type:'metabolic', badge:'燃脂日', title:'全身代謝＋腹肌核心強化＋腿部補強',
+    warmup:'關節活動＋輕鬆開合跳 · 8分鐘',
+    groups:[
+      {name:'代謝循環（4輪・40秒work/20秒rest，輪間休2分）', cls:'metabolic', ex:[
+        {n:'壺鈴擺盪', en:'Kettlebell Swing', sr:'循環', rest:''},
+        {n:'波比跳', en:'Burpee', sr:'循環', rest:''},
+        {n:'深蹲跳', en:'Squat Jump', sr:'循環', rest:''},
+        {n:'藥球砸地', en:'Med Ball Slam', sr:'循環', rest:''},
+        {n:'登山者', en:'Mountain Climber', sr:'循環', rest:''},
+        {n:'划船機衝刺', en:'Row Sprint', sr:'循環', rest:''},
+      ]},
+      {name:'腹肌核心強化（本日重點）', cls:'metabolic', ex:[
+        {n:'捲腹', en:'Crunch', sr:'3x20', rest:'-'},
+        {n:'抗旋轉推', en:'Pallof Press', sr:'3x12/側', rest:'-'},
+        {n:'懸吊抬腿', en:'Hanging Leg Raise', sr:'3x15', rest:'-'},
+        {n:'棒式', en:'Plank', sr:'3x45秒', rest:'-'},
+      ]},
+    ]},
+  {id:6, label:'六', type:'optional', badge:'選做', title:'戶外衝刺跑（腿部爆發力補強）',
+    rest:'慢跑熱身10分後，做 <b>6–8趟 30公尺全力衝刺</b>，每趟間走回起點休息（約60–90秒），收操伸展10分。不想加練這天可直接休息。'},
+  {id:7, label:'日', type:'rest', badge:'休息', title:'完全休息', rest:'完全休息，讓身體恢復，為下一週的訓練量做準備。'},
+];
+
+function chipClass(d){
+  if(d.type==='power') return 'power';
+  if(d.type==='metabolic') return 'metabolic';
+  return '';
+}
+function badgeClass(d){
+  if(d.type==='power') return 'power';
+  if(d.type==='metabolic') return 'metabolic';
+  return 'rest';
+}
+
+function renderDayStrip(){
+  const strip = document.getElementById('daystrip');
+  strip.innerHTML = DAYS.map(d=>`
+    <div class="chip ${chipClass(d)} ${d.id===1?'active':''}" data-id="${d.id}" onclick="selectDay(${d.id})">
+      <div class="d">${d.label}</div>
+      <div class="dot"></div>
+    </div>`).join('');
+}
+
+// ---- 打勾進度儲存（優先用 window.storage，環境不支援時退回記憶體暫存）----
+const memoryStore = {};
+async function getProgress(dayId){
+  const key = 'progress:day' + dayId;
+  if (typeof window.storage !== 'undefined'){
+    try{
+      const res = await window.storage.get(key, false);
+      return res ? JSON.parse(res.value) : {};
+    }catch(e){
+      return {};
+    }
+  }
+  return memoryStore[key] || {};
+}
+async function saveProgress(dayId, obj){
+  const key = 'progress:day' + dayId;
+  if (typeof window.storage !== 'undefined'){
+    try{ await window.storage.set(key, JSON.stringify(obj), false); }catch(e){}
+  }else{
+    memoryStore[key] = obj;
+  }
+}
+
+let currentProgress = {};
+let currentDayId = null;
+
+async function renderDay(d){
+  currentDayId = d.id;
+  let html = `<div class="daycard-head">
+      <div class="titlewrap">
+        <div class="kicker">星期${d.label}</div>
+        <h2>${d.title}</h2>
+      </div>
+      <div class="badge ${badgeClass(d)}">${d.badge}</div>
+    </div>`;
+
+  if(d.rest){
+    html += `<div class="restday-card">${d.rest}</div>`;
+    document.getElementById('view-train').innerHTML = html;
+    return;
+  }
+
+  const progress = await getProgress(d.id);
+  currentProgress = progress;
+
+  // 算總數與已完成數
+  let total = 0, doneCount = 0;
+  d.groups.forEach((g,gi)=> g.ex.forEach((e,ei)=>{
+    total++;
+    if(progress[`g${gi}e${ei}`]) doneCount++;
+  }));
+  const pct = total ? Math.round(doneCount/total*100) : 0;
+
+  const chipEl = document.querySelector(`.chip[data-id="${d.id}"]`);
+  if(chipEl){ chipEl.classList.toggle('complete', pct===100 && total>0); }
+
+  html += `<div class="progresswrap">
+      <div class="progressbar"><i style="width:${pct}%;background:${d.type==='metabolic'?'var(--metabolic)':'var(--power)'}"></i></div>
+      <div class="progresstext">${doneCount}/${total} 已完成</div>
+      <button class="resetbtn" onclick="resetDay(${d.id})">重置</button>
+    </div>`;
+
+  html += `<div class="warmup"><b>熱身　</b>${d.warmup}</div>`;
+
+  d.groups.forEach((g,gi)=>{
+    html += `<div class="group ${g.cls}">
+      <div class="group-head"><span class="bar"></span>${g.name}</div>`;
+    g.ex.forEach((e,ei)=>{
+      const exId = `g${gi}e${ei}`;
+      const isDone = !!progress[exId];
+      html += `<div class="ex ${isDone?'done':''}" onclick="toggleExercise(${d.id},'${exId}')">
+        <div class="checkbox">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5L9.5 18L20 6" stroke="#05060B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="body">
+          <div class="name">${e.n}<span class="en">${e.en}</span></div>
+          <div class="stats">
+            <div class="setsreps">${e.sr}</div>
+            ${e.rest && e.rest!=='-' ? `<div class="rest">休息 ${e.rest}</div>` : ''}
+          </div>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+
+  document.getElementById('view-train').innerHTML = html;
+}
+
+async function toggleExercise(dayId, exId){
+  const d = DAYS.find(x=>x.id===dayId);
+  const progress = await getProgress(dayId);
+  progress[exId] = !progress[exId];
+  await saveProgress(dayId, progress);
+  renderDay(d);
+}
+
+async function resetDay(dayId){
+  const d = DAYS.find(x=>x.id===dayId);
+  await saveProgress(dayId, {});
+  renderDay(d);
+}
+
+function selectDay(id){
+  document.querySelectorAll('.chip').forEach(c=>{
+    c.classList.remove('active');
+  });
+  const chip = document.querySelector(`.chip[data-id="${id}"]`);
+  chip.classList.add('active');
+  const d = DAYS.find(x=>x.id===id);
+  renderDay(d);
+}
+
+function setTab(tab){
+  document.getElementById('tab-train').classList.toggle('active', tab==='train');
+  document.getElementById('tab-nut').classList.toggle('active', tab==='nut');
+  document.getElementById('view-train').classList.toggle('active', tab==='train');
+  document.getElementById('view-nut').classList.toggle('active', tab==='nut');
+  document.getElementById('daystrip').style.display = tab==='train' ? 'flex' : 'none';
+}
+
+function renderNutrition(){
+  const html = `
+    <div class="nut-hero">
+      <div class="label">建議每日攝取</div>
+      <div class="kcal">1750–1850 <span>大卡</span></div>
+      <div class="desc">TDEE 約2150–2200大卡，扣除約350–400大卡赤字。赤字不拉太大，是為了保留訓練所需的力量表現與肌肉量。</div>
+    </div>
+
+    <div class="macrorow">
+      <div class="macro protein">
+        <div class="mname">蛋白質</div>
+        <div class="mval">145–150g</div>
+        <div class="bar"><i></i></div>
+      </div>
+      <div class="macro fat">
+        <div class="mname">脂肪</div>
+        <div class="mval">50–55g</div>
+        <div class="bar"><i></i></div>
+      </div>
+      <div class="macro carb">
+        <div class="mname">碳水</div>
+        <div class="mval">160–170g</div>
+        <div class="bar"><i></i></div>
+      </div>
+    </div>
+
+    <div class="section-title"><span class="bar"></span>訓練日碳循環</div>
+    <div class="carbtable">
+      <div class="carbrow">
+        <div class="ctype">高碳日<span class="days">星期二・星期五</span></div>
+        <div class="cgram">190–200g</div>
+      </div>
+      <div class="carbrow">
+        <div class="ctype">中碳日<span class="days">星期一・星期四</span></div>
+        <div class="cgram">160–170g</div>
+      </div>
+      <div class="carbrow">
+        <div class="ctype">低碳日<span class="days">星期三・六・日</span></div>
+        <div class="cgram">110–130g</div>
+      </div>
+    </div>
+
+    <div class="section-title"><span class="bar"></span>三餐範例（訓練日・約1800大卡）</div>
+    <div class="meal">
+      <div class="mealname">早餐</div>
+      <div class="content">茶葉蛋2顆＋無糖豆漿300ml＋地瓜150g</div>
+      <div class="protien">蛋白質約25g・訓練前2–3小時吃完</div>
+    </div>
+    <div class="meal">
+      <div class="mealname">午餐</div>
+      <div class="content">雞胸肉/魚肉150g＋糙米飯1碗＋大量蔬菜</div>
+      <div class="protien">蛋白質約40g・外食可選自助餐控制油炸</div>
+    </div>
+    <div class="meal">
+      <div class="mealname">訓練前點心</div>
+      <div class="content">香蕉1根＋無糖優格1杯</div>
+      <div class="protien">蛋白質約10g・訓練前30–60分鐘</div>
+    </div>
+    <div class="meal">
+      <div class="mealname">訓練後</div>
+      <div class="content">乳清蛋白1份＋白飯半碗</div>
+      <div class="protien">蛋白質約30g・訓練後30分鐘內</div>
+    </div>
+    <div class="meal">
+      <div class="mealname">晚餐</div>
+      <div class="content">牛肉/鮭魚/豆腐150g＋大量蔬菜＋少量澱粉</div>
+      <div class="protien">蛋白質約35g・澱粉依當天高／低碳日調整</div>
+    </div>
+
+    <div class="section-title"><span class="bar"></span>執行與調整原則</div>
+    <div class="rules">
+      <ul style="margin:0;padding-left:16px;">
+        <li>先照此熱量吃 <b>2週</b>，一週掉 <b>0.3–0.6kg</b> 是合理速度，太快代表赤字過大</li>
+        <li>2–3週體重沒變化，先確認是否真的吃到目標熱量，再減 <b>100–150大卡</b>，別一次砍太多</li>
+        <li>水分每天至少 <b>2000–2500ml</b>，訓練日再增加</li>
+        <li>乳清蛋白是唯一建議常備的補劑，方便訓練後快速補充，其餘先靠食物</li>
+        <li>每2–4週量測一次體脂體重，用來調整飲食，而不是調整訓練菜單</li>
+      </ul>
+    </div>
+  `;
+  document.getElementById('view-nut').innerHTML = html;
+}
+
+renderDayStrip();
+renderDay(DAYS[0]);
+renderNutrition();
+</script>
+</body>
+</html>
